@@ -1,5 +1,21 @@
 # Discord WAP
-Discord proxy client for old mobile browsers with Wireless Application Protocol 1.x support
+Discord proxy client for old mobile browsers with Wireless Application Protocol 1.x support.
+
+Also see [Discord J2ME](https://github.com/gtrxAC/discord-j2me), a client for devices with Java ME (MIDP) application support.
+
+## Status
+### Working
+* Server, channel, and DM lists
+  * Note: due to page size limitations, not all channels are shown
+* Message sending
+* Replying with ping on or off
+* Message history with pagination
+### Not implemented
+* HTML support
+* Message editing and deleting
+* Threads
+* Message timestamps
+* Settings (e.g. message load count)
 
 ## How to use
 A public instance is hosted at http://146.59.80.3/wap, but it is recommended to host your own instance if possible.
