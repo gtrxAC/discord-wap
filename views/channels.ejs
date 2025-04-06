@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+    <card title="<%= name %>">
+        <p align="center">
+            <anchor>
+                <prev/>
+                Back
+            </anchor>
+        </p>
+        <p>
+            <% channels.forEach(c => { %>
+                <anchor>
+                    <go method="post" href="/wap/ch">
+                        <postfield name="token" value="<%= token %>"/>
+                        <postfield name="id" value="<%= c.id %>"/>
+                        <postfield name="name" value="<%= c.name %>"/>
+                    </go>
+                    <%= c.name %>
+                </anchor>
+                <br/>
+            <% }) %>
+        </p>
+    </card>
+</wml>

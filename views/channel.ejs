@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+    <card id="channel" title="<%= name %>">
+        <p align="center">
+            <anchor>
+                <prev/>
+                Back
+            </anchor>
+            <br/>
+            <a href="#send">Send message</a>
+            <% if (page > 0) { %>
+                <br/>
+                <anchor>
+                    <go method="post" href="/wap/ch">
+                        <postfield name="token" value="<%= token %>"/>
+                        <postfield name="id" value="<%= id %>"/>
+                        <postfield name="name" value="<%= name %>"/>
+                        <% if (page > 1) { %>
+                            <postfield name="page" value="<%= page - 1 %>"/>
+                            <postfield name="after" value="<%= messages[0].id %>"/>
+                        <% } %>
+                    </go>
+                    Newer messages
+                </anchor>
+            <% } %>
+        </p>
+
+        <% messages.forEach(m => { %>
+            <p>
+                <anchor>
+                    <go href="#reply">
+                        <setvar name="rec" value="<%= m.id %>"/>
+                        <setvar name="recname" value="<%= m.author.name %>"/>
+                    </go>
+                    <%= m.author.name %>
+                </anchor>
+            </p>
+            <p>
+                <%= m.content %>
+            </p>
+        <% }) %>
+
+        <% if (messages.length == MESSAGE_COUNT) { %>
+            <p align="center">
+                <anchor>
+                    <go method="post" href="/wap/ch">
+                        <postfield name="token" value="<%= token %>"/>
+                        <postfield name="id" value="<%= id %>"/>
+                        <postfield name="name" value="<%= name %>"/>
+                        <postfield name="page" value="<%= page + 1 %>"/>
+                        <postfield name="before" value="<%= messages[messages.length - 1].id %>"/>
+                    </go>
+                    Older messages
+                </anchor>
+            </p>
+        <% } %>
+    </card>
+
+    <card id="send" title="<%= name %>">
+        <p>
+            Your message:
+            <br/>
+            <input name="message" size="2000"/>
+        </p>
+        
+        <p align="center">
+            <anchor>
+                <go method="post" href="/wap/send">
+                    <postfield name="token" value="<%= token %>"/>
+                    <postfield name="id" value="<%= id %>"/>
+                    <postfield name="text" value="$(message)"/>
+                </go>
+                Send
+            </anchor>
+            <br/>
+            <anchor>
+                <prev/>
+                Back
+            </anchor>
+        </p>
+    </card>
+
+    <card id="reply" title="<%= name %>">
+        <p>Reply to $(recname)</p>
+        <br/>
+        <input name="message" size="2000"/>
+
+        <p align="center">
+            <anchor>
+                <go method="post" href="/wap/send">
+                    <postfield name="token" value="<%= token %>"/>
+                    <postfield name="id" value="<%= id %>"/>
+                    <postfield name="text" value="$(message)"/>
+                    <postfield name="recipient" value="$(rec)"/>
+                </go>
+                Send @ON
+            </anchor>
+            <br/>
+            <anchor>
+                <go method="post" href="/wap/send">
+                    <postfield name="token" value="<%= token %>"/>
+                    <postfield name="id" value="<%= id %>"/>
+                    <postfield name="text" value="$(message)"/>
+                    <postfield name="recipient" value="$(rec)"/>
+                    <postfield name="ping" value="0"/>
+                </go>
+                Send @OFF
+            </anchor>
+            <br/>
+            <anchor>
+                <prev/>
+                Back
+            </anchor>
+        </p>
+    </card>
+</wml>

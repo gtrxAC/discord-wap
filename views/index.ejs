@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+    <card title="Discord WAP">
+        <p>The token can be found from your browser's dev tools - look online for help. Using an alt account is recommended.</p>
+        <p>For easy access, add the page to your bookmarks after logging in.</p>
+        <p>Token:</p>
+        <input name="token" size="100"/>
+        
+        <p align="center">
+            <anchor>
+               <go method="get" href="/wap/main">
+                   <postfield name="token" value="$(token)"/>
+               </go>
+               Log in
+            </anchor>
+        </p>
+    </card>
+</wml>

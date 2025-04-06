@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+    <card id="main" title="Discord WAP">
+        <anchor>
+            <go method="get" href="/wap/gl">
+                <postfield name="token" value="<%= token %>"/>
+            </go>
+            Servers
+        </anchor>
+        <br/>
+        <anchor>
+            <go href="#dms">
+                <setvar name="token" value="<%= token %>"/>
+            </go>
+            Direct messages
+        </anchor>
+        <br/>
+        <a href="/wap">Log out</a>
+    </card>
+
+    <card id="dms" title="Direct msgs.">
+        <p align="center">
+            <anchor>
+                <prev/>
+                Back
+            </anchor>
+        </p>
+        <p>
+            <% dms.forEach(d => { %>
+                <anchor>
+                    <go method="post" href="/wap/ch">
+                        <postfield name="token" value="$(token)"/>
+                        <postfield name="id" value="<%= d.id %>"/>
+                        <postfield name="name" value="@<%= d.name %>"/>
+                    </go>
+                    <%= d.name %>
+                </anchor>
+                <br/>
+            <% }) %>
+        </p>
+    </card>
+</wml>

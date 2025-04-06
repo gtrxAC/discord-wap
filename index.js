@@ -1,0 +1,407 @@
+const express = require('express');
+const axios = require('axios');
+const EmojiConvertor = require('emoji-js');
+
+const emoji = new EmojiConvertor();
+emoji.replace_mode = 'unified';
+
+const app = express();
+const PORT = 8008;
+const DEST_BASE = "https://discord.com/api/v9";
+
+app.set('view engine', 'ejs');
+app.set('views', './views');
+
+app.use(express.urlencoded({ extended: true }));
+
+// ID -> username mapping cache (used for parsing mentions)
+const userCache = new Map();
+const channelCache = new Map();
+const CACHE_SIZE = 10000;
+
+function decompressID(id) {
+    const idStr = atob(id);
+
+    return BigInt(idStr.charCodeAt(0)) << 56n |
+        BigInt(idStr.charCodeAt(1)) << 48n |
+        BigInt(idStr.charCodeAt(2)) << 40n |
+        BigInt(idStr.charCodeAt(3)) << 32n |
+        BigInt(idStr.charCodeAt(4)) << 24n |
+        BigInt(idStr.charCodeAt(5)) << 16n |
+        BigInt(idStr.charCodeAt(6)) << 8n |
+        BigInt(idStr.charCodeAt(7));
+}
+
+function compressID(id) {
+    id = BigInt(id);
+
+    const arr = [
+        Number(id >> 56n),
+        Number((id >> 48n) & 0xFFn),
+        Number((id >> 40n) & 0xFFn),
+        Number((id >> 32n) & 0xFFn),
+        Number((id >> 24n) & 0xFFn),
+        Number((id >> 16n) & 0xFFn),
+        Number((id >> 8n) & 0xFFn),
+        Number(id & 0xFFn),
+    ];
+    return btoa(String.fromCharCode(...arr))
+}
+
+function oneLine(str) {
+    // Make sure string fits on one line on the screen
+    // Optimized for Nokia monochrome phones, where average character width is 4.5 and screen width is 96 or 84
+    if (!str) return "(err)";
+    if (str.length > 16) return str.substring(0, 15) + "...";
+    return str;
+}
+
+function getError(e) {
+    if (!e.message) return e.toString();
+
+    if (e.message == "Request failed with status code 401") {
+        return "Authentication failed. Make sure the token is valid and entered correctly."
+    }
+    return e.message;
+}
+
+function handleError(res, e) {
+    console.log(e);
+    res.render("error", {error: getError(e)});
+}
+
+function parseMessageObject(msg) {
+    const result = {
+        id: compressID(msg.id)
+    }
+    if (msg.author) {
+        result.author = {
+            id: compressID(msg.author.id),
+            name: oneLine(msg.author.global_name ?? msg.author.username)
+        }
+    }
+    if (msg.type >= 1 && msg.type <= 11) result.type = msg.type;
+
+    // Parse content 
+    result.content = parseMessageContent(msg);
+
+    if (msg.referenced_message) {
+        let content = parseMessageContent(msg.referenced_message);
+
+        // Replace newlines with spaces (reply is shown as one line)
+        content = content.replace(/\r\n|\r|\n/gm, "  ");
+
+        if (content && content.length > 50) {
+            content = content.slice(0, 47).trim() + '...';
+        }
+        result.referenced_message = {
+            author: {
+                name: oneLine(msg.referenced_message.author.global_name ?? msg.referenced_message.author.username),
+                id: compressID(msg.referenced_message.author.id),
+            },
+            content
+        }
+    }
+    return result;
+}
+
+function parseMessageContent(msg) {
+    const target = msg.mentions?.[0]?.global_name ?? msg.mentions?.[0]?.username;
+    switch (msg.type) {
+        case 1: return `added ${target} to the group`;
+        case 2: return `removed ${target} from the group`;
+        case 3: return `started a call`;
+        case 4: return `changed the group name`;
+        case 5: return `changed the group icon`;
+        case 6: return `pinned a message`;
+        case 7: return `joined the server`;
+        case 8: return `boosted the server`;
+        case 9: return `boosted the server to level 1`;
+        case 10: return `boosted the server to level 2`;
+        case 11: return `boosted the server to level 3`;
+        default: return parseMessageContentNonStatus(msg);
+    }
+}
+
+function parseMessageContentNonStatus(msg) {
+    let result = "";
+
+    // Content from forwarded message
+    if (msg.message_snapshots) {
+        result = parseMessageContent(msg.message_snapshots[0].message);
+    }
+    // Normal message content
+    else if (msg.content) {
+        result = parseMessageContentText(msg.content);
+    }
+    
+    if (msg.attachments?.length) {
+        msg.attachments.forEach(att => {
+            if (result.length) result += "\n";
+            result += `(file: ${att.filename})`;
+        })
+    }
+    if (msg.sticker_items?.length) {
+        if (result.length) result += "\n";
+        result += `(sticker: ${msg.sticker_items[0].name})`;
+    }
+    if (msg.embeds?.length) {
+        msg.embeds.forEach(emb => {
+            if (!emb.title) return;
+            if (result.length) result += "\n";
+            result += `(embed: ${emb.title})`;
+        })
+    }
+    if (result == '') return "(unsupported message)";
+    return result;
+}
+
+function parseMessageContentText(content) {
+    if (!content) return content;
+    let result = content
+        // try to convert <@12345...> format into @username
+        .replace(/<@(\d{15,})>/gm, (mention, id) => {
+            if (userCache.has(id)) return `@${userCache.get(id)}`;
+            else return mention;
+        })
+        // try to convert <#12345...> format into #channelname
+        .replace(/<#(\d{15,})>/gm, (mention, id) => {
+            if (channelCache.has(id)) return `#${channelCache.get(id)}`;
+            else return mention;
+        })
+        // replace <:name:12345...> emoji format with :name:
+        .replace(/<a?(:\w*:)\d{15,}>/gm, "$1")
+
+    // Replace Unicode emojis with :name: textual representations
+    emoji.colons_mode = true;
+    result = emoji.replace_unified(result);
+
+    // Replace regional indicator emojis with textual representations
+    result = result.replace(/\ud83c[\udde6-\uddff]/g, match => {
+        return ":regional_indicator_"
+            + String.fromCharCode(match.charCodeAt(1) - 0xdde6 + 97)
+            + ":";
+    })
+
+    return result;
+}
+
+app.use((req, res, next) => {
+    res.locals.token = req.query?.token ?? req.body?.token;
+
+    res.locals.headers = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0",
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Authorization": res.locals.token,
+        "X-Discord-Locale": "en-GB",
+        "X-Debug-Options": "bugReporterEnabled",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin"
+    };
+
+    res.set("Content-Type", "text/vnd.wap.wml");
+    next();
+})
+
+app.get("/wap", (req, res) => {
+    res.render("index");
+})
+
+// Main menu including DMs
+app.get("/wap/main", async (req, res) => {
+    try {
+        const dmsGet = await axios.get(
+            `${DEST_BASE}/users/@me/channels`,
+            {headers: res.locals.headers}
+        )
+        // Sort by latest first
+        dmsGet.data.sort((a, b) => {
+            const a_id = BigInt(a.last_message_id ?? 0);
+            const b_id = BigInt(b.last_message_id ?? 0);
+            return (a_id < b_id ? 1 : a_id > b_id ? -1 : 0)
+        });
+
+        const dms = dmsGet.data
+            .filter(ch => ch.type == 1 || ch.type == 3)
+            .slice(0, 15)
+            .map(ch => {
+                const result = {
+                    id: compressID(ch.id),
+                    // type: ch.type,
+                    // last_message_id: ch.last_message_id
+                }
+
+                // Add group name for group DMs, recipient name for normal DMs
+                if (ch.type == 3) {
+                    result.name = ch.name;
+                } else {
+                    result.name = ch.recipients[0].global_name ?? ch.recipients[0].username;
+                }
+                result.name = oneLine(result.name);
+                return result;
+            })
+
+        res.render("main", {
+            token: res.locals.token,
+            dms
+        });
+    }
+    catch (e) {handleError(res, e)}
+})
+
+// Server list
+app.get("/wap/gl", async (req, res) => {
+    try {
+        const guildsGet = await axios.get(
+            `${DEST_BASE}/users/@me/guilds`,
+            {headers: res.locals.headers}
+        )
+
+        const guilds = guildsGet.data.map(g => ({
+            id: compressID(g.id),
+            name: oneLine(g.name)
+        }))
+
+        res.render("guilds", {
+            token: res.locals.token,
+            guilds
+        });
+    }
+    catch (e) {handleError(res, e)}
+})
+
+// Channel list of a server
+app.post("/wap/g", async (req, res) => {
+    try {
+        const channelsGet = await axios.get(
+            `${DEST_BASE}/guilds/${decompressID(req.body.id)}/channels`,
+            {headers: res.locals.headers}
+        )
+
+        // Populate channel name cache
+        channelsGet.data.forEach(ch => {
+            channelCache.set(ch.id, ch.name);
+
+            // If max size exceeded, remove the oldest item
+            if (channelCache.size > CACHE_SIZE) {
+                channelCache.delete(channelCache.keys().next().value);
+            }
+        })
+
+        // Due to page length limitations, limit the amount of channels to be shown:
+
+        // Up to 15 most recently used channels are shown.
+        const allChannels = channelsGet.data.filter(ch => ch.type == 0 || ch.type == 5);
+        allChannels.sort((a, b) => {
+            const a_id = BigInt(a.last_message_id ?? 0);
+            const b_id = BigInt(b.last_message_id ?? 0);
+            return (a_id < b_id ? 1 : a_id > b_id ? -1 : 0)
+        });
+
+        const recentChannelIDs = allChannels
+            .slice(0, 15)
+            .map(ch => ch.id);
+
+        // Also, channels with certain names will always be shown, because those are channels that people might often want to visit.
+        const whitelistedChannelIDs = allChannels
+            .filter(ch => /^(general|phones|off\S*topic|discord-j2me)$/g.test(ch.name))
+            .map(ch => ch.id);
+
+        const shownChannelIDs = [...new Set([...recentChannelIDs, ...whitelistedChannelIDs])]
+
+        const channels = allChannels
+            .filter(ch => shownChannelIDs.includes(ch.id))
+            .sort((a, b) => a.position - b.position)
+            .map(ch => ({
+                id: compressID(ch.id),
+                name: oneLine('#' + ch.name)
+            }))
+
+        res.render("channels", {
+            token: res.locals.token,
+            name: req.body.name,
+            channels
+        });
+    }
+    catch (e) {handleError(res, e)}
+})
+
+// Get channel messages
+app.post("/wap/ch", async (req, res) => {
+    try {
+        const MESSAGE_COUNT = 10;
+
+        let proxyUrl = `${DEST_BASE}/channels/${decompressID(req.body.id)}/messages`;
+        let queryParam = [`limit=${MESSAGE_COUNT}`];
+        if (req.body.before) queryParam.push(`before=${decompressID(req.body.before)}`);
+        if (req.body.after) queryParam.push(`after=${decompressID(req.body.after)}`);
+        proxyUrl += '?' + queryParam.join('&');
+    
+        const messagesGet = await axios.get(proxyUrl, {headers: res.locals.headers});
+    
+        // Populate username cache
+        messagesGet.data.forEach(msg => {
+            userCache.set(msg.author.id, msg.author.username);
+    
+            // If max size exceeded, remove the oldest item
+            if (userCache.size > CACHE_SIZE) {
+                userCache.delete(userCache.keys().next().value);
+            }
+        })
+    
+        const messages = messagesGet.data.map(parseMessageObject);
+
+        console.log(messages)
+    
+        res.render("channel", {
+            token: res.locals.token,
+            name: req.body.name,
+            id: req.body.id,
+            page: req.body.page ?? 0,
+            messages,
+            MESSAGE_COUNT
+        });
+    }
+    catch (e) {handleError(res, e)}
+})
+
+// Send message
+app.post("/wap/send", async (req, res) => {
+    try {
+        const send = {
+            content: req.body.text,
+            flags: 0,
+            mobile_network_type: "unknown",
+            tts: false
+        };
+        if (req.body.recipient) {
+            send.message_reference = {
+                message_id: decompressID(req.body.recipient)
+            }
+        }
+        if (Number(req.body.ping) == 0) {
+            send.allowed_mentions = {
+                replied_user: false
+            }
+        }
+
+        await axios.post(
+            `${DEST_BASE}/channels/${decompressID(req.body.id)}/messages`,
+            send,
+            {headers: res.locals.headers}
+        );
+
+        res.render("sent", {
+            token: res.locals.token,
+            name: req.body.name,
+            id: req.body.id
+        });
+    }
+    catch (e) {handleError(res, e)}
+})
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
