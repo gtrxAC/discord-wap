@@ -29,7 +29,7 @@
         <p>
             <% dms.forEach(d => { %>
                 <anchor>
-                    <go method="post" href="/wap/ch">
+                    <go method="get" href="/wap/ch">
                         <postfield name="token" value="$(token)"/>
                         <postfield name="id" value="<%= d.id %>"/>
                         <postfield name="name" value="@<%= d.name %>"/>

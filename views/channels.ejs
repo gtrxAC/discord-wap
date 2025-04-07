@@ -11,7 +11,7 @@
         <p>
             <% channels.forEach(c => { %>
                 <anchor>
-                    <go method="post" href="/wap/ch">
+                    <go method="get" href="/wap/ch">
                         <postfield name="token" value="<%= token %>"/>
                         <postfield name="id" value="<%= c.id %>"/>
                         <postfield name="name" value="<%= c.name %>"/>

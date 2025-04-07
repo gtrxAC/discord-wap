@@ -11,7 +11,7 @@
         <p>
             <% guilds.forEach(g => { %>
                 <anchor>
-                    <go method="post" href="/wap/g">
+                    <go method="get" href="/wap/g">
                         <postfield name="token" value="<%= token %>"/>
                         <postfield name="id" value="<%= g.id %>"/>
                         <postfield name="name" value="<%= g.name %>"/>

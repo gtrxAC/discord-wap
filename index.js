@@ -346,10 +346,10 @@ app.get("/wap/gl", getToken, async (req, res) => {
 })
 
 // Channel list of a server
-app.post("/wap/g", getToken, async (req, res) => {
+app.get("/wap/g", getToken, async (req, res) => {
     try {
         const channelsGet = await axios.get(
-            `${DEST_BASE}/guilds/${decompressID(req.body.id)}/channels`,
+            `${DEST_BASE}/guilds/${decompressID(req.query.id)}/channels`,
             {headers: res.locals.headers}
         )
 
@@ -394,7 +394,7 @@ app.post("/wap/g", getToken, async (req, res) => {
 
         res.render("channels", {
             token: compressToken(res.locals.token),
-            name: req.body.name,
+            name: req.query.name,
             channels
         });
     }
@@ -402,14 +402,14 @@ app.post("/wap/g", getToken, async (req, res) => {
 })
 
 // Get channel messages
-app.post("/wap/ch", getToken, async (req, res) => {
+app.get("/wap/ch", getToken, async (req, res) => {
     try {
         const MESSAGE_COUNT = 10;
 
-        let proxyUrl = `${DEST_BASE}/channels/${decompressID(req.body.id)}/messages`;
+        let proxyUrl = `${DEST_BASE}/channels/${decompressID(req.query.id)}/messages`;
         let queryParam = [`limit=${MESSAGE_COUNT}`];
-        if (req.body.before) queryParam.push(`before=${decompressID(req.body.before)}`);
-        if (req.body.after) queryParam.push(`after=${decompressID(req.body.after)}`);
+        if (req.query.before) queryParam.push(`before=${decompressID(req.query.before)}`);
+        if (req.query.after) queryParam.push(`after=${decompressID(req.query.after)}`);
         proxyUrl += '?' + queryParam.join('&');
     
         const messagesGet = await axios.get(proxyUrl, {headers: res.locals.headers});
@@ -425,14 +425,12 @@ app.post("/wap/ch", getToken, async (req, res) => {
         })
     
         const messages = messagesGet.data.map(m => parseMessageObject(req, m));
-
-        console.log(messages)
     
         res.render("channel", {
             token: compressToken(res.locals.token),
-            name: req.body.name,
-            id: req.body.id,
-            page: req.body.page ?? 0,
+            name: req.query.name,
+            id: req.query.id,
+            page: req.query.page ?? 0,
             messages,
             MESSAGE_COUNT
         });
