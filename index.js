@@ -48,11 +48,73 @@ function compressID(id) {
     return btoa(String.fromCharCode(...arr))
 }
 
-function oneLine(str) {
+function decompressToken(token) {
+    if (!token || !token.trim().length) throw new Error("Token not specified");
+
+    try {
+        let idPart = token.split('.')[0];
+        const rest = '.' + token.split('.').slice(1).join('.');
+    
+        if (idPart.length < 17) {
+            idPart = btoa(decompressID(idPart));
+        }
+        return idPart + rest;
+    }
+    catch (e) {
+        throw new Error("Token is invalid");
+    }
+}
+
+function compressToken(token) {
+    if (!token || !token.trim().length) throw new Error("Token not specified");
+
+    try {
+        let idPart = token.split('.')[0];
+        const rest = '.' + token.split('.').slice(1).join('.');
+        
+        if (idPart.length >= 17) {
+            idPart = compressID(atob(idPart));
+        }
+        return idPart + rest;
+    }
+    catch (e) {
+        throw new Error("Token is invalid");
+    }
+}
+
+/**
+ * Get an approximation of how many characters can fit on one line on the requester's device's display.
+ * @param {express.Request} req The express request to check
+ * @returns A rough and somewhat conservative estimate of how many columns the user's device's screen has
+ */
+function getCharactersPerLine(req) {
+    const ua = req.headers['user-agent'];
+
+    console.log(req.headers)
+    console.log(ua)
+
+    // could check some non-nokia models, for now, make a safe assumption of 16 chars
+    // could also use uaprof on devices that have that
+    if (!ua || !ua.startsWith('Nokia')) return 16;
+
+    // models with 84×48 display
+    if (/^Nokia(3330|5510|8265|8310)/.test(ua)) return 18;
+
+    // models with 96×65 or similar display (list may be incomplete)
+    if (/^Nokia(1101|3350|3410|35[^0]\d|3610|6010|6210|6310|6510|7110|8910)/.test(ua)) return 20;
+
+    // other nokias, assume a 128×128 or 128×160 display
+    return 21;
+}
+
+function oneLine(req, str) {
     // Make sure string fits on one line on the screen
-    // Optimized for Nokia monochrome phones, where average character width is 4.5 and screen width is 96 or 84
-    if (!str) return "(err)";
-    if (str.length > 16) return str.substring(0, 15) + "...";
+    if (str === null || str === undefined) return "(err)";
+    str = String(str);
+
+    const chars = getCharactersPerLine(req);
+
+    if (str.length > chars) return str.substring(0, chars - 1) + "...";
     return str;
 }
 
@@ -70,14 +132,14 @@ function handleError(res, e) {
     res.render("error", {error: getError(e)});
 }
 
-function parseMessageObject(msg) {
+function parseMessageObject(req, msg) {
     const result = {
         id: compressID(msg.id)
     }
     if (msg.author) {
         result.author = {
             id: compressID(msg.author.id),
-            name: oneLine(msg.author.global_name ?? msg.author.username)
+            name: oneLine(req, msg.author.global_name ?? msg.author.username)
         }
     }
     if (msg.type >= 1 && msg.type <= 11) result.type = msg.type;
@@ -96,7 +158,7 @@ function parseMessageObject(msg) {
         }
         result.referenced_message = {
             author: {
-                name: oneLine(msg.referenced_message.author.global_name ?? msg.referenced_message.author.username),
+                name: oneLine(req, msg.referenced_message.author.global_name ?? msg.referenced_message.author.username),
                 id: compressID(msg.referenced_message.author.id),
             },
             content
@@ -153,7 +215,10 @@ function parseMessageContentNonStatus(msg) {
         })
     }
     if (result == '') return "(unsupported message)";
-    return result;
+
+    // iOS keyboard (I think it's that) is stupid and replaces apostrophes with this unicode character
+    // that shows up as a rectangle/missing character on old phones. Replace it with a normal apostrophe.
+    return result.replace(/’/g, "'");
 }
 
 function parseMessageContentText(content) {
@@ -186,21 +251,29 @@ function parseMessageContentText(content) {
     return result;
 }
 
+function getToken(req, res, next) {
+    try {
+        res.locals.token = req.query?.token ?? req.body?.token;
+    
+        res.locals.headers = {
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0",
+            "Accept": "*/*",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Authorization": decompressToken(res.locals.token),
+            "X-Discord-Locale": "en-GB",
+            "X-Debug-Options": "bugReporterEnabled",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin"
+        };
+        next();
+    }
+    catch (e) {
+        handleError(res, e);
+    }
+}
+
 app.use((req, res, next) => {
-    res.locals.token = req.query?.token ?? req.body?.token;
-
-    res.locals.headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0",
-        "Accept": "*/*",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Authorization": res.locals.token,
-        "X-Discord-Locale": "en-GB",
-        "X-Debug-Options": "bugReporterEnabled",
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-origin"
-    };
-
     res.set("Content-Type", "text/vnd.wap.wml");
     next();
 })
@@ -210,7 +283,7 @@ app.get("/wap", (req, res) => {
 })
 
 // Main menu including DMs
-app.get("/wap/main", async (req, res) => {
+app.get("/wap/main", getToken, async (req, res) => {
     try {
         const dmsGet = await axios.get(
             `${DEST_BASE}/users/@me/channels`,
@@ -239,12 +312,12 @@ app.get("/wap/main", async (req, res) => {
                 } else {
                     result.name = ch.recipients[0].global_name ?? ch.recipients[0].username;
                 }
-                result.name = oneLine(result.name);
+                result.name = oneLine(req, parseMessageContentText(result.name));
                 return result;
             })
 
         res.render("main", {
-            token: res.locals.token,
+            token: compressToken(res.locals.token),
             dms
         });
     }
@@ -252,7 +325,7 @@ app.get("/wap/main", async (req, res) => {
 })
 
 // Server list
-app.get("/wap/gl", async (req, res) => {
+app.get("/wap/gl", getToken, async (req, res) => {
     try {
         const guildsGet = await axios.get(
             `${DEST_BASE}/users/@me/guilds`,
@@ -261,11 +334,11 @@ app.get("/wap/gl", async (req, res) => {
 
         const guilds = guildsGet.data.map(g => ({
             id: compressID(g.id),
-            name: oneLine(g.name)
+            name: oneLine(req, parseMessageContentText(g.name))
         }))
 
         res.render("guilds", {
-            token: res.locals.token,
+            token: compressToken(res.locals.token),
             guilds
         });
     }
@@ -273,7 +346,7 @@ app.get("/wap/gl", async (req, res) => {
 })
 
 // Channel list of a server
-app.post("/wap/g", async (req, res) => {
+app.post("/wap/g", getToken, async (req, res) => {
     try {
         const channelsGet = await axios.get(
             `${DEST_BASE}/guilds/${decompressID(req.body.id)}/channels`,
@@ -316,11 +389,11 @@ app.post("/wap/g", async (req, res) => {
             .sort((a, b) => a.position - b.position)
             .map(ch => ({
                 id: compressID(ch.id),
-                name: oneLine('#' + ch.name)
+                name: oneLine(req, '#' + parseMessageContentText(ch.name))
             }))
 
         res.render("channels", {
-            token: res.locals.token,
+            token: compressToken(res.locals.token),
             name: req.body.name,
             channels
         });
@@ -329,7 +402,7 @@ app.post("/wap/g", async (req, res) => {
 })
 
 // Get channel messages
-app.post("/wap/ch", async (req, res) => {
+app.post("/wap/ch", getToken, async (req, res) => {
     try {
         const MESSAGE_COUNT = 10;
 
@@ -351,12 +424,12 @@ app.post("/wap/ch", async (req, res) => {
             }
         })
     
-        const messages = messagesGet.data.map(parseMessageObject);
+        const messages = messagesGet.data.map(m => parseMessageObject(req, m));
 
         console.log(messages)
     
         res.render("channel", {
-            token: res.locals.token,
+            token: compressToken(res.locals.token),
             name: req.body.name,
             id: req.body.id,
             page: req.body.page ?? 0,
@@ -368,7 +441,7 @@ app.post("/wap/ch", async (req, res) => {
 })
 
 // Send message
-app.post("/wap/send", async (req, res) => {
+app.post("/wap/send", getToken, async (req, res) => {
     try {
         const send = {
             content: req.body.text,
@@ -394,9 +467,8 @@ app.post("/wap/send", async (req, res) => {
         );
 
         res.render("sent", {
-            token: res.locals.token,
-            name: req.body.name,
-            id: req.body.id
+            token: compressToken(res.locals.token),
+            name: req.body.name
         });
     }
     catch (e) {handleError(res, e)}
