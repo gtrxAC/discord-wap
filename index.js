@@ -502,7 +502,7 @@ app.post("/wap/send", getToken, async (req, res) => {
         };
         if (req.body.recipient) {
             send.message_reference = {
-                message_id: decompressID(req.body.recipient)
+                message_id: String(decompressID(req.body.recipient))
             }
         }
         if (Number(req.body.ping) == 0) {
