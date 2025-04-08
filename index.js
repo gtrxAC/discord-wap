@@ -82,6 +82,28 @@ function compressToken(token) {
     }
 }
 
+function getIdTimestamp(res, id) {
+    const date = new Date(Number((BigInt(id) >> 22n) + 1420070400000n));
+    date.setHours(date.getHours() + res.locals.settings.timeOffsetHours);
+    date.setMinutes(date.getMinutes() + res.locals.settings.timeOffsetMinutes);
+    let period = '';
+
+    if (res.locals.settings.use12hTime) {
+        period = date.getHours() < 12 ? "A" : "P";
+
+        // Convert hours to 12-hour format
+        date.setHours(date.getHours() % 12);
+        if (date.getHours() == 0) {
+            date.setHours(12);
+        }
+    }
+
+    let minutes = date.getMinutes();
+    if (minutes < 10) minutes = '0' + minutes;
+
+    return date.getHours() + ":" + minutes + period;
+}
+
 /**
  * Get an approximation of how many characters can fit on one line on the requester's device's display.
  * @param {express.Request} req The express request to check
@@ -90,15 +112,12 @@ function compressToken(token) {
 function getCharactersPerLine(req) {
     const ua = req.headers['user-agent'];
 
-    console.log(req.headers)
-    console.log(ua)
-
     // could check some non-nokia models, for now, make a safe assumption of 16 chars
     // could also use uaprof on devices that have that
     if (!ua || !ua.startsWith('Nokia')) return 16;
 
     // models with 84×48 display
-    if (/^Nokia(3330|5510|8265|8310)/.test(ua)) return 18;
+    if (/^Nokia(3330|5510|8265|8310)/.test(ua)) return 17;
 
     // models with 96×65 or similar display (list may be incomplete)
     if (/^Nokia(1101|3350|3410|35[^0]\d|3610|6010|6210|6310|6510|7110|8910)/.test(ua)) return 20;
@@ -254,12 +273,32 @@ function parseMessageContentText(content) {
 function getToken(req, res, next) {
     try {
         res.locals.token = req.query?.token ?? req.body?.token;
+
+        const settingsArr = res.locals.token.split('.').slice(3);
+
+        let messageLoadCount = Number(settingsArr[0]) || 10;
+        if (messageLoadCount > 100) messageLoadCount = 100;
+        else if (messageLoadCount < 1) messageLoadCount = 1;
+
+        let timeOffsetHours = Number(settingsArr[2]) || 0;
+        let timeOffsetMinutes = Number(settingsArr[3]) || 0;
+        if (timeOffsetHours < -14) timeOffsetHours = -14;
+        if (timeOffsetHours > 14) timeOffsetHours = 14;
+        if (![0, 15, 30, 45].includes(timeOffsetMinutes)) timeOffsetMinutes = 0;
+
+        res.locals.settings = {
+            messageLoadCount,
+            altChannelListLayout: (Number(settingsArr[1]) || 0) != 0,
+            timeOffsetHours,
+            timeOffsetMinutes,
+            use12hTime: (Number(settingsArr[4]) || 0) != 0
+        }
     
         res.locals.headers = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0",
             "Accept": "*/*",
             "Accept-Language": "en-US,en;q=0.5",
-            "Authorization": decompressToken(res.locals.token),
+            "Authorization": decompressToken(res.locals.token).split('.').slice(0, 3).join('.'),
             "X-Discord-Locale": "en-GB",
             "X-Debug-Options": "bugReporterEnabled",
             "Sec-Fetch-Dest": "empty",
@@ -365,7 +404,7 @@ app.get("/wap/g", getToken, async (req, res) => {
 
         // Due to page length limitations, limit the amount of channels to be shown:
 
-        // Up to 15 most recently used channels are shown.
+        // Sort channels by most recently used
         const allChannels = channelsGet.data.filter(ch => ch.type == 0 || ch.type == 5);
         allChannels.sort((a, b) => {
             const a_id = BigInt(a.last_message_id ?? 0);
@@ -373,24 +412,38 @@ app.get("/wap/g", getToken, async (req, res) => {
             return (a_id < b_id ? 1 : a_id > b_id ? -1 : 0)
         });
 
-        const recentChannelIDs = allChannels
-            .slice(0, 15)
-            .map(ch => ch.id);
+        let channels;
 
-        // Also, channels with certain names will always be shown, because those are channels that people might often want to visit.
-        const whitelistedChannelIDs = allChannels
-            .filter(ch => /^(general|phones|off\S*topic|discord-j2me)$/g.test(ch.name))
-            .map(ch => ch.id);
-
-        const shownChannelIDs = [...new Set([...recentChannelIDs, ...whitelistedChannelIDs])]
-
-        const channels = allChannels
-            .filter(ch => shownChannelIDs.includes(ch.id))
-            .sort((a, b) => a.position - b.position)
-            .map(ch => ({
-                id: compressID(ch.id),
-                name: oneLine(req, '#' + parseMessageContentText(ch.name))
-            }))
+        // Up to 15 most recently used channels are shown.
+        if (res.locals.settings.altChannelListLayout) {
+            channels = allChannels
+                .slice(0, 15)
+                .map(ch => ({
+                    id: compressID(ch.id),
+                    name: oneLine(req, '#' + parseMessageContentText(ch.name)),
+                    label: oneLine(req, getIdTimestamp(res, ch.last_message_id) + ' ' + parseMessageContentText(ch.name))
+                }))
+        } else {
+            const recentChannelIDs = allChannels
+                .slice(0, 15)
+                .map(ch => ch.id);
+    
+            // Also, channels with certain names will always be shown, because those are channels that people might often want to visit.
+            const whitelistedChannelIDs = allChannels
+                .filter(ch => /^(general|phones|off\S*topic|discord-j2me)$/g.test(ch.name))
+                .map(ch => ch.id);
+    
+            const shownChannelIDs = [...new Set([...recentChannelIDs, ...whitelistedChannelIDs])]
+    
+            channels = allChannels
+                .filter(ch => shownChannelIDs.includes(ch.id))
+                .sort((a, b) => a.position - b.position)
+                .map(ch => ({
+                    id: compressID(ch.id),
+                    name: oneLine(req, '#' + parseMessageContentText(ch.name)),
+                    label: oneLine(req, '#' + parseMessageContentText(ch.name))
+                }))
+        }
 
         res.render("channels", {
             token: compressToken(res.locals.token),
