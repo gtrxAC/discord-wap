@@ -129,7 +129,7 @@ function getCharactersPerLine(req) {
 function oneLine(req, str) {
     // Make sure string fits on one line on the screen
     if (str === null || str === undefined) return "(err)";
-    str = String(str);
+    str = parseMessageContentText(String(str));
 
     const chars = getCharactersPerLine(req);
 
@@ -351,7 +351,7 @@ app.get("/wap/main", getToken, async (req, res) => {
                 } else {
                     result.name = ch.recipients[0].global_name ?? ch.recipients[0].username;
                 }
-                result.name = oneLine(req, parseMessageContentText(result.name));
+                result.name = oneLine(req, result.name);
                 return result;
             })
 
@@ -373,7 +373,7 @@ app.get("/wap/gl", getToken, async (req, res) => {
 
         const guilds = guildsGet.data.map(g => ({
             id: compressID(g.id),
-            name: oneLine(req, parseMessageContentText(g.name))
+            name: oneLine(req, g.name)
         }))
 
         res.render("guilds", {
@@ -420,8 +420,8 @@ app.get("/wap/g", getToken, async (req, res) => {
                 .slice(0, 15)
                 .map(ch => ({
                     id: compressID(ch.id),
-                    name: oneLine(req, '#' + parseMessageContentText(ch.name)),
-                    label: oneLine(req, getIdTimestamp(res, ch.last_message_id) + ' ' + parseMessageContentText(ch.name))
+                    name: oneLine(req, '#' + ch.name),
+                    label: oneLine(req, getIdTimestamp(res, ch.last_message_id) + ' ' + ch.name)
                 }))
         } else {
             const recentChannelIDs = allChannels
@@ -440,8 +440,8 @@ app.get("/wap/g", getToken, async (req, res) => {
                 .sort((a, b) => a.position - b.position)
                 .map(ch => ({
                     id: compressID(ch.id),
-                    name: oneLine(req, '#' + parseMessageContentText(ch.name)),
-                    label: oneLine(req, '#' + parseMessageContentText(ch.name))
+                    name: oneLine(req, '#' + ch.name),
+                    label: oneLine(req, '#' + ch.name)
                 }))
         }
 
