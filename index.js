@@ -22,14 +22,16 @@ const CACHE_SIZE = 10000;
 function decompressID(id) {
     const idStr = atob(id);
 
-    return BigInt(idStr.charCodeAt(0)) << 56n |
+    return String(
+        BigInt(idStr.charCodeAt(0)) << 56n |
         BigInt(idStr.charCodeAt(1)) << 48n |
         BigInt(idStr.charCodeAt(2)) << 40n |
         BigInt(idStr.charCodeAt(3)) << 32n |
         BigInt(idStr.charCodeAt(4)) << 24n |
         BigInt(idStr.charCodeAt(5)) << 16n |
         BigInt(idStr.charCodeAt(6)) << 8n |
-        BigInt(idStr.charCodeAt(7));
+        BigInt(idStr.charCodeAt(7))
+    );
 }
 
 function compressID(id) {
@@ -83,25 +85,44 @@ function compressToken(token) {
 }
 
 function getIdTimestamp(res, id) {
+    if (!id) return "N/A";
+
     const date = new Date(Number((BigInt(id) >> 22n) + 1420070400000n));
     date.setHours(date.getHours() + res.locals.settings.timeOffsetHours);
     date.setMinutes(date.getMinutes() + res.locals.settings.timeOffsetMinutes);
-    let period = '';
 
-    if (res.locals.settings.use12hTime) {
-        period = date.getHours() < 12 ? "A" : "P";
+    const now = new Date();
+    now.setHours(now.getHours() + res.locals.settings.timeOffsetHours);
+    now.setMinutes(now.getMinutes() + res.locals.settings.timeOffsetMinutes);
 
-        // Convert hours to 12-hour format
-        date.setHours(date.getHours() % 12);
-        if (date.getHours() == 0) {
-            date.setHours(12);
+    if (date.getDate() == now.getDate() && date.getMonth() == now.getMonth() && date.getFullYear() == now.getFullYear()) {
+        // today -> show the time
+        let period = '';
+
+        if (res.locals.settings.use12hTime) {
+            period = date.getHours() < 12 ? "A" : "P";
+    
+            // Convert hours to 12-hour format
+            date.setHours(date.getHours() % 12);
+            if (date.getHours() == 0) {
+                date.setHours(12);
+            }
         }
+    
+        let minutes = date.getMinutes();
+        if (minutes < 10) minutes = '0' + minutes;
+    
+        return date.getHours() + ":" + minutes + period;
+    } else {
+        // not today -> show the date
+        let day = date.getDate();
+        if (day < 10) day = '0' + day;
+
+        let month = date.getMonth() + 1;
+        if (month < 10) month = '0' + month;
+
+        return day + "/" + month;
     }
-
-    let minutes = date.getMinutes();
-    if (minutes < 10) minutes = '0' + minutes;
-
-    return date.getHours() + ":" + minutes + period;
 }
 
 /**
@@ -219,18 +240,18 @@ function parseMessageContentNonStatus(msg) {
     if (msg.attachments?.length) {
         msg.attachments.forEach(att => {
             if (result.length) result += "\n";
-            result += `(file: ${att.filename})`;
+            result += `(file: ${parseMessageContentText(att.filename)})`;
         })
     }
     if (msg.sticker_items?.length) {
         if (result.length) result += "\n";
-        result += `(sticker: ${msg.sticker_items[0].name})`;
+        result += `(sticker: ${parseMessageContentText(msg.sticker_items[0].name)})`;
     }
     if (msg.embeds?.length) {
         msg.embeds.forEach(emb => {
             if (!emb.title) return;
             if (result.length) result += "\n";
-            result += `(embed: ${emb.title})`;
+            result += `(embed: ${parseMessageContentText(emb.title)})`;
         })
     }
     if (result == '') return "(unsupported message)";
@@ -519,6 +540,7 @@ app.post("/wap/send", getToken, async (req, res) => {
 
         res.render("sent", {
             token: compressToken(res.locals.token),
+            id: req.body.id,
             name: req.body.name
         });
     }

@@ -69,6 +69,7 @@
                 <go method="post" href="/wap/send">
                     <postfield name="token" value="<%= token %>"/>
                     <postfield name="id" value="<%= id %>"/>
+                    <postfield name="name" value="<%= name %>"/>
                     <postfield name="text" value="$(message)"/>
                 </go>
                 Send
@@ -82,15 +83,18 @@
     </card>
 
     <card id="reply" title="<%= name %>">
-        <p>Reply to $(recname)</p>
-        <br/>
-        <input name="message" size="2000"/>
+        <p>
+            Reply to $(recname)
+            <br/>
+            <input name="message" size="2000"/>
+        </p>
 
         <p align="center">
             <anchor>
                 <go method="post" href="/wap/send">
                     <postfield name="token" value="<%= token %>"/>
                     <postfield name="id" value="<%= id %>"/>
+                    <postfield name="name" value="<%= name %>"/>
                     <postfield name="text" value="$(message)"/>
                     <postfield name="recipient" value="$(rec)"/>
                 </go>
@@ -101,6 +105,7 @@
                 <go method="post" href="/wap/send">
                     <postfield name="token" value="<%= token %>"/>
                     <postfield name="id" value="<%= id %>"/>
+                    <postfield name="name" value="<%= name %>"/>
                     <postfield name="text" value="$(message)"/>
                     <postfield name="recipient" value="$(rec)"/>
                     <postfield name="ping" value="0"/>
