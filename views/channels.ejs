@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
 <wml>
-    <card title="<%= name %>">
+    <card title="$(gname)">
         <p align="center">
             <anchor>
                 <prev/>
@@ -12,9 +12,9 @@
             <% channels.forEach(c => { %>
                 <anchor>
                     <go method="get" href="/wap/ch">
+                        <setvar name="cname" value="<%= c.name %>"/>
                         <postfield name="token" value="<%= token %>"/>
                         <postfield name="id" value="<%= c.id %>"/>
-                        <postfield name="name" value="<%= c.name %>"/>
                     </go>
                     <%= c.label %>
                 </anchor>

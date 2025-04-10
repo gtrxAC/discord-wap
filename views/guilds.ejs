@@ -12,9 +12,9 @@
             <% guilds.forEach(g => { %>
                 <anchor>
                     <go method="get" href="/wap/g">
+                        <setvar name="gname" value="<%= g.name %>"/>
                         <postfield name="token" value="<%= token %>"/>
                         <postfield name="id" value="<%= g.id %>"/>
-                        <postfield name="name" value="<%= g.name %>"/>
                     </go>
                     <%= g.name %>
                 </anchor>

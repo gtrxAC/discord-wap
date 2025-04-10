@@ -468,7 +468,6 @@ app.get("/wap/g", getToken, async (req, res) => {
 
         res.render("channels", {
             token: compressToken(res.locals.token),
-            name: req.query.name,
             channels
         });
     }
@@ -502,7 +501,6 @@ app.get("/wap/ch", getToken, async (req, res) => {
     
         res.render("channel", {
             token: compressToken(res.locals.token),
-            name: req.query.name,
             id: req.query.id,
             page: req.query.page ?? 0,
             messages,
@@ -538,11 +536,7 @@ app.post("/wap/send", getToken, async (req, res) => {
             {headers: res.locals.headers}
         );
 
-        res.render("sent", {
-            token: compressToken(res.locals.token),
-            id: req.body.id,
-            name: req.body.name
-        });
+        res.render("sent");
     }
     catch (e) {handleError(res, e)}
 })

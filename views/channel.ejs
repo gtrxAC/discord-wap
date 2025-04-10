@@ -1,21 +1,25 @@
 <?xml version="1.0"?>
 <!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
 <wml>
-    <card id="channel" title="<%= name %>">
+    <card id="channel" title="$(cname)">
         <p align="center">
             <anchor>
                 <prev/>
                 Back
             </anchor>
             <br/>
-            <a href="#send">Send message</a>
+            <anchor>
+                <go href="#send">
+                    <setvar name="message" value=""/>
+                </go>
+                Send message
+            </anchor>
             <% if (page > 0) { %>
                 <br/>
                 <anchor>
                     <go method="get" href="/wap/ch">
                         <postfield name="token" value="<%= token %>"/>
                         <postfield name="id" value="<%= id %>"/>
-                        <postfield name="name" value="<%= name %>"/>
                         <% if (page > 1) { %>
                             <postfield name="page" value="<%= page - 1 %>"/>
                             <postfield name="after" value="<%= messages[0].id %>"/>
@@ -30,6 +34,7 @@
             <p>
                 <anchor>
                     <go href="#reply">
+                        <setvar name="message" value=""/>
                         <setvar name="rec" value="<%= m.id %>"/>
                         <setvar name="recname" value="<%= m.author.name %>"/>
                     </go>
@@ -47,7 +52,6 @@
                     <go method="get" href="/wap/ch">
                         <postfield name="token" value="<%= token %>"/>
                         <postfield name="id" value="<%= id %>"/>
-                        <postfield name="name" value="<%= name %>"/>
                         <postfield name="page" value="<%= page + 1 %>"/>
                         <postfield name="before" value="<%= messages[messages.length - 1].id %>"/>
                     </go>
@@ -57,7 +61,11 @@
         <% } %>
     </card>
 
-    <card id="send" title="<%= name %>">
+    <card id="send" title="$(cname)">
+        <onevent type="onenterbackward">
+            <prev/>
+        </onevent>
+
         <p>
             Your message:
             <br/>
@@ -69,7 +77,6 @@
                 <go method="post" href="/wap/send">
                     <postfield name="token" value="<%= token %>"/>
                     <postfield name="id" value="<%= id %>"/>
-                    <postfield name="name" value="<%= name %>"/>
                     <postfield name="text" value="$(message)"/>
                 </go>
                 Send
@@ -82,7 +89,11 @@
         </p>
     </card>
 
-    <card id="reply" title="<%= name %>">
+    <card id="reply" title="$(cname)">
+        <onevent type="onenterbackward">
+            <prev/>
+        </onevent>
+
         <p>
             Reply to $(recname)
             <br/>
@@ -94,7 +105,6 @@
                 <go method="post" href="/wap/send">
                     <postfield name="token" value="<%= token %>"/>
                     <postfield name="id" value="<%= id %>"/>
-                    <postfield name="name" value="<%= name %>"/>
                     <postfield name="text" value="$(message)"/>
                     <postfield name="recipient" value="$(rec)"/>
                 </go>
@@ -105,7 +115,6 @@
                 <go method="post" href="/wap/send">
                     <postfield name="token" value="<%= token %>"/>
                     <postfield name="id" value="<%= id %>"/>
-                    <postfield name="name" value="<%= name %>"/>
                     <postfield name="text" value="$(message)"/>
                     <postfield name="recipient" value="$(rec)"/>
                     <postfield name="ping" value="0"/>
