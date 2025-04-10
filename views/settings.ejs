@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+    <card title="Settings">
+        <p>
+            Message count:
+            <br/>
+            <input name="mcount" size="3" value="<%= settings.messageLoadCount %>"/>
+        </p>
+        <p>
+            Sort channels by:
+            <br/>
+            <select name="sort" value="<%= settings.altChannelListLayout ? 1 : 0 %>">
+                <option value="0">Position</option>
+                <option value="1">Last message</option>
+            </select>
+        </p>
+        <p>
+            Time offset (h):
+            <br/>
+            <input name="tzh" size="3" value="<%= settings.timeOffsetHours %>"/>
+        </p>
+        <p>
+            Time offset (min):
+            <br/>
+            <input name="tzm" size="2" value="<%= settings.timeOffsetMinutes %>"/>
+        </p>
+        <p>
+            Time format:
+            <br/>
+            <select name="time" value="<%= settings.use12hTime ? 1 : 0 %>">
+                <option value="0">24 hours</option>
+                <option value="1">12 hours</option>
+            </select>
+        </p>
+        <p>
+            To save your settings, press 'save', then add the page to your bookmarks again.
+        </p>
+        <p align="center">
+            <anchor>
+               <go method="get" href="/wap/main">
+                   <postfield name="token" value="$(token)"/>
+                   <postfield name="s0" value="$(mcount)"/>
+                   <postfield name="s1" value="$(sort)"/>
+                   <postfield name="s2" value="$(tzh)"/>
+                   <postfield name="s3" value="$(tzm)"/>
+                   <postfield name="s4" value="$(time)"/>
+               </go>
+               Save
+            </anchor>
+            <br/>
+            <anchor>
+                <prev/>
+               Cancel
+            </anchor>
+        </p>
+    </card>
+</wml>

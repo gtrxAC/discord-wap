@@ -19,8 +19,16 @@ const userCache = new Map();
 const channelCache = new Map();
 const CACHE_SIZE = 10000;
 
+// Base64 but better - instead of '/' and '=' characters, we use '-' and '_', which stay as one character when URL encoded
+function customBase64Decode(str) {
+    return atob(str.replace(/-/g, '/').replace(/_/g, '='));
+}
+function customBase64Encode(str) {
+    return btoa(str).replace(/\//g, '-').replace(/=/g, '_')
+}
+
 function decompressID(id) {
-    const idStr = atob(id);
+    const idStr = customBase64Decode(id);
 
     return String(
         BigInt(idStr.charCodeAt(0)) << 56n |
@@ -47,7 +55,7 @@ function compressID(id) {
         Number((id >> 8n) & 0xFFn),
         Number(id & 0xFFn),
     ];
-    return btoa(String.fromCharCode(...arr))
+    return customBase64Encode(String.fromCharCode(...arr))
 }
 
 function decompressToken(token) {
@@ -163,6 +171,12 @@ function getError(e) {
 
     if (e.message == "Request failed with status code 401") {
         return "Authentication failed. Make sure the token is valid and entered correctly."
+    }
+    if (e.message == "Request failed with status code 403") {
+        return "Access denied. Make sure you have permission to access this channel."
+    }
+    if (e.message == "Request failed with status code 404") {
+        return "The channel was not found."
     }
     return e.message;
 }
@@ -295,6 +309,14 @@ function getToken(req, res, next) {
     try {
         res.locals.token = req.query?.token ?? req.body?.token;
 
+        if (req.query.s0) {
+            res.locals.token = res.locals.token.split('.').slice(0, 3).join('.')
+                + '.' + req.query.s0
+                + '.' + req.query.s1
+                + '.' + req.query.s2
+                + '.' + req.query.s3
+                + '.' + req.query.s4;
+        }
         const settingsArr = res.locals.token.split('.').slice(3);
 
         let messageLoadCount = Number(settingsArr[0]) || 10;
@@ -398,7 +420,6 @@ app.get("/wap/gl", getToken, async (req, res) => {
         }))
 
         res.render("guilds", {
-            token: compressToken(res.locals.token),
             guilds
         });
     }
@@ -467,7 +488,6 @@ app.get("/wap/g", getToken, async (req, res) => {
         }
 
         res.render("channels", {
-            token: compressToken(res.locals.token),
             channels
         });
     }
@@ -477,10 +497,8 @@ app.get("/wap/g", getToken, async (req, res) => {
 // Get channel messages
 app.get("/wap/ch", getToken, async (req, res) => {
     try {
-        const MESSAGE_COUNT = 10;
-
         let proxyUrl = `${DEST_BASE}/channels/${decompressID(req.query.id)}/messages`;
-        let queryParam = [`limit=${MESSAGE_COUNT}`];
+        let queryParam = [`limit=${res.locals.settings.messageLoadCount}`];
         if (req.query.before) queryParam.push(`before=${decompressID(req.query.before)}`);
         if (req.query.after) queryParam.push(`after=${decompressID(req.query.after)}`);
         proxyUrl += '?' + queryParam.join('&');
@@ -500,11 +518,10 @@ app.get("/wap/ch", getToken, async (req, res) => {
         const messages = messagesGet.data.map(m => parseMessageObject(req, m));
     
         res.render("channel", {
-            token: compressToken(res.locals.token),
             id: req.query.id,
             page: req.query.page ?? 0,
             messages,
-            MESSAGE_COUNT
+            messageCount: res.locals.settings.messageLoadCount
         });
     }
     catch (e) {handleError(res, e)}
@@ -539,6 +556,12 @@ app.post("/wap/send", getToken, async (req, res) => {
         res.render("sent");
     }
     catch (e) {handleError(res, e)}
+})
+
+app.get("/wap/set", getToken, (req, res) => {
+    res.render("settings", {
+        settings: res.locals.settings
+    });
 })
 
 app.listen(PORT, () => {

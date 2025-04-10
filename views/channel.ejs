@@ -18,7 +18,7 @@
                 <br/>
                 <anchor>
                     <go method="get" href="/wap/ch">
-                        <postfield name="token" value="<%= token %>"/>
+                        <postfield name="token" value="$(token)"/>
                         <postfield name="id" value="<%= id %>"/>
                         <% if (page > 1) { %>
                             <postfield name="page" value="<%= page - 1 %>"/>
@@ -46,11 +46,11 @@
             </p>
         <% }) %>
 
-        <% if (messages.length == MESSAGE_COUNT) { %>
+        <% if (messages.length == messageCount) { %>
             <p align="center">
                 <anchor>
                     <go method="get" href="/wap/ch">
-                        <postfield name="token" value="<%= token %>"/>
+                        <postfield name="token" value="$(token)"/>
                         <postfield name="id" value="<%= id %>"/>
                         <postfield name="page" value="<%= page + 1 %>"/>
                         <postfield name="before" value="<%= messages[messages.length - 1].id %>"/>
@@ -75,7 +75,7 @@
         <p align="center">
             <anchor>
                 <go method="post" href="/wap/send">
-                    <postfield name="token" value="<%= token %>"/>
+                    <postfield name="token" value="$(token)"/>
                     <postfield name="id" value="<%= id %>"/>
                     <postfield name="text" value="$(message)"/>
                 </go>
@@ -103,7 +103,7 @@
         <p align="center">
             <anchor>
                 <go method="post" href="/wap/send">
-                    <postfield name="token" value="<%= token %>"/>
+                    <postfield name="token" value="$(token)"/>
                     <postfield name="id" value="<%= id %>"/>
                     <postfield name="text" value="$(message)"/>
                     <postfield name="recipient" value="$(rec)"/>
@@ -113,7 +113,7 @@
             <br/>
             <anchor>
                 <go method="post" href="/wap/send">
-                    <postfield name="token" value="<%= token %>"/>
+                    <postfield name="token" value="$(token)"/>
                     <postfield name="id" value="<%= id %>"/>
                     <postfield name="text" value="$(message)"/>
                     <postfield name="recipient" value="$(rec)"/>

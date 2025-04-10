@@ -13,7 +13,7 @@
                 <anchor>
                     <go method="get" href="/wap/ch">
                         <setvar name="cname" value="<%= c.name %>"/>
-                        <postfield name="token" value="<%= token %>"/>
+                        <postfield name="token" value="$(token)"/>
                         <postfield name="id" value="<%= c.id %>"/>
                     </go>
                     <%= c.label %>
