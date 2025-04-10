@@ -10,12 +10,12 @@ Also see [Discord J2ME](https://github.com/gtrxAC/discord-j2me), a client for de
 * Message sending
 * Replying with ping on or off
 * Message history with pagination
+* Settings (e.g. message load count)
 ### Not implemented
 * HTML support
 * Message editing and deleting
 * Threads
 * Message timestamps
-* Settings (e.g. message load count)
 
 ## How to use
 A public instance is hosted at http://146.59.80.3/wap, but it is recommended to host your own instance if possible.
