@@ -21,10 +21,10 @@ const CACHE_SIZE = 10000;
 
 // Base64 but better - instead of '/' and '=' characters, we use '-' and '_', which stay as one character when URL encoded
 function customBase64Decode(str) {
-    return atob(str.replace(/-/g, '/').replace(/_/g, '='));
+    return atob(str.replace(/-/g, '+').replace(/_/g, '/'));
 }
 function customBase64Encode(str) {
-    return btoa(str).replace(/\//g, '-').replace(/=/g, '_')
+    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
 
 function decompressID(id) {
@@ -149,7 +149,7 @@ function getCharactersPerLine(req) {
     if (/^Nokia(3330|5510|8265|8310)/.test(ua)) return 17;
 
     // models with 96×65 or similar display (list may be incomplete)
-    if (/^Nokia(1101|3350|3410|35[^0]\d|3610|6010|6210|6310|6510|7110|8910)/.test(ua)) return 20;
+    if (/^Nokia(1101|3350|3410|35[^0]\d|3610|6010|6210|6310|6510|7110|8910)/.test(ua)) return 19;
 
     // other nokias, assume a 128×128 or 128×160 display
     return 21;
@@ -186,15 +186,17 @@ function handleError(res, e) {
     res.render("error", {error: getError(e)});
 }
 
-function parseMessageObject(req, msg) {
+function parseMessageObject(req, res, msg) {
     const result = {
-        id: compressID(msg.id)
+        id: compressID(msg.id),
     }
     if (msg.author) {
+        const author = msg.author.global_name ?? msg.author.username;
         result.author = {
             id: compressID(msg.author.id),
-            name: oneLine(req, msg.author.global_name ?? msg.author.username)
+            name: oneLine(req, author)
         }
+        result.authorLine = oneLine(req, author + " " + getIdTimestamp(res, msg.id));
     }
     if (msg.type >= 1 && msg.type <= 11) result.type = msg.type;
 
@@ -515,7 +517,7 @@ app.get("/wap/ch", getToken, async (req, res) => {
             }
         })
     
-        const messages = messagesGet.data.map(m => parseMessageObject(req, m));
+        const messages = messagesGet.data.map(m => parseMessageObject(req, res, m));
     
         res.render("channel", {
             id: req.query.id,
