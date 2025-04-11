@@ -20,6 +20,8 @@ Also see [Discord J2ME](https://github.com/gtrxAC/discord-j2me), a client for de
 ## How to use
 A public instance is hosted at http://146.59.80.3/wap, but it is recommended to host your own instance if possible.
 
+Using a secondary/alt account is recommended for safety. Additionally, the servers list may fail to load if the account is a member of too many servers.
+
 You will need:
 * A Discord account
 * A way to get that account's token (either a PC or an Android device with the Puffin browser installed)
