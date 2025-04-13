@@ -404,8 +404,10 @@ app.get("/wap/main", getToken, async (req, res) => {
                 // Add group name for group DMs, recipient name for normal DMs
                 if (ch.type == 3) {
                     result.name = ch.name;
+                    result.namePrefix = '';
                 } else {
                     result.name = ch.recipients[0].global_name ?? ch.recipients[0].username;
+                    result.namePrefix = '@';
                 }
                 result.name = oneLine(req, result.name);
                 return result;

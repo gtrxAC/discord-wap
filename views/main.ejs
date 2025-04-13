@@ -42,7 +42,7 @@
             <% dms.forEach(d => { %>
                 <anchor>
                     <go method="get" href="/wap/ch">
-                        <setvar name="cname" value="@<%= d.name %>"/>
+                        <setvar name="cname" value="<%= d.namePrefix %><%= d.name %>"/>
                         <postfield name="token" value="$(token)"/>
                         <postfield name="id" value="<%= d.id %>"/>
                     </go>
