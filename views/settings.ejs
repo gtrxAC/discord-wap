@@ -34,6 +34,14 @@
             </select>
         </p>
         <p>
+            Textbox size:
+            <br/>
+            <select name="tbs" value="<%= settings.limitTextBoxSize ? 1 : 0 %>">
+                <option value="0">Full</option>
+                <option value="1">Limited</option>
+            </select>
+        </p>
+        <p>
             To save your settings, press 'save', then add the page to your bookmarks again.
         </p>
         <p align="center">
@@ -45,6 +53,7 @@
                    <postfield name="s2" value="$(tzh)"/>
                    <postfield name="s3" value="$(tzm)"/>
                    <postfield name="s4" value="$(time)"/>
+                   <postfield name="s5" value="$(tbs)"/>
                </go>
                Save
             </anchor>

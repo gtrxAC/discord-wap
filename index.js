@@ -140,13 +140,19 @@ function getIdTimestamp(res, id) {
  */
 function getCharactersPerLine(req) {
     const ua = req.headers['user-agent'];
+    if (!ua) return 16;
 
+    // siemens: assume 101 pixel wide display (there are larger ones too, but most of them have decent j2me support anyway)
+    // small font size, tested on siemens a65. a55 seems to use the same font
+    // for medium font size, a suitable number would be 15
+    if (ua.startsWith('SIE-')) return 18;
+    
     // could check some non-nokia models, for now, make a safe assumption of 16 chars
     // could also use uaprof on devices that have that
-    if (!ua || !ua.startsWith('Nokia')) return 16;
+    if (!ua.startsWith('Nokia')) return 16;
 
     // models with 84×48 display
-    if (/^Nokia(3330|5510|8265|8310)/.test(ua)) return 17;
+    if (/^Nokia(3330|5510|8265|8310)/.test(ua)) return 16;
 
     // models with 96×65 or similar display (list may be incomplete)
     if (/^Nokia(1101|3350|3410|35[^0]\d|3610|6010|6210|6310|6510|7110|8910)/.test(ua)) return 19;
@@ -162,7 +168,7 @@ function oneLine(req, str) {
 
     const chars = getCharactersPerLine(req);
 
-    if (str.length > chars) return str.substring(0, chars - 1) + "...";
+    if (str.length > chars) return str.substring(0, chars - 1).trimEnd() + "...";
     return str;
 }
 
@@ -177,6 +183,9 @@ function getError(e) {
     }
     if (e.message == "Request failed with status code 404") {
         return "The channel was not found."
+    }
+    if (e.message == "The string to be decoded is not correctly encoded.") {
+        return "We've updated our ID encoding scheme. Please return to the Discord WAP front page and try again."
     }
     return e.message;
 }
@@ -317,7 +326,8 @@ function getToken(req, res, next) {
                 + '.' + req.query.s1
                 + '.' + req.query.s2
                 + '.' + req.query.s3
-                + '.' + req.query.s4;
+                + '.' + req.query.s4
+                + '.' + req.query.s5;
         }
         const settingsArr = res.locals.token.split('.').slice(3);
 
@@ -336,7 +346,8 @@ function getToken(req, res, next) {
             altChannelListLayout: (Number(settingsArr[1]) || 0) != 0,
             timeOffsetHours,
             timeOffsetMinutes,
-            use12hTime: (Number(settingsArr[4]) || 0) != 0
+            use12hTime: (Number(settingsArr[4]) || 0) != 0,
+            limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
         }
     
         res.locals.headers = {
@@ -402,7 +413,8 @@ app.get("/wap/main", getToken, async (req, res) => {
 
         res.render("main", {
             token: compressToken(res.locals.token),
-            dms
+            dms,
+            userAgent: req.headers['user-agent']
         });
     }
     catch (e) {handleError(res, e)}
@@ -523,7 +535,8 @@ app.get("/wap/ch", getToken, async (req, res) => {
             id: req.query.id,
             page: req.query.page ?? 0,
             messages,
-            messageCount: res.locals.settings.messageLoadCount
+            messageCount: res.locals.settings.messageLoadCount,
+            textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000
         });
     }
     catch (e) {handleError(res, e)}
