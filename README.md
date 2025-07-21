@@ -6,7 +6,7 @@ Also see [Discord J2ME](https://github.com/gtrxAC/discord-j2me), a client for de
 ## Status
 ### Working
 * Server, channel, and DM lists
-  * Note: due to page size limitations, not all channels are shown
+  * Note: due to page size limitations, only the most recently used channels are shown
 * Message sending
 * Replying with ping on or off
 * Message history with pagination
@@ -18,21 +18,23 @@ Also see [Discord J2ME](https://github.com/gtrxAC/discord-j2me), a client for de
 * Message timestamps
 
 ## How to use
-A public instance is hosted at http://146.59.80.3/wap, but it is recommended to host your own instance if possible.
+A public instance is hosted at http://gtrxac.fi/wap or http://146.59.80.3/wap, but it is recommended to host your own instance if possible.
 
-Using a secondary/alt account is recommended for safety. Additionally, the servers list may fail to load if the account is a member of too many servers.
+Using a secondary/alt account is recommended for safety, especially when using public instances. However, when using third-party clients, Discord has been known to restrict or temporarily disable newly created accounts or accounts that don't have two-factor authentication or a verified phone number. If your alt account is likely to get restricted, it may be worth using your main account instead.
+
+Additionally, the servers list may fail to load if the account is a member of too many servers.
 
 You will need:
 * A Discord account
-* A way to get that account's token (either a PC or an Android device with the Puffin browser installed)
+* A way to get that account's token (either a PC or an Android device with the Kiwi browser installed, or any browser that supports developer tools)
 * A phone that supports WAP 1.x, WML 1.1 or higher, and a data transfer technology that is available in your region (usually GPRS).
 
 Steps:
 * Get your account's token using, for example, [this guide](https://github.com/NotNexuss/Get-Discord-Token).
 * Configure your phone's internet access point settings. In particular, set the APN (access point name) to your carrier's APN, and set the WAP gateway's IP address to one of the IPs listed [here](https://nbpfan.bs0dd.net/index.php?lang=eng&page=wap%2Fmain).
-* Go to your phone's browser and enter the instance's address, for example `http://146.59.80.3/wap`.
+* Go to your phone's browser and enter the instance's address, for example `http://gtrxac.fi/wap`.
 * When the page loads, enter your account's token and select `Log in`.
-* For quick access in the future, you should add the main menu (Servers/DMs selection) to your bookmarks. This bookmark will contain your account's token.
+* For quick access in the future, you should add the main menu (Servers/DMs/Settings selection) to your bookmarks. This bookmark will contain your account's token.
 
 ## Self-hosting
 1. Install [Node.js](https://nodejs.org).
