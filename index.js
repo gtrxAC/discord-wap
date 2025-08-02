@@ -374,7 +374,9 @@ app.use((req, res, next) => {
 })
 
 app.get("/wap", (req, res) => {
-    res.render("index");
+    res.render("index", {
+        userAgent: req.headers['user-agent']
+    });
 })
 
 // Main menu including DMs
@@ -416,7 +418,6 @@ app.get("/wap/main", getToken, async (req, res) => {
         res.render("main", {
             token: compressToken(res.locals.token),
             dms,
-            userAgent: req.headers['user-agent']
         });
     }
     catch (e) {handleError(res, e)}
