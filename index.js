@@ -489,7 +489,7 @@ app.get("/wap/g", getToken, async (req, res) => {
     
             // Also, channels with certain names will always be shown, because those are channels that people might often want to visit.
             const whitelistedChannelIDs = allChannels
-                .filter(ch => /^(general|phones|off\S*topic|discord-j2me)$/g.test(ch.name))
+                .filter(ch => /^(general|phones|off\S*topic|discord-j2me-wap)$/g.test(ch.name))
                 .map(ch => ch.id);
     
             const shownChannelIDs = [...new Set([...recentChannelIDs, ...whitelistedChannelIDs])]
