@@ -545,6 +545,8 @@ app.get("/wap/g", getToken, async (req, res) => {
                 const shownChannelIDs = [...new Set([...recentChannelIDs, ...whitelistedChannelIDs])]
         
                 channels = allChannels.filter(ch => shownChannelIDs.includes(ch.id));
+            } else {
+                channels = allChannels;
             }
 
             channels = channels

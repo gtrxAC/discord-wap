@@ -1,23 +1,29 @@
+html {
+    background-color: #eee;
+}
+
 * {
     font-family: "Inter", sans-serif;
     color: #333;
 }
 
 body {
+    background-color: #fff;
+    height: 100%;
     max-width: 640px;
     margin: 0 auto;
-    padding: 0.5em;
+    padding: 1em 0.5em;
 }
 
 p {
-    margin: 0.4em 0;
+    margin: 0.2em 0 0.6em 0;
 }
 
-input {
+input, button, select {
     margin: 0.2em 0 0.2em 0;
 }
 
-input[type="submit"] {
+input[type="submit"], button, select {
     background-color: #fff;
     color: #000;
     border: solid 1px #aaa;
@@ -25,10 +31,10 @@ input[type="submit"] {
     padding: 0.2em 0.5em;
 }
 
-input[type="submit"]:hover {
+input[type="submit"]:hover, button:hover, select:hover {
     background-color: #eee;
 }
 
-input[type="submit"]:active {
+input[type="submit"]:active, button:active, select:active {
     background-color: #ddd;
 }
