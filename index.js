@@ -192,7 +192,7 @@ function getError(e) {
 
 function handleError(res, e) {
     console.log(e);
-    res.render("error", {error: getError(e)});
+    render(res, "error", {error: getError(e)});
 }
 
 function parseMessageObject(req, res, msg) {
@@ -368,59 +368,87 @@ function getToken(req, res, next) {
     }
 }
 
+async function fetchDMs(req, res) {
+    const dmsGet = await axios.get(
+        `${DEST_BASE}/users/@me/channels`,
+        {headers: res.locals.headers}
+    )
+    // Sort by latest first
+    dmsGet.data.sort((a, b) => {
+        const a_id = BigInt(a.last_message_id ?? 0);
+        const b_id = BigInt(b.last_message_id ?? 0);
+        return (a_id < b_id ? 1 : a_id > b_id ? -1 : 0)
+    });
+
+    return dmsGet.data
+        .filter(ch => ch.type == 1 || ch.type == 3)
+        .slice(0, 15)
+        .map(ch => {
+            const result = {
+                id: compressID(ch.id),
+                // type: ch.type,
+                // last_message_id: ch.last_message_id
+            }
+
+            // Add group name for group DMs, recipient name for normal DMs
+            if (ch.type == 3) {
+                result.name = ch.name;
+                result.namePrefix = '';
+            } else {
+                result.name = ch.recipients[0].global_name ?? ch.recipients[0].username;
+                result.namePrefix = '@';
+            }
+            result.name = oneLine(req, result.name);
+            return result;
+        })
+}
+
 app.use((req, res, next) => {
-    res.set("Content-Type", "text/vnd.wap.wml");
+    res.locals.format = req.headers['accept'].includes('html') ? "html" : "wml";
     next();
 })
 
+function render(res, viewName, viewVars) {
+    if (res.locals.format == "wml") res.set("Content-Type", "text/vnd.wap.wml");
+    res.render(`${res.locals.format}/${viewName}`, viewVars);
+}
+
 app.get("/wap", (req, res) => {
-    res.render("index", {
+    render(res, "index", {
         userAgent: req.headers['user-agent']
     });
 })
 
-// Main menu including DMs
+app.get("/wap/about", (req, res) => {
+    render(res, "about", {
+        userAgent: req.headers['user-agent']
+    });
+})
+
+// Main menu (including DMs in WML version)
 app.get("/wap/main", getToken, async (req, res) => {
     try {
-        const dmsGet = await axios.get(
-            `${DEST_BASE}/users/@me/channels`,
-            {headers: res.locals.headers}
-        )
-        // Sort by latest first
-        dmsGet.data.sort((a, b) => {
-            const a_id = BigInt(a.last_message_id ?? 0);
-            const b_id = BigInt(b.last_message_id ?? 0);
-            return (a_id < b_id ? 1 : a_id > b_id ? -1 : 0)
-        });
+        const dms = (res.locals.format == 'wml') && await fetchDMs(req, res);
 
-        const dms = dmsGet.data
-            .filter(ch => ch.type == 1 || ch.type == 3)
-            .slice(0, 15)
-            .map(ch => {
-                const result = {
-                    id: compressID(ch.id),
-                    // type: ch.type,
-                    // last_message_id: ch.last_message_id
-                }
-
-                // Add group name for group DMs, recipient name for normal DMs
-                if (ch.type == 3) {
-                    result.name = ch.name;
-                    result.namePrefix = '';
-                } else {
-                    result.name = ch.recipients[0].global_name ?? ch.recipients[0].username;
-                    result.namePrefix = '@';
-                }
-                result.name = oneLine(req, result.name);
-                return result;
-            })
-
-        res.render("main", {
+        render(res, "main", {
             token: compressToken(res.locals.token),
             dms,
         });
     }
-    catch (e) {handleError(res, e)}
+    catch (e) {handleError(req, res, e)}
+})
+
+// Direct message list (separate page for HTML version)
+app.get("/wap/dm", getToken, async (req, res) => {
+    try {
+        const dms = await fetchDMs(req, res);
+
+        render(res, "dms", {
+            token: compressToken(res.locals.token),
+            dms,
+        });
+    }
+    catch (e) {handleError(req, res, e)}
 })
 
 // Server list
@@ -436,11 +464,11 @@ app.get("/wap/gl", getToken, async (req, res) => {
             name: oneLine(req, g.name)
         }))
 
-        res.render("guilds", {
+        render(res, "guilds", {
             guilds
         });
     }
-    catch (e) {handleError(res, e)}
+    catch (e) {handleError(req, res, e)}
 })
 
 // Channel list of a server
@@ -504,11 +532,12 @@ app.get("/wap/g", getToken, async (req, res) => {
                 }))
         }
 
-        res.render("channels", {
+        render(res, "channels", {
+            gname: req.query.gname,
             channels
         });
     }
-    catch (e) {handleError(res, e)}
+    catch (e) {handleError(req, res, e)}
 })
 
 // Get channel messages
@@ -534,15 +563,35 @@ app.get("/wap/ch", getToken, async (req, res) => {
     
         const messages = messagesGet.data.map(m => parseMessageObject(req, res, m));
     
-        res.render("channel", {
+        render(res, "channel", {
             id: req.query.id,
             page: req.query.page ?? 0,
             messages,
             messageCount: res.locals.settings.messageLoadCount,
-            textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000
+            textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000,
+            id: req.query.id,
+            cname: req.query.cname,
         });
     }
-    catch (e) {handleError(res, e)}
+    catch (e) {handleError(req, res, e)}
+})
+
+app.get("/wap/send", getToken, async (req, res) => {
+    render(res, "send", {
+        id: req.query.id,
+        cname: req.query.cname,
+        token: req.query.token,
+    })
+})
+
+app.get("/wap/reply", getToken, async (req, res) => {
+    render(res, "reply", {
+        id: req.query.id,
+        cname: req.query.cname,
+        token: req.query.token,
+        rec: req.query.rec,
+        recname: req.query.recname,
+    })
 })
 
 // Send message
@@ -571,14 +620,15 @@ app.post("/wap/send", getToken, async (req, res) => {
             {headers: res.locals.headers}
         );
 
-        res.render("sent");
+        render(res, "sent");
     }
-    catch (e) {handleError(res, e)}
+    catch (e) {handleError(req, res, e)}
 })
 
 app.get("/wap/set", getToken, (req, res) => {
-    res.render("settings", {
-        settings: res.locals.settings
+    render(res, "settings", {
+        settings: res.locals.settings,
+        token: req.query.token
     });
 })
 

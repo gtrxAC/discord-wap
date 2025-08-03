@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= gname %></title>
+</head>
+<body>
+    <% channels.forEach(c => { %>
+        <form action="/wap/ch">
+            <input type="hidden" name="gname" value="<%= gname %>">
+            <input type="hidden" name="cname" value="<%= c.name %>">
+            <input type="hidden" name="token" value="<%= token %>">
+            <input type="hidden" name="id" value="<%= c.id %>">
+            <input type="submit" value="<%= c.label %>">
+        </form>
+    <% }) %>
+</body>
+</html>

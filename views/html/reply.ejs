@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= cname %></title>
+</head>
+<body>
+    <p>Reply to <%= recname %></p>
+    <form action="/wap/send">
+        <input type="hidden" name="token" value="<%= token %>"/>
+        <input type="hidden" name="id" value="<%= id %>"/>
+        <input type="hidden" name="recipient" value="<%= rec %>"/>
+        <label for="text">Your message:</label> <br/>
+        <textarea name="text" id="text" cols="30" rows="5" maxlength="2000"></textarea> <br/>
+        <input type="checkbox" name="ping" id="ping" value="1">
+        <label for="ping">Mention author</label> <br/>
+        <input type="submit" value="Send">
+    </form>
+</body>
+</html>

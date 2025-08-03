@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servers</title>
+</head>
+<body>
+    <% guilds.forEach(g => { %>
+        <form action="/wap/g">
+            <input type="hidden" name="gname" value="<%= g.name %>">
+            <input type="hidden" name="token" value="<%= token %>">
+            <input type="hidden" name="id" value="<%= g.id %>">
+            <input type="submit" value="<%= g.name %>">
+        </form>
+    <% }) %>
+</body>
+</html>

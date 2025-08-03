@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+</head>
+<body>
+    <form action="/wap/main">
+        <input type="hidden" name="token" value="<%= token %>"/>
+        <label for="s0">Message load count:</label> <br/>
+        <input type="number" name="s0" id="s0" min="1" max="100" value="<%= settings.messageLoadCount %>"> <br/>
+        <label for="s0">Time offset (h):</label> <br/>
+        <input type="number" name="s2" id="s2" min="-20" max="20" value="<%= settings.timeOffsetHours %>"/> <br/>
+        <label for="s0">Time offset (min):</label> <br/>
+        <input type="number" name="s3" id="s3" min="-60" max="60" value="<%= settings.timeOffsetMinutes %>"/> <br/>
+        <input type="checkbox" name="s1" id="s1" <%= settings.altChannelListLayout ? 'checked' : '' %> value="1">
+        <label for="s1">Recent channels first</label> <br/>
+        <input type="checkbox" name="s4" id="s4" <%= settings.use12hTime ? 'checked' : '' %> value="1">
+        <label for="s1">12-hour time</label> <br/>
+        <input type="submit" value="Save">
+    </form>
+    <small>To save your settings, press 'save', then add the page to your bookmarks again.</small>
+</body>
+</html>

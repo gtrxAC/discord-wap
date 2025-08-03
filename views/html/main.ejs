@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord WAP</title>
+</head>
+<body>
+    <form action="/wap/gl">
+        <input type="hidden" name="token" value="<%= token %>">
+        <input type="submit" value="Servers">
+    </form>
+    <form action="/wap/dm">
+        <input type="hidden" name="token" value="<%= token %>">
+        <input type="submit" value="Direct messages">
+    </form>
+    <form action="/wap/set">
+        <input type="hidden" name="token" value="<%= token %>">
+        <input type="submit" value="Settings">
+    </form>
+    <form action="/wap">
+        <input type="hidden" name="token" value="<%= token %>">
+        <input type="submit" value="Log out">
+    </form>
+</body>
+</html>

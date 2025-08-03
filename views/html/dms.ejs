@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct msgs.</title>
+</head>
+<body>
+    <% dms.forEach(d => { %>
+        <form action="/wap/ch">
+            <input type="hidden" name="cname" value="<%= d.namePrefix %><%= d.name %>">
+            <input type="hidden" name="token" value="<%= token %>">
+            <input type="hidden" name="id" value="<%= d.id %>">
+            <input type="submit" value="<%= d.namePrefix %><%= d.name %>">
+        </form>
+    <% }) %>
+</body>
+</html>
