@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const EmojiConvertor = require('emoji-js');
+const path = require('path');
 
 const emoji = new EmojiConvertor();
 emoji.replace_mode = 'unified';
@@ -12,6 +13,7 @@ const DEST_BASE = "https://discord.com/api/v9";
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
+app.use(express.static(path.join(__dirname, 'static')));
 app.use(express.urlencoded({ extended: true }));
 
 // ID -> username mapping cache (used for parsing mentions)
@@ -141,6 +143,9 @@ function getIdTimestamp(res, id) {
 function getCharactersPerLine(req) {
     const ua = req.headers['user-agent'];
     if (!ua) return 16;
+
+    // don't limit on modern devices
+    if (req.res.locals.format == "html") return 999;
 
     // siemens: assume 101 pixel wide display (there are larger ones too, but most of them have decent j2me support anyway)
     // small font size, tested on siemens a65. a55 seems to use the same font

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= cname %></title>
+    <link rel="stylesheet" href="/wap/style.css">
 </head>
 <body>
     <div style="text-align: center;">
@@ -30,6 +31,7 @@
     <% messages.forEach(m => { %>
         <form action="/wap/reply">
             <input type="hidden" name="id" value="<%= id %>">
+            <input type="hidden" name="cname" value="<%= cname %>">
             <input type="hidden" name="rec" value="<%= m.id %>"/>
             <input type="hidden" name="recname" value="<%= m.author.name %>"/>
             <input type="hidden" name="token" value="<%= token %>">

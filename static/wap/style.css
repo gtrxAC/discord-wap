@@ -1,0 +1,34 @@
+* {
+    font-family: "Inter", sans-serif;
+    color: #333;
+}
+
+body {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0.5em;
+}
+
+p {
+    margin: 0.4em 0;
+}
+
+input {
+    margin: 0.2em 0 0.2em 0;
+}
+
+input[type="submit"] {
+    background-color: #fff;
+    color: #000;
+    border: solid 1px #aaa;
+    border-radius: 2px;
+    padding: 0.2em 0.5em;
+}
+
+input[type="submit"]:hover {
+    background-color: #eee;
+}
+
+input[type="submit"]:active {
+    background-color: #ddd;
+}
