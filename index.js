@@ -387,7 +387,7 @@ async function fetchDMs(req, res) {
 
     return dmsGet.data
         .filter(ch => ch.type == 1 || ch.type == 3)
-        .slice(0, 15)
+        .slice(0, (res.locals.format == 'wml') ? 15 : 20)
         .map(ch => {
             const result = {
                 id: compressID(ch.id),
@@ -506,29 +506,33 @@ app.get("/wap/g", getToken, async (req, res) => {
 
         let channels;
 
-        // Up to 15 most recently used channels are shown.
         if (res.locals.settings.altChannelListLayout) {
+            // "Recent channels first" option enabled: show up to 15 (WML) or 30 (HTML) channels in order of most recent message
             channels = allChannels
-                .slice(0, 15)
+                .slice(0, (res.locals.format == 'wml') ? 15 : 30)
                 .map(ch => ({
                     id: compressID(ch.id),
                     name: oneLine(req, '#' + ch.name),
                     label: oneLine(req, getIdTimestamp(res, ch.last_message_id) + ' ' + ch.name)
                 }))
         } else {
-            const recentChannelIDs = allChannels
-                .slice(0, 15)
-                .map(ch => ch.id);
-    
-            // Also, channels with certain names will always be shown, because those are channels that people might often want to visit.
-            const whitelistedChannelIDs = allChannels
-                .filter(ch => /^(general|phones|off\S*topic|discord-j2me-wap)$/g.test(ch.name))
-                .map(ch => ch.id);
-    
-            const shownChannelIDs = [...new Set([...recentChannelIDs, ...whitelistedChannelIDs])]
-    
-            channels = allChannels
-                .filter(ch => shownChannelIDs.includes(ch.id))
+            // "Recent channels first" disabled: show channels in their original order (still only show 15 most recently used channels in WML)
+            if (res.locals.format == 'wml') {
+                const recentChannelIDs = allChannels
+                    .slice(0, 15)
+                    .map(ch => ch.id);
+        
+                // Also, channels with certain names will always be shown, because those are channels that people might often want to visit.
+                const whitelistedChannelIDs = allChannels
+                    .filter(ch => /^(general|phones|off\S*topic|discord-j2me-wap)$/g.test(ch.name))
+                    .map(ch => ch.id);
+        
+                const shownChannelIDs = [...new Set([...recentChannelIDs, ...whitelistedChannelIDs])]
+        
+                channels = allChannels.filter(ch => shownChannelIDs.includes(ch.id));
+            }
+
+            channels = channels
                 .sort((a, b) => a.position - b.position)
                 .map(ch => ({
                     id: compressID(ch.id),
