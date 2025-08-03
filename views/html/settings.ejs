@@ -7,33 +7,35 @@
     <link rel="stylesheet" href="/wap/style.css">
 </head>
 <body>
-    <form action="/wap/main">
-        <input type="hidden" name="token" value="<%= token %>"/>
-        <input type="hidden" name="s5" value="0"/>
-        
-        <label for="s0">Message load count:</label> <br/>
-        <input type="number" name="s0" id="s0" min="1" max="100" value="<%= settings.messageLoadCount %>"> <br/>
+    <div class="main">
+        <form action="/wap/main">
+            <input type="hidden" name="token" value="<%= token %>"/>
+            <input type="hidden" name="s5" value="0"/>
+            
+            <label for="s0">Message lodfsfsdad count:</label> <br/>
+            <input type="number" name="s0" id="s0" min="1" max="100" value="<%= settings.messageLoadCount %>"> <br/>
 
-        <label for="s2">Time offset (h):</label> <br/>
-        <input type="number" name="s2" id="s2" min="-20" max="20" value="<%= settings.timeOffsetHours %>"/> <br/>
+            <label for="s2">Time offset (h):</label> <br/>
+            <input type="number" name="s2" id="s2" min="-20" max="20" value="<%= settings.timeOffsetHours %>"/> <br/>
 
-        <label for="s3">Time offset (min):</label> <br/>
-        <input type="number" name="s3" id="s3" min="-59" max="59" value="<%= settings.timeOffsetMinutes %>"/> <br/>
+            <label for="s3">Time offset (min):</label> <br/>
+            <input type="number" name="s3" id="s3" min="-59" max="59" value="<%= settings.timeOffsetMinutes %>"/> <br/>
 
-        <label for="s1">Sort channels by:</label> <br/>
-        <select name="s1" id="s1">
-            <option value="0" <%= settings.altChannelListLayout ? '' : 'selected' %>>Position</option>
-            <option value="1" <%= settings.altChannelListLayout ? 'selected' : '' %>>Last message</option>
-        </select> <br/>
+            <label for="s1">Sort channels by:</label> <br/>
+            <select name="s1" id="s1">
+                <option value="0" <%= settings.altChannelListLayout ? '' : 'selected' %>>Position</option>
+                <option value="1" <%= settings.altChannelListLayout ? 'selected' : '' %>>Last message</option>
+            </select> <br/>
 
-        <label for="s4">Time format:</label> <br/>
-        <select name="s4" id="s4">
-            <option value="0" <%= settings.use12hTime ? '' : 'selected' %>>24 hours</option>
-            <option value="1" <%= settings.use12hTime ? 'selected' : '' %>>12 hours</option>
-        </select> <br/>
+            <label for="s4">Time format:</label> <br/>
+            <select name="s4" id="s4">
+                <option value="0" <%= settings.use12hTime ? '' : 'selected' %>>24 hours</option>
+                <option value="1" <%= settings.use12hTime ? 'selected' : '' %>>12 hours</option>
+            </select> <br/>
 
-        <input type="submit" value="Save">
-    </form>
-    <small>To save your settings, press 'save', then add the page to your bookmarks again.</small>
+            <input type="submit" value="Save">
+        </form>
+        <small>To save your settings, press 'save', then add the page to your bookmarks again.</small>
+    </div>
 </body>
 </html>

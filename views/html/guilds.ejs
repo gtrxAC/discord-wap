@@ -7,13 +7,15 @@
     <link rel="stylesheet" href="/wap/style.css">
 </head>
 <body>
-    <% guilds.forEach(g => { %>
-        <form action="/wap/g">
-            <input type="hidden" name="gname" value="<%= g.name %>">
-            <input type="hidden" name="token" value="<%= token %>">
-            <input type="hidden" name="id" value="<%= g.id %>">
-            <input type="submit" value="<%= g.name %>">
-        </form>
-    <% }) %>
+    <div class="main">
+        <% guilds.forEach(g => { %>
+            <form action="/wap/g">
+                <input type="hidden" name="gname" value="<%= g.name %>">
+                <input type="hidden" name="token" value="<%= token %>">
+                <input type="hidden" name="id" value="<%= g.id %>">
+                <input type="submit" value="<%= g.name %>">
+            </form>
+        <% }) %>
+    </div>
 </body>
 </html>

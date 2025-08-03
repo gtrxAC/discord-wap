@@ -7,13 +7,15 @@
     <link rel="stylesheet" href="/wap/style.css">
 </head>
 <body>
-    <% dms.forEach(d => { %>
-        <form action="/wap/ch">
-            <input type="hidden" name="cname" value="<%= d.namePrefix %><%= d.name %>">
-            <input type="hidden" name="token" value="<%= token %>">
-            <input type="hidden" name="id" value="<%= d.id %>">
-            <input type="submit" value="<%= d.namePrefix %><%= d.name %>">
-        </form>
-    <% }) %>
+    <div class="main">
+        <% dms.forEach(d => { %>
+            <form action="/wap/ch">
+                <input type="hidden" name="cname" value="<%= d.namePrefix %><%= d.name %>">
+                <input type="hidden" name="token" value="<%= token %>">
+                <input type="hidden" name="id" value="<%= d.id %>">
+                <input type="submit" value="<%= d.namePrefix %><%= d.name %>">
+            </form>
+        <% }) %>
+    </div>
 </body>
 </html>

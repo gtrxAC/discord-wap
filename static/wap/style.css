@@ -1,15 +1,16 @@
-html {
-    background-color: #eee;
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #ddd;
+    color: #333;
 }
 
 * {
     font-family: "Inter", sans-serif;
-    color: #333;
 }
 
-body {
+.main {
     background-color: #fff;
-    height: 100%;
     max-width: 640px;
     margin: 0 auto;
     padding: 1em 0.5em;
@@ -20,7 +21,11 @@ p {
 }
 
 input, button, select {
-    margin: 0.2em 0 0.2em 0;
+    margin: 0.2em 0 0.1em 0;
+}
+
+input[type="text"], textarea {
+    max-width: 80%;
 }
 
 input[type="submit"], button, select {

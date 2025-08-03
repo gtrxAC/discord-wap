@@ -7,12 +7,15 @@
     <link rel="stylesheet" href="/wap/style.css">
 </head>
 <body>
-    <form action="/wap/send" method="post" style="text-align: center;">
-        <input type="hidden" name="token" value="<%= token %>"/>
-        <input type="hidden" name="id" value="<%= id %>"/>
-        <label for="text">Your message:</label> <br/>
-        <textarea name="text" id="text" cols="30" rows="5" maxlength="2000"></textarea> <br/>
-        <input type="submit" value="Send">
-    </form>
+    <div class="main" style="text-align: center;">
+        <form action="/wap/send" method="post">
+            <input type="hidden" name="token" value="<%= token %>"/>
+            <input type="hidden" name="id" value="<%= id %>"/>
+            <input type="hidden" name="cname" value="<%= cname %>"/>
+            <label for="text">Your message:</label> <br/>
+            <textarea name="text" id="text" cols="30" rows="5" maxlength="2000"></textarea> <br/>
+            <input type="submit" value="Send">
+        </form>
+    </div>
 </body>
 </html>

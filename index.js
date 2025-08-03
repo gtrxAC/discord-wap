@@ -641,7 +641,9 @@ app.post("/wap/send", getToken, async (req, res) => {
             {headers: res.locals.headers}
         );
 
-        render(res, "sent");
+        render(res, "sent", {
+            cname: req.query.cname
+        });
     }
     catch (e) {handleError(req, res, e)}
 })
