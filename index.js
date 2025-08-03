@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const EmojiConvertor = require('emoji-js');
 const path = require('path');
+const { LRUCache } = require('lru-cache');
 
 const emoji = new EmojiConvertor();
 emoji.replace_mode = 'unified';
@@ -17,9 +18,8 @@ app.use(express.static(path.join(__dirname, 'static')));
 app.use(express.urlencoded({ extended: true }));
 
 // ID -> username mapping cache (used for parsing mentions)
-const userCache = new Map();
-const channelCache = new Map();
-const CACHE_SIZE = 10000;
+const userCache = new LRUCache({max: 10000});
+const channelNameCache = new LRUCache({max: 10000});
 
 // Base64 but better - instead of '/' and '=' characters, we use '-' and '_', which stay as one character when URL encoded
 function customBase64Decode(str) {
@@ -301,7 +301,7 @@ function parseMessageContentText(content) {
         })
         // try to convert <#12345...> format into #channelname
         .replace(/<#(\d{15,})>/gm, (mention, id) => {
-            if (channelCache.has(id)) return `#${channelCache.get(id)}`;
+            if (channelNameCache.has(id)) return `#${channelNameCache.get(id)}`;
             else return mention;
         })
         // replace <:name:12345...> emoji format with :name:
@@ -324,6 +324,7 @@ function parseMessageContentText(content) {
 function getToken(req, res, next) {
     try {
         res.locals.token = req.query?.token ?? req.body?.token;
+        res.locals.userID = res.locals.token.split('.')[0];
 
         if (req.query.s0) {
             res.locals.token = res.locals.token.split('.').slice(0, 3).join('.')
@@ -456,18 +457,26 @@ app.get("/wap/dm", getToken, async (req, res) => {
     catch (e) {handleError(req, res, e)}
 })
 
+const guildCache = new LRUCache({max: 200, ttl: 10*60*1000, updateAgeOnGet: false})
+
 // Server list
 app.get("/wap/gl", getToken, async (req, res) => {
     try {
-        const guildsGet = await axios.get(
-            `${DEST_BASE}/users/@me/guilds`,
-            {headers: res.locals.headers}
-        )
+        let guilds;
 
-        const guilds = guildsGet.data.map(g => ({
-            id: compressID(g.id),
-            name: oneLine(req, g.name)
-        }))
+        if (guildCache.has(res.locals.userID)) {
+            guilds = guildCache.get(res.locals.userID);
+        } else {
+            const guildsGet = await axios.get(
+                `${DEST_BASE}/users/@me/guilds`,
+                {headers: res.locals.headers}
+            )
+            guilds = guildsGet.data.map(g => ({
+                id: compressID(g.id),
+                name: oneLine(req, g.name)
+            }))
+            guildCache.set(res.locals.userID, guilds);
+        }
 
         render(res, "guilds", {
             guilds
@@ -476,22 +485,28 @@ app.get("/wap/gl", getToken, async (req, res) => {
     catch (e) {handleError(req, res, e)}
 })
 
+const channelCache = new LRUCache({max: 400, ttl: 10*60*1000, updateAgeOnGet: false});
+
 // Channel list of a server
 app.get("/wap/g", getToken, async (req, res) => {
     try {
-        const channelsGet = await axios.get(
-            `${DEST_BASE}/guilds/${decompressID(req.query.id)}/channels`,
-            {headers: res.locals.headers}
-        )
+        // Channel list cache can be used if last message IDs are not relevant ("Recent channels first" disabled and using HTML version)
+        const useCache = (!res.locals.settings.altChannelListLayout && res.locals.format == 'html')
+        let channelsGet;
+
+        if (useCache && channelCache.has(req.query.id)) {
+            channelsGet = channelCache.get(req.query.id);
+        } else {
+            channelsGet = await axios.get(
+                `${DEST_BASE}/guilds/${decompressID(req.query.id)}/channels`,
+                {headers: res.locals.headers}
+            )
+            if (useCache) channelCache.set(req.query.id, channelsGet);
+        }
 
         // Populate channel name cache
         channelsGet.data.forEach(ch => {
-            channelCache.set(ch.id, ch.name);
-
-            // If max size exceeded, remove the oldest item
-            if (channelCache.size > CACHE_SIZE) {
-                channelCache.delete(channelCache.keys().next().value);
-            }
+            channelNameCache.set(ch.id, ch.name);
         })
 
         // Due to page length limitations, limit the amount of channels to be shown:
@@ -563,11 +578,6 @@ app.get("/wap/ch", getToken, async (req, res) => {
         // Populate username cache
         messagesGet.data.forEach(msg => {
             userCache.set(msg.author.id, msg.author.username);
-    
-            // If max size exceeded, remove the oldest item
-            if (userCache.size > CACHE_SIZE) {
-                userCache.delete(userCache.keys().next().value);
-            }
         })
     
         const messages = messagesGet.data.map(m => parseMessageObject(req, res, m));
