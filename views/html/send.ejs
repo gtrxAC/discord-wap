@@ -6,7 +6,7 @@
     <title><%= cname %></title>
 </head>
 <body>
-    <form action="/wap/send">
+    <form action="/wap/send" method="post">
         <input type="hidden" name="token" value="<%= token %>"/>
         <input type="hidden" name="id" value="<%= id %>"/>
         <label for="text">Your message:</label> <br/>
