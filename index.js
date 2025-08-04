@@ -3,6 +3,7 @@ const axios = require('axios');
 const EmojiConvertor = require('emoji-js');
 const path = require('path');
 const { LRUCache } = require('lru-cache');
+const sanitizeHtml = require('sanitize-html');
 
 const emoji = new EmojiConvertor();
 emoji.replace_mode = 'unified';
@@ -288,7 +289,11 @@ function parseMessageContentNonStatus(msg) {
 
     // iOS keyboard (I think it's that) is stupid and replaces apostrophes with this unicode character
     // that shows up as a rectangle/missing character on old phones. Replace it with a normal apostrophe.
-    return result.replace(/’/g, "'");
+    result = result.replace(/’/g, "'");
+
+    result = sanitizeHtml(result, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'})
+        .replace(/\n/g, '<br/>');
+    return result;
 }
 
 function parseMessageContentText(content) {
