@@ -441,7 +441,7 @@ app.get("/wap/main", getToken, async (req, res) => {
             dms,
         });
     }
-    catch (e) {handleError(req, res, e)}
+    catch (e) {handleError(res, e)}
 })
 
 // Direct message list (separate page for HTML version)
@@ -454,7 +454,7 @@ app.get("/wap/dm", getToken, async (req, res) => {
             dms,
         });
     }
-    catch (e) {handleError(req, res, e)}
+    catch (e) {handleError(res, e)}
 })
 
 const guildCache = new LRUCache({max: 200, ttl: 10*60*1000, updateAgeOnGet: false})
@@ -482,7 +482,7 @@ app.get("/wap/gl", getToken, async (req, res) => {
             guilds
         });
     }
-    catch (e) {handleError(req, res, e)}
+    catch (e) {handleError(res, e)}
 })
 
 const channelCache = new LRUCache({max: 400, ttl: 10*60*1000, updateAgeOnGet: false});
@@ -563,7 +563,7 @@ app.get("/wap/g", getToken, async (req, res) => {
             channels
         });
     }
-    catch (e) {handleError(req, res, e)}
+    catch (e) {handleError(res, e)}
 })
 
 // Get channel messages
@@ -594,7 +594,7 @@ app.get("/wap/ch", getToken, async (req, res) => {
             cname: req.query.cname,
         });
     }
-    catch (e) {handleError(req, res, e)}
+    catch (e) {handleError(res, e)}
 })
 
 app.get("/wap/send", getToken, async (req, res) => {
@@ -645,7 +645,7 @@ app.post("/wap/send", getToken, async (req, res) => {
             cname: req.query.cname
         });
     }
-    catch (e) {handleError(req, res, e)}
+    catch (e) {handleError(res, e)}
 })
 
 app.get("/wap/set", getToken, (req, res) => {
