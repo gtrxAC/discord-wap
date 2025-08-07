@@ -39,6 +39,12 @@
                 <input type="submit" value="<%= m.authorLine %>">
             </form>
             <p>
+                <% if (m.referenced_message) { %>
+                    <div class="reply">
+                        <img src="/wap/reply.gif" alt="reply to">
+                        <b><%= m.referenced_message.author.name %></b> <%- m.referenced_message.content %>
+                    </div>
+                <% } %>
                 <%- m.content %>
             </p>
         <% }) %>

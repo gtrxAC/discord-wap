@@ -219,7 +219,7 @@ function parseMessageObject(req, res, msg) {
     result.content = parseMessageContent(msg);
 
     if (msg.referenced_message) {
-        let content = parseMessageContent(msg.referenced_message);
+        let content = parseMessageContent(msg.referenced_message, true);
 
         // Replace newlines with spaces (reply is shown as one line)
         content = content.replace(/\r\n|\r|\n/gm, "  ");
@@ -238,7 +238,7 @@ function parseMessageObject(req, res, msg) {
     return result;
 }
 
-function parseMessageContent(msg) {
+function parseMessageContent(msg, singleLine = false) {
     const target = msg.mentions?.[0]?.global_name ?? msg.mentions?.[0]?.username;
     switch (msg.type) {
         case 1: return `added ${target} to the group`;
@@ -252,11 +252,11 @@ function parseMessageContent(msg) {
         case 9: return `boosted the server to level 1`;
         case 10: return `boosted the server to level 2`;
         case 11: return `boosted the server to level 3`;
-        default: return parseMessageContentNonStatus(msg);
+        default: return parseMessageContentNonStatus(msg, singleLine);
     }
 }
 
-function parseMessageContentNonStatus(msg) {
+function parseMessageContentNonStatus(msg, singleLine) {
     let result = "";
 
     // Content from forwarded message
@@ -292,7 +292,7 @@ function parseMessageContentNonStatus(msg) {
     result = result.replace(/’/g, "'");
 
     result = sanitizeHtml(result, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'})
-        .replace(/\n/g, '<br/>');
+        .replace(/\n/g, singleLine ? ' ' : '<br/>');
     return result;
 }
 
