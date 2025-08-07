@@ -9,12 +9,10 @@
 <body>
     <div class="main">
         <% dms.forEach(d => { %>
-            <form action="/wap/ch">
-                <input type="hidden" name="cname" value="<%= d.namePrefix %><%= d.name %>">
-                <input type="hidden" name="token" value="<%= token %>">
-                <input type="hidden" name="id" value="<%= d.id %>">
-                <input type="submit" value="<%= d.namePrefix %><%= d.name %>">
-            </form>
+            <a href="/wap/ch?cname=<%= encodeURIComponent(d.namePrefix + d.name) %>&id=<%= d.id %>">
+                <%= d.namePrefix %><%= d.name %>
+            </a>
+            <br/>
         <% }) %>
     </div>
 </body>

@@ -12,14 +12,12 @@
             <form action="/wap/send">
                 <input type="hidden" name="id" value="<%= id %>">
                 <input type="hidden" name="cname" value="<%= cname %>">
-                <input type="hidden" name="token" value="<%= token %>">
                 <input type="submit" value="Send message">
             </form>
             <% if (page > 0) { %>
                 <form action="/wap/ch">
                     <input type="hidden" name="id" value="<%= id %>">
                     <input type="hidden" name="cname" value="<%= cname %>">
-                    <input type="hidden" name="token" value="<%= token %>">
                     <% if (page > 1) { %>
                         <input type="hidden" name="after" value="<%= messages[0].id %>"/>
                         <input type="hidden" name="page" value="<%= page - 1 %>"/>
@@ -30,21 +28,15 @@
         </div>
 
         <% messages.forEach(m => { %>
-            <form action="/wap/reply">
-                <input type="hidden" name="id" value="<%= id %>">
-                <input type="hidden" name="cname" value="<%= cname %>">
-                <input type="hidden" name="rec" value="<%= m.id %>"/>
-                <input type="hidden" name="recname" value="<%= m.author.name %>"/>
-                <input type="hidden" name="token" value="<%= token %>">
-                <input type="submit" value="<%= m.authorLine %>">
-            </form>
+            <a href="/wap/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= m.id %>&recname=<%= encodeURIComponent(m.author.name) %>"><%= m.author.name %></a>
+            <span class="time"><%= m.timestamp %></span>
+            <% if (m.referenced_message) { %>
+                <div class="reply">
+                    <img src="/wap/reply.gif" alt="reply to">
+                    <b><%= m.referenced_message.author.name %></b> <%- m.referenced_message.content %>
+                </div>
+            <% } %>
             <p>
-                <% if (m.referenced_message) { %>
-                    <div class="reply">
-                        <img src="/wap/reply.gif" alt="reply to">
-                        <b><%= m.referenced_message.author.name %></b> <%- m.referenced_message.content %>
-                    </div>
-                <% } %>
                 <%- m.content %>
             </p>
         <% }) %>
@@ -54,7 +46,6 @@
                 <form action="/wap/ch">
                     <input type="hidden" name="id" value="<%= id %>">
                     <input type="hidden" name="cname" value="<%= cname %>">
-                    <input type="hidden" name="token" value="<%= token %>">
                     <input type="hidden" name="before" value="<%= messages[messages.length - 1].id %>"/>
                     <input type="hidden" name="page" value="<%= page + 1 %>"/>
                     <input type="submit" value="Older messages">

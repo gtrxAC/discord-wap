@@ -8,22 +8,10 @@
 </head>
 <body>
     <div class="main">
-        <form action="/wap/gl">
-            <input type="hidden" name="token" value="<%= token %>">
-            <input type="submit" value="Servers">
-        </form>
-        <form action="/wap/dm">
-            <input type="hidden" name="token" value="<%= token %>">
-            <input type="submit" value="Direct messages">
-        </form>
-        <form action="/wap/set">
-            <input type="hidden" name="token" value="<%= token %>">
-            <input type="submit" value="Settings">
-        </form>
-        <form action="/wap">
-            <input type="hidden" name="token" value="<%= token %>">
-            <input type="submit" value="Log out">
-        </form>
+        <a href="/wap/gl">Servers</a> <br/>
+        <a href="/wap/dm">Direct messages</a> <br/>
+        <a href="/wap/set">Settings</a> <br/>
+        <a href="/wap">Log out</a>
     </div>
 </body>
 </html>

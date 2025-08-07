@@ -4,6 +4,7 @@ const EmojiConvertor = require('emoji-js');
 const path = require('path');
 const { LRUCache } = require('lru-cache');
 const sanitizeHtml = require('sanitize-html');
+const cookieParser = require('cookie-parser');
 
 const emoji = new EmojiConvertor();
 emoji.replace_mode = 'unified';
@@ -167,10 +168,12 @@ function getCharactersPerLine(req) {
     return 21;
 }
 
-function oneLine(req, str) {
+function oneLine(req, str, showEmoji = true) {
     // Make sure string fits on one line on the screen
     if (str === null || str === undefined) return "(err)";
-    str = parseMessageContentText(String(str));
+
+    if (showEmoji) str = parseMessageContentText(String(str));
+    else str = sanitize(String(str));
 
     const chars = getCharactersPerLine(req);
 
@@ -201,6 +204,10 @@ function handleError(res, e) {
     render(res, "error", {error: getError(e)});
 }
 
+function sanitize(str) {
+    return sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
+}
+
 function parseMessageObject(req, res, msg) {
     const result = {
         id: compressID(msg.id),
@@ -209,9 +216,10 @@ function parseMessageObject(req, res, msg) {
         const author = msg.author.global_name ?? msg.author.username;
         result.author = {
             id: compressID(msg.author.id),
-            name: oneLine(req, author)
+            name: oneLine(req, author, false)
         }
-        result.authorLine = oneLine(req, author + " " + getIdTimestamp(res, msg.id));
+        result.authorLine = oneLine(req, author + " " + getIdTimestamp(res, msg.id), false);
+        result.timestamp = getIdTimestamp(res, msg.id);  // separate timestamp for html version
     }
     if (msg.type >= 1 && msg.type <= 11) result.type = msg.type;
 
@@ -229,7 +237,7 @@ function parseMessageObject(req, res, msg) {
         }
         result.referenced_message = {
             author: {
-                name: oneLine(req, msg.referenced_message.author.global_name ?? msg.referenced_message.author.username),
+                name: oneLine(req, msg.referenced_message.author.global_name ?? msg.referenced_message.author.username, false),
                 id: compressID(msg.referenced_message.author.id),
             },
             content
@@ -291,8 +299,7 @@ function parseMessageContentNonStatus(msg, singleLine) {
     // that shows up as a rectangle/missing character on old phones. Replace it with a normal apostrophe.
     result = result.replace(/’/g, "'");
 
-    result = sanitizeHtml(result, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'})
-        .replace(/\n/g, singleLine ? ' ' : '<br/>');
+    result = sanitize(result).replace(/\n/g, singleLine ? ' ' : '<br/>');
     return result;
 }
 
@@ -328,7 +335,9 @@ function parseMessageContentText(content) {
 
 function getToken(req, res, next) {
     try {
-        res.locals.token = req.query?.token ?? req.body?.token;
+        res.locals.token = req.query?.token ?? req.body?.token ?? req.cookies?.dwtoken;
+        if (!res.locals.token) throw new Error("Your request does not contain a token. Please return to the Discord WAP front page and try again.");
+
         res.locals.userID = res.locals.token.split('.')[0];
 
         if (req.query.s0) {
@@ -372,6 +381,7 @@ function getToken(req, res, next) {
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin"
         };
+        if (!req.cookies?.dwtoken) res.cookie('dwtoken', res.locals.token);
         next();
     }
     catch (e) {
@@ -413,6 +423,8 @@ async function fetchDMs(req, res) {
             return result;
         })
 }
+
+app.use(cookieParser());
 
 app.use((req, res, next) => {
     res.locals.format = req.headers['accept'].includes('html') ? "html" : "wml";

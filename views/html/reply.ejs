@@ -10,7 +10,6 @@
     <div class="main" style="text-align: center;">
         <p>Reply to <%= recname %></p>
         <form action="/wap/send" method="post">
-            <input type="hidden" name="token" value="<%= token %>"/>
             <input type="hidden" name="id" value="<%= id %>"/>
             <input type="hidden" name="recipient" value="<%= rec %>"/>
             <label for="text">Your message:</label> <br/>

@@ -9,13 +9,10 @@
 <body>
     <div class="main">
         <% channels.forEach(c => { %>
-            <form action="/wap/ch">
-                <input type="hidden" name="gname" value="<%= gname %>">
-                <input type="hidden" name="cname" value="<%= c.name %>">
-                <input type="hidden" name="token" value="<%= token %>">
-                <input type="hidden" name="id" value="<%= c.id %>">
-                <input type="submit" value="<%= c.label %>">
-            </form>
+            <a href="/wap/ch?gname=<%= encodeURIComponent(gname) %>&cname=<%= encodeURIComponent(c.name) %>&id=<%= c.id %>">
+                <%= c.label %>
+            </a>
+            <br/>
         <% }) %>
     </div>
 </body>
