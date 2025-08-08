@@ -33,6 +33,12 @@
                 <option value="1" <%= settings.use12hTime ? 'selected' : '' %>>12 hours</option>
             </select> <br/>
 
+            <label for="s6">Latest messages:</label> <br/>
+            <select name="s6" id="s6">
+                <option value="0" <%= settings.reverseChat ? '' : 'selected' %>>On top</option>
+                <option value="1" <%= settings.reverseChat ? 'selected' : '' %>>On bottom</option>
+            </select> <br/>
+
             <input type="submit" value="Save">
         </form>
         <small>To save your settings, press 'save', then add the page to your bookmarks again.</small>

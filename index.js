@@ -347,7 +347,8 @@ function getToken(req, res, next) {
                 + '.' + req.query.s2
                 + '.' + req.query.s3
                 + '.' + req.query.s4
-                + '.' + req.query.s5;
+                + '.' + req.query.s5
+                + '.' + req.query.s6;
         }
         const settingsArr = res.locals.token.split('.').slice(3);
 
@@ -368,6 +369,7 @@ function getToken(req, res, next) {
             timeOffsetMinutes,
             use12hTime: (Number(settingsArr[4]) || 0) != 0,
             limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
+            reverseChat: (Number(settingsArr[6]) || 0) != 0,
         }
     
         res.locals.headers = {
@@ -381,7 +383,7 @@ function getToken(req, res, next) {
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin"
         };
-        if (!req.cookies?.dwtoken) res.cookie('dwtoken', res.locals.token);
+        if (req.cookies?.dwtoken != res.locals.token) res.cookie('dwtoken', res.locals.token);
         next();
     }
     catch (e) {
@@ -468,6 +470,7 @@ app.get("/wap/dm", getToken, async (req, res) => {
 
         render(res, "dms", {
             token: compressToken(res.locals.token),
+            reverseChat: res.locals.settings.reverseChat,
             dms,
         });
     }
@@ -577,6 +580,7 @@ app.get("/wap/g", getToken, async (req, res) => {
 
         render(res, "channels", {
             gname: req.query.gname,
+            reverseChat: res.locals.settings.reverseChat,
             channels
         });
     }
@@ -600,12 +604,17 @@ app.get("/wap/ch", getToken, async (req, res) => {
         })
     
         const messages = messagesGet.data.map(m => parseMessageObject(req, res, m));
+
+        if (res.locals.settings.reverseChat && res.locals.format == 'html') {
+            messages.reverse();
+        }
     
         render(res, "channel", {
             id: req.query.id,
             page: req.query.page ?? 0,
             messages,
             messageCount: res.locals.settings.messageLoadCount,
+            reverseChat: res.locals.settings.reverseChat,
             textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000,
             id: req.query.id,
             cname: req.query.cname,
