@@ -24,12 +24,7 @@
                     <% if (!settings.compact) { %>
                         <img src="/wap/reply.gif" alt="reply to">
                     <% } %>
-                    <b>
-                        <% if (settings.compact) { %>
-                            to
-                        <% } %>
-                        <%= m.referenced_message.author.name %>
-                    </b>
+                    <%- settings.compact ? ('to ' + m.referenced_message.author.name + ':') : ('<b>' + m.referenced_message.author.name + '</b>') %>
                     <%- m.referenced_message.content %>
                 </div>
             <% } %>

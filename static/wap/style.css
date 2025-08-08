@@ -2,7 +2,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: #ddd;
-    color: #333;
+    color: #111;
 }
 
 * {
@@ -45,9 +45,8 @@ input[type="submit"]:active, button:active, select:active {
 }
 
 .reply {
-    color: #444;
+    color: #555;
     font-size: 12px;
-    font-style: italic;
     margin: 0.3em 0 0 0;
 }
 

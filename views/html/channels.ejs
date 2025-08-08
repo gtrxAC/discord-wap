@@ -10,7 +10,7 @@
 <body>
     <div class="main">
         <% channels.forEach(c => { %>
-            <a href="/wap/ch?gname=<%= encodeURIComponent(gname) %>&cname=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#bottom' : '' %>"><%= c.label %></a>
+            <a href="/wap/ch?cname=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#bottom' : '' %>"><%= c.label %></a>
             <br/>
         <% }) %>
     </div>

@@ -21,16 +21,16 @@
             <label for="s3">Time offset (min):</label> <br/>
             <input type="number" name="s3" id="s3" min="-59" max="59" value="<%= settings.timeOffsetMinutes %>"/> <br/>
 
-            <label for="s1">Sort channels by:</label> <br/>
-            <select name="s1" id="s1">
-                <option value="0" <%= settings.altChannelListLayout ? '' : 'selected' %>>Position</option>
-                <option value="1" <%= settings.altChannelListLayout ? 'selected' : '' %>>Last message</option>
-            </select> <br/>
-
             <label for="s4">Time format:</label> <br/>
             <select name="s4" id="s4">
                 <option value="0" <%= settings.use12hTime ? '' : 'selected' %>>24 hours</option>
                 <option value="1" <%= settings.use12hTime ? 'selected' : '' %>>12 hours</option>
+            </select> <br/>
+
+            <label for="s1">Sort channels by:</label> <br/>
+            <select name="s1" id="s1">
+                <option value="0" <%= settings.altChannelListLayout ? '' : 'selected' %>>Position</option>
+                <option value="1" <%= settings.altChannelListLayout ? 'selected' : '' %>>Last message</option>
             </select> <br/>
 
             <label for="s6">Latest messages:</label> <br/>
