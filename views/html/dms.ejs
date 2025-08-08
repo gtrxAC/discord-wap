@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Direct msgs.</title>
-    <link rel="stylesheet" href="/wap/style.css">
+    <link rel="stylesheet" href="/wap/<%= settings?.compact ? 'style-compact' : 'style' %>.css">
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
     <div class="main">
         <% dms.forEach(d => { %>
-            <a href="/wap/ch?cname=<%= encodeURIComponent(d.namePrefix + d.name) %>&id=<%= d.id %><%= reverseChat ? '#bottom' : '' %>">
-                <%= d.namePrefix %><%= d.name %>
-            </a>
+            <a href="/wap/ch?cname=<%= encodeURIComponent(d.namePrefix + d.name) %>&id=<%= d.id %><%= settings.reverseChat ? '#bottom' : '' %>"><%= d.namePrefix %><%= d.name %></a>
             <br/>
         <% }) %>
     </div>

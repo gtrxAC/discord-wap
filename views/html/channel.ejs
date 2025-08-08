@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= cname %></title>
-    <link rel="stylesheet" href="/wap/style.css">
+    <link rel="stylesheet" href="/wap/<%= settings?.compact ? 'style-compact' : 'style' %>.css">
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
     <div class="main">
         <div style="text-align: center;">
-            <% if (!reverseChat) { %>
+            <% if (!settings.reverseChat) { %>
             <%- include('include/send'); %>
             <% } %>
-            <%- include(reverseChat ? 'include/olderMessages' : 'include/newerMessages'); %>
+            <%- include(settings.reverseChat ? 'include/olderMessages' : 'include/newerMessages'); %>
         </div>
 
         <% messages.forEach(m => { %>
@@ -21,8 +21,16 @@
             <span class="time"><%= m.timestamp %></span>
             <% if (m.referenced_message) { %>
                 <div class="reply">
-                    <img src="/wap/reply.gif" alt="reply to">
-                    <b><%= m.referenced_message.author.name %></b> <%- m.referenced_message.content %>
+                    <% if (!settings.compact) { %>
+                        <img src="/wap/reply.gif" alt="reply to">
+                    <% } %>
+                    <b>
+                        <% if (settings.compact) { %>
+                            to
+                        <% } %>
+                        <%= m.referenced_message.author.name %>
+                    </b>
+                    <%- m.referenced_message.content %>
                 </div>
             <% } %>
             <p>
@@ -31,8 +39,8 @@
         <% }) %>
 
         <div id="bottom" style="text-align: center;">
-            <%- include(reverseChat ? 'include/newerMessages' : 'include/olderMessages'); %>
-            <% if (reverseChat) { %>
+            <%- include(settings.reverseChat ? 'include/newerMessages' : 'include/olderMessages'); %>
+            <% if (settings.reverseChat) { %>
             <%- include('include/send'); %>
             <% } %>
         </div>

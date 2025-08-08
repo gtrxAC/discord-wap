@@ -3,9 +3,9 @@
         <input type="hidden" name="id" value="<%= id %>">
         <input type="hidden" name="cname" value="<%= cname %>">
         <% if (page > 1) { %>
-            <input type="hidden" name="after" value="<%= reverseChat ? messages[messages.length - 1].id : messages[0].id %>"/>
+            <input type="hidden" name="after" value="<%= settings.reverseChat ? messages[messages.length - 1].id : messages[0].id %>"/>
             <input type="hidden" name="page" value="<%= page - 1 %>"/>
         <% } %>
-        <input type="submit" value="Newer messages">
+        <input type="submit" value="Newer messages" onclick="event.preventDefault(); window.history.back();">
     </form>
 <% } %>

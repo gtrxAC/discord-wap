@@ -232,8 +232,10 @@ function parseMessageObject(req, res, msg) {
         // Replace newlines with spaces (reply is shown as one line)
         content = content.replace(/\r\n|\r|\n/gm, "  ");
 
-        if (content && content.length > 50) {
-            content = content.slice(0, 47).trim() + '...';
+        const limit = (res.locals.settings.compact ? 30 : 50);
+
+        if (content && content.length > limit) {
+            content = content.slice(0, limit - 3).trim() + '...';
         }
         result.referenced_message = {
             author: {
@@ -348,7 +350,8 @@ function getToken(req, res, next) {
                 + '.' + req.query.s3
                 + '.' + req.query.s4
                 + '.' + req.query.s5
-                + '.' + req.query.s6;
+                + '.' + req.query.s6
+                + '.' + req.query.s7;
         }
         const settingsArr = res.locals.token.split('.').slice(3);
 
@@ -370,6 +373,7 @@ function getToken(req, res, next) {
             use12hTime: (Number(settingsArr[4]) || 0) != 0,
             limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
             reverseChat: (Number(settingsArr[6]) || 0) != 0,
+            compact: (Number(settingsArr[7]) || 0) != 0,
         }
     
         res.locals.headers = {
@@ -435,7 +439,11 @@ app.use((req, res, next) => {
 
 function render(res, viewName, viewVars) {
     if (res.locals.format == "wml") res.set("Content-Type", "text/vnd.wap.wml");
-    res.render(`${res.locals.format}/${viewName}`, viewVars);
+
+    res.render(`${res.locals.format}/${viewName}`, {
+        settings: res.locals.settings,
+        ...viewVars
+    });
 }
 
 app.get("/wap", (req, res) => {
@@ -470,7 +478,6 @@ app.get("/wap/dm", getToken, async (req, res) => {
 
         render(res, "dms", {
             token: compressToken(res.locals.token),
-            reverseChat: res.locals.settings.reverseChat,
             dms,
         });
     }
@@ -580,7 +587,6 @@ app.get("/wap/g", getToken, async (req, res) => {
 
         render(res, "channels", {
             gname: req.query.gname,
-            reverseChat: res.locals.settings.reverseChat,
             channels
         });
     }
@@ -613,8 +619,6 @@ app.get("/wap/ch", getToken, async (req, res) => {
             id: req.query.id,
             page: req.query.page ?? 0,
             messages,
-            messageCount: res.locals.settings.messageLoadCount,
-            reverseChat: res.locals.settings.reverseChat,
             textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000,
             id: req.query.id,
             cname: req.query.cname,
@@ -676,7 +680,6 @@ app.post("/wap/send", getToken, async (req, res) => {
 
 app.get("/wap/set", getToken, (req, res) => {
     render(res, "settings", {
-        settings: res.locals.settings,
         token: req.query.token
     });
 })
