@@ -42,6 +42,15 @@
             </select>
         </p>
         <p>
+            Appearance:
+            <br/>
+            <select name="lay" value="<%= settings.layout %>">
+                <option value="2">WML</option>
+                <option value="0">Standard (HTML)</option>
+                <option value="1">Compact (HTML)</option>
+            </select>
+        </p>
+        <p>
             To save your settings, press 'save', then add the page to your bookmarks again.
         </p>
         <p align="center">
@@ -55,7 +64,7 @@
                    <postfield name="s4" value="$(time)"/>
                    <postfield name="s5" value="$(tbs)"/>
                    <postfield name="s6" value="0"/>
-                   <postfield name="s7" value="0"/>
+                   <postfield name="s7" value="$(lay)"/>
                </go>
                Save
             </anchor>

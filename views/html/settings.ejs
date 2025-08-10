@@ -41,8 +41,9 @@
 
             <label for="s7">Appearance:</label> <br/>
             <select name="s7" id="s7">
-                <option value="0" <%= settings.compact ? '' : 'selected' %>>Standard</option>
-                <option value="1" <%= settings.compact ? 'selected' : '' %>>Compact</option>
+                <option value="0" <%= (settings.layout == 'standard') ? 'selected' : '' %>>Standard</option>
+                <option value="1" <%= (settings.layout == 'compact') ? 'selected' : '' %>>Compact</option>
+                <option value="2" <%= (settings.layout == 'wml') ? 'selected' : '' %>>WML</option>
             </select> <br/>
 
             <input type="submit" value="Save">

@@ -232,7 +232,7 @@ function parseMessageObject(req, res, msg) {
         // Replace newlines with spaces (reply is shown as one line)
         content = content.replace(/\r\n|\r|\n/gm, "  ");
 
-        const limit = (res.locals.settings.compact ? 30 : 50);
+        const limit = (res.locals.settings.layout != 'standard') ? 30 : 50;
 
         if (content && content.length > limit) {
             content = content.slice(0, limit - 3).trim() + '...';
@@ -365,6 +365,10 @@ function getToken(req, res, next) {
         if (timeOffsetHours > 14) timeOffsetHours = 14;
         if (![0, 15, 30, 45].includes(timeOffsetMinutes)) timeOffsetMinutes = 0;
 
+        let layout = Number(settingsArr[7]);
+        if (![0, 1, 2].includes(layout)) layout = (res.locals.format == 'wml') ? 2 : 0;
+        res.locals.format = (layout == 2) ? 'wml' : 'html';
+
         res.locals.settings = {
             messageLoadCount,
             altChannelListLayout: (Number(settingsArr[1]) || 0) != 0,
@@ -373,7 +377,8 @@ function getToken(req, res, next) {
             use12hTime: (Number(settingsArr[4]) || 0) != 0,
             limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
             reverseChat: (Number(settingsArr[6]) || 0) != 0,
-            compact: (Number(settingsArr[7]) || 0) != 0,
+            compact: (layout == 1),
+            layout
         }
     
         res.locals.headers = {
