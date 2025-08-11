@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings</title>
-    <link rel="stylesheet" href="/wap/<%= settings?.compact ? 'style-compact' : 'style' %>.css">
+    <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>">
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
@@ -42,6 +42,7 @@
             <label for="s7">Appearance:</label> <br/>
             <select name="s7" id="s7">
                 <option value="0" <%= (settings.layout == 'standard') ? 'selected' : '' %>>Standard</option>
+                <option value="3" <%= (settings.layout == 'dark') ? 'selected' : '' %>>Dark</option>
                 <option value="1" <%= (settings.layout == 'compact') ? 'selected' : '' %>>Compact</option>
                 <option value="2" <%= (settings.layout == 'wml') ? 'selected' : '' %>>WML</option>
             </select> <br/>

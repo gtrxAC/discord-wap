@@ -366,7 +366,7 @@ function getToken(req, res, next) {
         if (![0, 15, 30, 45].includes(timeOffsetMinutes)) timeOffsetMinutes = 0;
 
         let layout = Number(settingsArr[7]);
-        if (![0, 1, 2].includes(layout)) layout = (res.locals.format == 'wml') ? 2 : 0;
+        if (![0, 1, 2, 3].includes(layout)) layout = (res.locals.format == 'wml') ? 2 : 0;
         res.locals.format = (layout == 2) ? 'wml' : 'html';
 
         res.locals.settings = {
@@ -378,7 +378,8 @@ function getToken(req, res, next) {
             limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
             reverseChat: (Number(settingsArr[6]) || 0) != 0,
             compact: (layout == 1),
-            layout
+            layout: ['standard', 'compact', 'wml', 'dark'][layout],
+            cssFile: ['style.css', 'style-compact.css', '', 'style-dark.css'][layout]
         }
     
         res.locals.headers = {

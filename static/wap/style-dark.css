@@ -1,8 +1,8 @@
 body {
     margin: 0;
     padding: 0;
-    background-color: #ddd;
-    color: #111;
+    background-color: #112;
+    color: #eee;
 }
 
 * {
@@ -10,7 +10,7 @@ body {
 }
 
 .main {
-    background-color: #fff;
+    background-color: #223;
     max-width: 640px;
     margin: 0 auto;
     padding: 1em 0.4em;
@@ -29,39 +29,42 @@ input, button, select {
     margin: 0.2em 0 0.1em 0;
 }
 
-input[type="text"], textarea {
+input[type="text"], input[type="number"], textarea {
+    background-color: #223;
+    color: #eee;
+    border: solid 1px #556;
     max-width: 80%;
 }
 
 input[type="submit"], button, select {
-    background-color: #fff;
-    color: #000;
-    border: solid 1px #aaa;
+    background-color: #223;
+    color: #fff;
+    border: solid 1px #556;
     border-radius: 2px;
     padding: 0.2em 0.5em;
 }
 
 input[type="submit"]:hover, button:hover, select:hover {
-    background-color: #eee;
+    background-color: #334;
 }
 
 input[type="submit"]:active, button:active, select:active {
-    background-color: #ddd;
+    background-color: #445;
 }
 
 .reply {
-    color: #555;
+    color: #99a;
     font-size: 12px;
     margin: 0.3em 0 0 0;
 }
 
 a {
-    color: #14c;
+    color: #59f;
     font-weight: bold;
     text-decoration: none;
 }
 
 .time {
-    color: #777;
+    color: #99a;
     font-size: 12px;
 }

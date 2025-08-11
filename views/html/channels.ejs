@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= gname %></title>
-    <link rel="stylesheet" href="/wap/<%= settings?.compact ? 'style-compact' : 'style' %>.css">
+    <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>">
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
-    <div class="main">
+    <div class="main list">
         <% channels.forEach(c => { %>
             <a href="/wap/ch?cname=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#bottom' : '' %>"><%= c.label %></a>
             <br/>
