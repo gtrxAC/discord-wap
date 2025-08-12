@@ -31,19 +31,23 @@ function customBase64Encode(str) {
     return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
 
-function decompressID(id) {
-    const idStr = customBase64Decode(id);
+function decompressID(id, type) {
+    try {
+        const idStr = customBase64Decode(id);
 
-    return String(
-        BigInt(idStr.charCodeAt(0)) << 56n |
-        BigInt(idStr.charCodeAt(1)) << 48n |
-        BigInt(idStr.charCodeAt(2)) << 40n |
-        BigInt(idStr.charCodeAt(3)) << 32n |
-        BigInt(idStr.charCodeAt(4)) << 24n |
-        BigInt(idStr.charCodeAt(5)) << 16n |
-        BigInt(idStr.charCodeAt(6)) << 8n |
-        BigInt(idStr.charCodeAt(7))
-    );
+        return String(
+            BigInt(idStr.charCodeAt(0)) << 56n |
+            BigInt(idStr.charCodeAt(1)) << 48n |
+            BigInt(idStr.charCodeAt(2)) << 40n |
+            BigInt(idStr.charCodeAt(3)) << 32n |
+            BigInt(idStr.charCodeAt(4)) << 24n |
+            BigInt(idStr.charCodeAt(5)) << 16n |
+            BigInt(idStr.charCodeAt(6)) << 8n |
+            BigInt(idStr.charCodeAt(7))
+        );
+    } catch (e) {
+        throw new Error(`A required ${type} ID is missing or invalid. Please return to the Discord WAP front page and try again.`);
+    }
 }
 
 function compressID(id) {
@@ -70,7 +74,7 @@ function decompressToken(token) {
         const rest = '.' + token.split('.').slice(1).join('.');
     
         if (idPart.length < 17) {
-            idPart = btoa(decompressID(idPart));
+            idPart = btoa(decompressID(idPart, 'user'));
         }
         return idPart + rest;
     }
@@ -342,6 +346,18 @@ function getToken(req, res, next) {
 
         res.locals.userID = res.locals.token.split('.')[0];
 
+        if (req.query.cn) {
+            // ?cn=example is a shorthand for ?cname=%23example (guild channel with #)
+            res.locals.channelName = "#" + req.query.cn;
+        }
+        else if (req.query.dn) {
+            // ?dn=example is a shorthand for ?cname=%40example (dm user with @)
+            res.locals.channelName = "@" + req.query.dn;
+        }
+        else {
+            res.locals.channelName = req.query.cname ?? "Discord WAP";
+        }
+
         if (req.query.s0) {
             res.locals.token = res.locals.token.split('.').slice(0, 3).join('.')
                 + '.' + req.query.s0
@@ -424,12 +440,11 @@ async function fetchDMs(req, res) {
             }
 
             // Add group name for group DMs, recipient name for normal DMs
-            if (ch.type == 3) {
+            result.isGroup = (ch.type == 3);
+            if (result.isGroup) {
                 result.name = ch.name;
-                result.namePrefix = '';
             } else {
                 result.name = ch.recipients[0].global_name ?? ch.recipients[0].username;
-                result.namePrefix = '@';
             }
             result.name = oneLine(req, result.name);
             return result;
@@ -531,7 +546,7 @@ app.get("/wap/g", getToken, async (req, res) => {
             channelsGet = channelCache.get(req.query.id);
         } else {
             channelsGet = await axios.get(
-                `${DEST_BASE}/guilds/${decompressID(req.query.id)}/channels`,
+                `${DEST_BASE}/guilds/${decompressID(req.query.id, 'server')}/channels`,
                 {headers: res.locals.headers}
             )
             if (useCache) channelCache.set(req.query.id, channelsGet);
@@ -560,7 +575,7 @@ app.get("/wap/g", getToken, async (req, res) => {
                 .slice(0, (res.locals.format == 'wml') ? 15 : 30)
                 .map(ch => ({
                     id: compressID(ch.id),
-                    name: oneLine(req, '#' + ch.name),
+                    name: oneLine(req, ch.name),
                     label: oneLine(req, getIdTimestamp(res, ch.last_message_id) + ' ' + ch.name)
                 }))
         } else {
@@ -586,7 +601,7 @@ app.get("/wap/g", getToken, async (req, res) => {
                 .sort((a, b) => a.position - b.position)
                 .map(ch => ({
                     id: compressID(ch.id),
-                    name: oneLine(req, '#' + ch.name),
+                    name: oneLine(req, ch.name),
                     label: oneLine(req, '#' + ch.name)
                 }))
         }
@@ -602,10 +617,10 @@ app.get("/wap/g", getToken, async (req, res) => {
 // Get channel messages
 app.get("/wap/ch", getToken, async (req, res) => {
     try {
-        let proxyUrl = `${DEST_BASE}/channels/${decompressID(req.query.id)}/messages`;
+        let proxyUrl = `${DEST_BASE}/channels/${decompressID(req.query.id, 'channel')}/messages`;
         let queryParam = [`limit=${res.locals.settings.messageLoadCount}`];
-        if (req.query.before) queryParam.push(`before=${decompressID(req.query.before)}`);
-        if (req.query.after) queryParam.push(`after=${decompressID(req.query.after)}`);
+        if (req.query.before) queryParam.push(`before=${decompressID(req.query.before, 'message')}`);
+        if (req.query.after) queryParam.push(`after=${decompressID(req.query.after, 'message')}`);
         proxyUrl += '?' + queryParam.join('&');
     
         const messagesGet = await axios.get(proxyUrl, {headers: res.locals.headers});
@@ -627,7 +642,7 @@ app.get("/wap/ch", getToken, async (req, res) => {
             messages,
             textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000,
             id: req.query.id,
-            cname: req.query.cname,
+            cname: res.locals.channelName,
         });
     }
     catch (e) {handleError(res, e)}
@@ -636,7 +651,7 @@ app.get("/wap/ch", getToken, async (req, res) => {
 app.get("/wap/send", getToken, async (req, res) => {
     render(res, "send", {
         id: req.query.id,
-        cname: req.query.cname,
+        cname: res.locals.channelName,
         token: req.query.token,
     })
 })
@@ -644,7 +659,7 @@ app.get("/wap/send", getToken, async (req, res) => {
 app.get("/wap/reply", getToken, async (req, res) => {
     render(res, "reply", {
         id: req.query.id,
-        cname: req.query.cname,
+        cname: res.locals.channelName,
         token: req.query.token,
         rec: req.query.rec,
         recname: req.query.recname,
@@ -662,7 +677,7 @@ app.post("/wap/send", getToken, async (req, res) => {
         };
         if (req.body.recipient) {
             send.message_reference = {
-                message_id: String(decompressID(req.body.recipient))
+                message_id: String(decompressID(req.body.recipient, 'message'))
             }
         }
         if (Number(req.body.ping) == 0) {
@@ -672,13 +687,13 @@ app.post("/wap/send", getToken, async (req, res) => {
         }
 
         await axios.post(
-            `${DEST_BASE}/channels/${decompressID(req.body.id)}/messages`,
+            `${DEST_BASE}/channels/${decompressID(req.body.id, 'channel')}/messages`,
             send,
             {headers: res.locals.headers}
         );
 
         render(res, "sent", {
-            cname: req.query.cname
+            cname: res.locals.channelName
         });
     }
     catch (e) {handleError(res, e)}

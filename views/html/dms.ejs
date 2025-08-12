@@ -10,7 +10,7 @@
 <body>
     <div class="main list">
         <% dms.forEach(d => { %>
-            <a href="/wap/ch?cname=<%= encodeURIComponent(d.namePrefix + d.name) %>&id=<%= d.id %><%= settings.reverseChat ? '#bottom' : '' %>"><%= d.namePrefix %><%= d.name %></a>
+            <a href="/wap/ch?<%= d.isGroup ? 'cname' : 'dn' %>=<%= encodeURIComponent(d.name) %>&id=<%= d.id %><%= settings.reverseChat ? '#bottom' : '' %>"><%= d.name %></a>
             <br/>
         <% }) %>
     </div>

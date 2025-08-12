@@ -40,7 +40,7 @@
             <% dms.forEach(d => { %>
                 <anchor>
                     <go method="get" href="/wap/ch">
-                        <setvar name="cname" value="<%= d.namePrefix %><%= d.name %>"/>
+                        <setvar name="<%= d.isGroup ? 'cname' : 'dn' %>" value="<%= d.name %>"/>
                         <postfield name="token" value="$(token)"/>
                         <postfield name="id" value="<%= d.id %>"/>
                     </go>
