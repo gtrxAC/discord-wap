@@ -1,5 +1,5 @@
 # Discord WAP
-Discord proxy client for old mobile browsers with Wireless Application Protocol 1.x support.
+Discord proxy client for old mobile browsers with Wireless Application Protocol 1.x or HTML support.
 
 Also see [Discord J2ME](https://github.com/gtrxAC/discord-j2me), a client for devices with Java ME (MIDP) application support.
 
@@ -27,12 +27,13 @@ Additionally, the servers list may fail to load on older devices if the account 
 
 You will need:
 * A Discord account
-* A way to get that account's token (either a PC or an Android device with the Kiwi browser installed, or any browser that supports developer tools)
-* A phone that supports WAP 1.x, WML 1.1 or higher, and a data transfer technology that is available in your region (usually GPRS).
+* A way to get that account's token, e.g. a web browser with support for developer tools (most PC browsers, or Kiwi Browser on Android)
+* A phone that supports xHTML/HTML or WAP 1.x/WML 1.1 or higher
+* A data transfer technology that is available in your region (usually GPRS)
 
 Steps:
 * Get your account's token using, for example, [this guide](https://github.com/NotNexuss/Get-Discord-Token).
-* Configure your phone's internet access point settings. In particular, set the APN (access point name) to your carrier's APN, and set the WAP gateway's IP address to one of the IPs listed [here](https://nbpfan.bs0dd.net/index.php?lang=eng&page=wap%2Fmain).
+* Configure your phone's internet access point settings. In particular, set the APN (access point name) to your carrier's APN, and set the WAP gateway's IP address to one of the IPs listed [here](https://nbpfan.bs0dd.net/index.php?lang=eng&page=wap%2Fmain). Guides for certain phone brands are provided [here](https://lpcwiki.miraheze.org/wiki/GPRS_configuration).
 * Go to your phone's browser and enter the instance's address, for example `http://gtrxac.fi/wap`.
 * When the page loads, enter your account's token and select `Log in`.
 * For quick access in the future, you should add the main menu (Servers/DMs/Settings selection) to your bookmarks. This bookmark will contain your account's token.
