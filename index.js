@@ -409,7 +409,9 @@ function getToken(req, res, next) {
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin"
         };
-        if (req.cookies?.dwtoken != res.locals.token) res.cookie('dwtoken', res.locals.token);
+        if (req.cookies?.dwtoken != res.locals.token) {
+            res.cookie('dwtoken', res.locals.token, {maxAge: 1000*60*60*24*30});
+        }
         next();
     }
     catch (e) {
