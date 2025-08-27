@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= cname %></title>
+    <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
+    <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>">
+    <link rel="stylesheet" href="/wap/<%= settings?.channelCssFile ?? 'channel.css' %>">
+</head>
+<body>
+    <div class="main">
+        <div style="text-align: center;">
+            <% if (!settings.reverseChat) { %>
+            <%- include('include/sendNew'); %>
+            <% } %>
+            <%- include(settings.reverseChat ? 'include/olderMessages' : 'include/newerMessages'); %>
+        </div>
+
+        <table>
+            <% messages.forEach(m => { %>
+                <% if (m.referenced_message) { %>
+                    <tr class="replyrow">
+                        <td class="replyicon">
+                            <img src="/wap/<%= settings.dark ? 'reply-dark' : 'reply' %>.gif" alt="reply to">
+                        </td>
+                        <td class="reply">
+                            <%- settings.compact ? ('to ' + m.referenced_message.author.name + ':') : ('<b>' + m.referenced_message.author.name + '</b>') %>
+                            <%- m.referenced_message.content %>
+                        </td>
+                    </tr>
+                <% } %>
+                <tr class="message <%= m.showAuthor ? '' : 'noauthor' %>">
+                    <td>
+                        <% if (m.showAuthor) { %>
+                            <% if (m.avatar) { %>
+                                <img src="/wap/avatar-overlay<%= settings.dark ? '-dark' : '' %>.png" width="28px" height="28px" class="overlay">
+                            <% } %>
+                            <img src="<%= m.avatar ?? '/wap/avatar.png' %>" alt="avatar" width="28px" height="28px">
+                        <% } %>
+                    </td>
+                    <td>
+                        <% if (m.showAuthor) { %>
+                            <a href="/wap/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= m.id %>&recname=<%= encodeURIComponent(m.author.name) %>"><%= m.author.name %></a>
+                            <span class="time"><%= m.timestamp %></span>
+                        <% } %>
+                        <p>
+                            <%- m.content %>
+                        </p>
+                    </td>
+                </tr>
+            <% }) %>
+        </table>
+    </div>
+
+    <div id="bottom" style="text-align: center;">
+        <%- include(settings.reverseChat ? 'include/newerMessages' : 'include/olderMessages'); %>
+        <% if (settings.reverseChat) { %>
+        <%- include('include/sendNew'); %>
+        <% } %>
+    </div>
+</body>
+</html>

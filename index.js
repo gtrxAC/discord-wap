@@ -215,6 +215,8 @@ function sanitize(str) {
 function parseMessageObject(req, res, msg) {
     const result = {
         id: compressID(msg.id),
+        showAuthor: msg.showAuthor,
+        avatar: msg.avatar
     }
     if (msg.author) {
         const author = msg.author.global_name ?? msg.author.username;
@@ -225,7 +227,10 @@ function parseMessageObject(req, res, msg) {
         result.authorLine = oneLine(req, author + " " + getIdTimestamp(res, msg.id), false);
         result.timestamp = getIdTimestamp(res, msg.id);  // separate timestamp for html version
     }
-    if (msg.type >= 1 && msg.type <= 11) result.type = msg.type;
+    if (msg.type >= 1 && msg.type <= 11) {
+        result.isStatus = true;
+        result.type = msg.type;
+    }
 
     // Parse content 
     result.content = parseMessageContent(msg);
@@ -382,7 +387,7 @@ function getToken(req, res, next) {
         if (![0, 15, 30, 45].includes(timeOffsetMinutes)) timeOffsetMinutes = 0;
 
         let layout = Number(settingsArr[7]);
-        if (![0, 1, 2, 3].includes(layout)) layout = (res.locals.format == 'wml') ? 2 : 0;
+        if (![0, 1, 2, 3, 4, 5].includes(layout)) layout = (res.locals.format == 'wml') ? 2 : 0;
         res.locals.format = (layout == 2) ? 'wml' : 'html';
 
         res.locals.settings = {
@@ -393,9 +398,12 @@ function getToken(req, res, next) {
             use12hTime: (Number(settingsArr[4]) || 0) != 0,
             limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
             reverseChat: (Number(settingsArr[6]) || 0) != 0,
+            layout: ['standard', 'compact', 'wml', 'dark', 'modern', 'modern-dark'][layout],
+            cssFile: ['style.css', 'style-compact.css', '', 'style-dark.css', 'style.css', 'style-dark.css'][layout],
+            channelCssFile: [null, null, null, null, 'channel.css', 'channel-dark.css'][layout],
             compact: (layout == 1),
-            layout: ['standard', 'compact', 'wml', 'dark'][layout],
-            cssFile: ['style.css', 'style-compact.css', '', 'style-dark.css'][layout]
+            modern: (layout == 4 || layout == 5),
+            dark: (layout == 3 || layout == 5),
         }
     
         res.locals.headers = {
@@ -469,11 +477,13 @@ function render(res, viewName, viewVars) {
     });
 }
 
-app.get("/wap", (req, res) => {
+const index = (req, res) => {
     render(res, "index", {
         userAgent: req.headers['user-agent']
     });
-})
+}
+app.get("/wap", index);
+app.get("/wap/", index);
 
 app.get("/wap/about", (req, res) => {
     render(res, "about", {
@@ -616,6 +626,17 @@ app.get("/wap/g", getToken, async (req, res) => {
     catch (e) {handleError(res, e)}
 })
 
+// ported from discord j2me
+function shouldShowAuthor(msg, above, clusterStart) {
+    if (!above) return true;
+    if (msg.referenced_message) return true;
+    if (above.author?.id != msg.author?.id) return true;
+    if (msg.attachments && !msg.content) return true;
+    if (msg.isStatus || above.isStatus) return true;
+
+    return (BigInt(msg.id) >> 22n) - (BigInt(clusterStart) >> 22n) > BigInt(7*60*1000);
+}
+
 // Get channel messages
 app.get("/wap/ch", getToken, async (req, res) => {
     try {
@@ -631,6 +652,24 @@ app.get("/wap/ch", getToken, async (req, res) => {
         messagesGet.data.forEach(msg => {
             userCache.set(msg.author.id, msg.author.username);
         })
+
+        // See which messages the author line and profile pic should be shown for
+        messagesGet.data.reverse();
+        let clusterStart = 0;
+        let above = null;
+
+        messagesGet.data.forEach(m => {
+            m.showAuthor = shouldShowAuthor(m, above, clusterStart);
+            if (m.showAuthor) {
+                clusterStart = m.id;
+
+                if (m.author?.id && m.author?.avatar) {
+                    m.avatar = `http://media.discordapp.net/avatars/${m.author.id}/${m.author.avatar}.png?size=16`
+                }
+            }
+            above = m;
+        })
+        messagesGet.data.reverse();
     
         const messages = messagesGet.data.map(m => parseMessageObject(req, res, m));
 
@@ -638,7 +677,7 @@ app.get("/wap/ch", getToken, async (req, res) => {
             messages.reverse();
         }
     
-        render(res, "channel", {
+        render(res, res.locals.settings.modern ? "channelNew" : "channel", {
             id: req.query.id,
             page: req.query.page ?? 0,
             messages,

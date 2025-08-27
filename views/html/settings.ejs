@@ -42,7 +42,9 @@
             <label for="s7">Appearance:</label> <br/>
             <select name="s7" id="s7">
                 <option value="0" <%= (settings.layout == 'standard') ? 'selected' : '' %>>Standard</option>
-                <option value="3" <%= (settings.layout == 'dark') ? 'selected' : '' %>>Dark</option>
+                <option value="3" <%= (settings.layout == 'dark') ? 'selected' : '' %>>Standard Dark</option>
+                <option value="4" <%= (settings.layout == 'modern') ? 'selected' : '' %>>Modern</option>
+                <option value="5" <%= (settings.layout == 'modern-dark') ? 'selected' : '' %>>Modern Dark</option>
                 <option value="1" <%= (settings.layout == 'compact') ? 'selected' : '' %>>Compact</option>
                 <option value="2" <%= (settings.layout == 'wml') ? 'selected' : '' %>>WML</option>
             </select> <br/>

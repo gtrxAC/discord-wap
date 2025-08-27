@@ -38,7 +38,7 @@ input[type="submit"], button, select {
     color: #000;
     border: solid 1px #aaa;
     border-radius: 2px;
-    padding: 0.2em 0.5em;
+    padding: 0.3em 0.5em;
 }
 
 input[type="submit"]:hover, button:hover, select:hover {

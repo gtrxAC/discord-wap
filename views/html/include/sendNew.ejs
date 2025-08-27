@@ -1,0 +1,17 @@
+<table class="chatbar">
+    <tr>
+        <form action="/wap/send" method="post">
+            <input type="hidden" name="id" value="<%= id %>"/>
+            <input type="hidden" name="cname" value="<%= cname %>"/>
+            <td>
+                <textarea name="text" id="text" maxlength="2000" placeholder="Message <%= cname %>"></textarea>
+            </td>
+            <td class="chatbtns">
+                <input class="chatbtn" type="image" src="/wap/send<%= settings.dark ? '-dark' : '' %>.gif" width="24" height="24" alt="Send">
+                <a href="/wap/send?id=<%= encodeURIComponent(id) %>&cname=<%= encodeURIComponent(cname) %>">
+                    <img class="chatbtn" src="/wap/full<%= settings.dark ? '-dark' : '' %>.gif" width="24" height="24" alt="Full">
+                </a>
+            </td>
+        </form>
+    </tr>
+</table>

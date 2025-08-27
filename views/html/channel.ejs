@@ -22,7 +22,7 @@
             <% if (m.referenced_message) { %>
                 <div class="reply">
                     <% if (!settings.compact) { %>
-                        <img src="/wap/<%= (settings.layout == 'dark') ? 'reply-dark' : 'reply' %>.gif" alt="reply to">
+                        <img src="/wap/<%= settings.dark ? 'reply-dark' : 'reply' %>.gif" alt="reply to">
                     <% } %>
                     <%- settings.compact ? ('to ' + m.referenced_message.author.name + ':') : ('<b>' + m.referenced_message.author.name + '</b>') %>
                     <%- m.referenced_message.content %>

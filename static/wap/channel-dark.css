@@ -1,0 +1,65 @@
+* {
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+body {
+    background-color: #223;
+}
+p {
+    margin: 0;
+    overflow-wrap: break-word;
+}
+.main {
+    padding: 0;
+    margin: 0.2em;
+    max-width: 100%;
+}
+
+input[type="text"], textarea {
+    max-width: unset;
+}
+
+.replyrow {
+    overflow: hidden;
+    line-height: 1.1;
+    vertical-align: bottom;
+}
+.replyicon {
+    text-align: right;
+}
+.reply {
+    padding-top: 0.4em;
+}
+
+.message td {
+    vertical-align: top;
+    padding: 0.2em 0.2em 0.2em 0;
+}
+.message.noauthor td {
+    padding-top: 0;
+}
+
+.chatbar {
+    background-color: #334;
+    width: 100%;
+    vertical-align: middle;
+    padding: 0.3em 0.1em 0.3em 0.3em;
+}
+.chatbar textarea {
+    background-color: #445;
+    width: 100%;
+    min-height: 1.8em;
+    height: 2.8em;
+    resize: vertical;
+}
+.chatbtns {
+    width: 75px;
+}
+.chatbtn {
+    margin: 0.2em;
+}
+
+.overlay {
+    position: absolute;
+}
