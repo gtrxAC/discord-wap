@@ -397,7 +397,7 @@ function getToken(req, res, next) {
             timeOffsetMinutes,
             use12hTime: (Number(settingsArr[4]) || 0) != 0,
             limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
-            reverseChat: (Number(settingsArr[6]) || 0) != 0,
+            reverseChat: (Number(settingsArr[6]) || 0) != 0 || layout == 4 || layout == 5,
             layout: ['standard', 'compact', 'wml', 'dark', 'modern', 'modern-dark'][layout],
             cssFile: ['style.css', 'style-compact.css', '', 'style-dark.css', 'style.css', 'style-dark.css'][layout],
             channelCssFile: [null, null, null, null, 'channel.css', 'channel-dark.css'][layout],

@@ -41,11 +41,11 @@
                     </td>
                     <td>
                         <% if (m.showAuthor) { %>
-                            <a href="/wap/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= m.id %>&recname=<%= encodeURIComponent(m.author.name) %>"><%= m.author.name %></a>
+                            <a href="#"><%= m.author.name %></a>
                             <span class="time"><%= m.timestamp %></span>
                         <% } %>
                         <p>
-                            <%- m.content %>
+                            <a href="/wap/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= m.id %>&recname=<%= encodeURIComponent(m.author.name) %>"><%- m.content %></a>
                         </p>
                     </td>
                 </tr>

@@ -17,7 +17,7 @@ p {
 }
 
 input[type="text"], textarea {
-    max-width: unset;
+    max-width: inherit;
 }
 
 .replyrow {
@@ -39,12 +39,16 @@ input[type="text"], textarea {
 .message.noauthor td {
     padding-top: 0;
 }
+.message p a {
+    color: inherit;
+    font-weight: inherit;
+}
 
 .chatbar {
     background-color: #334;
     width: 100%;
     vertical-align: middle;
-    padding: 0.3em 0.1em 0.3em 0.3em;
+    padding: 0.2em 0.1em 0.2em 0.2em;
 }
 .chatbar textarea {
     background-color: #445;
@@ -62,4 +66,8 @@ input[type="text"], textarea {
 
 .overlay {
     position: absolute;
+}
+
+a img {
+    border: inherit;
 }
