@@ -3,6 +3,7 @@
         <form action="/wap/send" method="post">
             <input type="hidden" name="id" value="<%= id %>"/>
             <input type="hidden" name="cname" value="<%= cname %>"/>
+            <input type="hidden" name="fromchatbar" value="1"/>
             <td>
                 <textarea name="text" id="text" maxlength="2000" placeholder="Message <%= cname %>"></textarea>
             </td>

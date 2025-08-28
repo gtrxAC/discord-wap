@@ -10,7 +10,7 @@
 <body>
     <div class="main" style="text-align: center;">
         <p>Message sent!</p>
-        <button onclick="window.history.go(-2);">Back</button>
+        <button onclick="window.history.go(<%= fromChatBar ? '-1' : '-2' %>);">Back</button>
     </div>
 </body>
 </html>

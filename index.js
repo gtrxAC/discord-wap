@@ -344,6 +344,16 @@ function parseMessageContentText(content) {
     return result;
 }
 
+function getDefaultLayout(req, res) {
+    if (res.locals.format == 'wml') return 2;
+
+    // modern layout for modern browsers
+    const ua = (req.headers['user-agent'] ?? '').toLowerCase();
+    if (ua.includes('webkit') || ua.includes('gecko')) return 4;
+
+    return 0;
+}
+
 function getToken(req, res, next) {
     try {
         res.locals.token = req.query?.token ?? req.body?.token ?? req.cookies?.dwtoken;
@@ -387,7 +397,9 @@ function getToken(req, res, next) {
         if (![0, 15, 30, 45].includes(timeOffsetMinutes)) timeOffsetMinutes = 0;
 
         let layout = Number(settingsArr[7]);
-        if (![0, 1, 2, 3, 4, 5].includes(layout)) layout = (res.locals.format == 'wml') ? 2 : 0;
+        if (![0, 1, 2, 3, 4, 5].includes(layout)) {
+            layout = getDefaultLayout(req, res);
+        }
         res.locals.format = (layout == 2) ? 'wml' : 'html';
 
         res.locals.settings = {
@@ -734,7 +746,8 @@ app.post("/wap/send", getToken, async (req, res) => {
         );
 
         render(res, "sent", {
-            cname: res.locals.channelName
+            fromChatBar: req.body.fromchatbar,
+            cname: res.locals.channelName 
         });
     }
     catch (e) {handleError(res, e)}
