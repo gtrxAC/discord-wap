@@ -6,17 +6,17 @@ Also see [Discord J2ME](https://github.com/gtrxAC/discord-j2me), a client for de
 ## Status
 ### Working
 * Server, channel, and DM lists
-  * Note: due to page size limitations, only the most recently used channels are shown
+  * Note: due to page size limitations, only the most recently used channels are shown (WML version)
 * Message sending
 * Replying with ping on or off
 * Message history with pagination
 * Settings (e.g. message load count)
-* HTML support
 * Message timestamps
+* Attachments and profile pictures (HTML "modern" layout only)
 ### Not implemented
 * Message editing and deleting
 * Threads
-* Images, profile pictures, emojis
+* Emojis
 
 ## How to use
 A public instance is hosted at http://gtrxac.fi/wap or http://146.59.80.3/wap, but it is recommended to host your own instance if possible.
@@ -41,6 +41,7 @@ Steps:
 ## Self-hosting
 1. Install [Node.js](https://nodejs.org).
 2. Clone this repository.
-3. Change the port number near the beginning of the `index.js` file, if necessary.
+3. Copy `.env.example` to `.env`.
+4. Edit the variables inside the `.env` file as you see fit.
 4. Open a terminal in the folder of the cloned repository.
 5. Run `npm i` and `node .`

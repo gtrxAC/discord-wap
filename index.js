@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const EmojiConvertor = require('emoji-js');
@@ -10,7 +11,6 @@ const emoji = new EmojiConvertor();
 emoji.replace_mode = 'unified';
 
 const app = express();
-const PORT = 8008;
 const DEST_BASE = "https://discord.com/api/v9";
 
 app.set('view engine', 'ejs');
@@ -233,15 +233,15 @@ function parseMessageObject(req, res, msg) {
     }
 
     // Parse content 
-    result.content = parseMessageContent(msg);
+    result.content = parseMessageContent(res, msg);
 
     if (msg.referenced_message) {
-        let content = parseMessageContent(msg.referenced_message, true);
+        let content = parseMessageContent(res, msg.referenced_message, true);
 
         // Replace newlines with spaces (reply is shown as one line)
         content = content.replace(/\r\n|\r|\n/gm, "  ");
 
-        const limit = (res.locals.settings.layout != 'standard') ? 30 : 50;
+        const limit = (res.locals.settings.layout != 'standard' && !res.locals.settings.modern) ? 30 : 50;
 
         if (content && content.length > limit) {
             content = content.slice(0, limit - 3).trim() + '...';
@@ -254,10 +254,39 @@ function parseMessageObject(req, res, msg) {
             content
         }
     }
+
+    if (res.locals.settings.modern && msg.attachments) {
+        result.attachments = msg.attachments.map(att => {
+            const isImage = att.content_type?.includes('image');
+            let url;
+            if (isImage) {
+                let width = att.width;
+                let height = att.height;
+                if (width > 1000 || height > 1000) {
+                    const ratio = Math.max(att.width, att.height)/1000;
+                    width = Math.round(width/ratio);
+                    height = Math.round(height/ratio);
+                }
+                url = att.proxy_url.replace(/^https/, 'http') + `width=${width}&height=${height}`;
+            }
+            else if (process.env.CDN_PROXY) {
+                url = att.url.replace("https://cdn.discordapp.com", process.env.CDN_PROXY);
+            }
+            else {
+                url = att.url;
+            }
+
+            return {
+                filename: att.filename,
+                url
+            }
+        })
+    }
+
     return result;
 }
 
-function parseMessageContent(msg, singleLine = false) {
+function parseMessageContent(res, msg, singleLine = false) {
     const target = msg.mentions?.[0]?.global_name ?? msg.mentions?.[0]?.username;
     switch (msg.type) {
         case 1: return `added ${target} to the group`;
@@ -271,23 +300,23 @@ function parseMessageContent(msg, singleLine = false) {
         case 9: return `boosted the server to level 1`;
         case 10: return `boosted the server to level 2`;
         case 11: return `boosted the server to level 3`;
-        default: return parseMessageContentNonStatus(msg, singleLine);
+        default: return parseMessageContentNonStatus(res, msg, singleLine);
     }
 }
 
-function parseMessageContentNonStatus(msg, singleLine) {
+function parseMessageContentNonStatus(res, msg, singleLine) {
     let result = "";
 
     // Content from forwarded message
     if (msg.message_snapshots) {
-        result = parseMessageContent(msg.message_snapshots[0].message);
+        result = parseMessageContent(res, msg.message_snapshots[0].message);
     }
     // Normal message content
     else if (msg.content) {
         result = parseMessageContentText(msg.content);
     }
     
-    if (msg.attachments?.length) {
+    if (msg.attachments?.length && !res.locals.settings.modern) {
         msg.attachments.forEach(att => {
             if (result.length) result += "\n";
             result += `(file: ${parseMessageContentText(att.filename)})`;
@@ -304,7 +333,7 @@ function parseMessageContentNonStatus(msg, singleLine) {
             result += `(embed: ${parseMessageContentText(emb.title)})`;
         })
     }
-    if (result == '') return "(unsupported message)";
+    if (result == '' && !msg.attachments) return "(unsupported message)";
 
     // iOS keyboard (I think it's that) is stupid and replaces apostrophes with this unicode character
     // that shows up as a rectangle/missing character on old phones. Replace it with a normal apostrophe.
@@ -357,7 +386,12 @@ function getDefaultLayout(req, res) {
 function getToken(req, res, next) {
     try {
         res.locals.token = req.query?.token ?? req.body?.token ?? req.cookies?.dwtoken;
+
         if (!res.locals.token) throw new Error("Your request does not contain a token. Please return to the Discord WAP front page and try again.");
+        
+        if (process.env.PASSWORD && process.env.PASSWORD_TOKEN && res.locals.token == process.env.PASSWORD) {
+            res.locals.token = process.env.PASSWORD_TOKEN;
+        }
 
         res.locals.userID = res.locals.token.split('.')[0];
 
@@ -759,6 +793,6 @@ app.get("/wap/set", getToken, (req, res) => {
     });
 })
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(process.env.PORT, () => {
+    console.log(`Server is running on http://localhost:${process.env.PORT}`);
 });
