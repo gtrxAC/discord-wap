@@ -510,7 +510,8 @@ async function fetchDMs(req, res) {
 app.use(cookieParser());
 
 app.use((req, res, next) => {
-    res.locals.format = req.headers['accept'].includes('html') ? "html" : "wml";
+    const accept = req.headers['accept'] ?? '';
+    res.locals.format = accept.includes('html') ? "html" : "wml";
     next();
 })
 
