@@ -72,3 +72,6 @@ input[type="text"], textarea {
 a img {
     border: inherit;
 }
+.break {
+    word-break: break-all;
+}

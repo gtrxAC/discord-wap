@@ -212,6 +212,11 @@ function sanitize(str) {
     return sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
 }
 
+function fixWordBreak(str) {
+    // add CSS "word-break: break-all" to words with at least 15 chars
+    return str.replace(/([^\s]{15,})/g, "<span class='break'>$1</span>")
+}
+
 function parseMessageObject(req, res, msg) {
     const result = {
         id: compressID(msg.id),
@@ -277,7 +282,7 @@ function parseMessageObject(req, res, msg) {
             }
 
             return {
-                filename: att.filename,
+                filename: fixWordBreak(sanitize(att.filename)),
                 url
             }
         })
@@ -339,7 +344,7 @@ function parseMessageContentNonStatus(res, msg, singleLine) {
     // that shows up as a rectangle/missing character on old phones. Replace it with a normal apostrophe.
     result = result.replace(/’/g, "'");
 
-    result = sanitize(result).replace(/\n/g, singleLine ? ' ' : '<br/>');
+    result = fixWordBreak(sanitize(result)).replace(/\n/g, singleLine ? ' ' : '<br/>');
     return result;
 }
 
