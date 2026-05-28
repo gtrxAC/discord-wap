@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= cname %></title>
     <!-- <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>"> -->
-    <link rel="stylesheet" href="dw.css">
+    <link rel="stylesheet" href="/wap/dw.css">
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
@@ -18,7 +18,7 @@
     <% if (messages.length == settings.messageLoadCount) { %>
         <table>
             <tr><td>
-                <form action="/wap/ch<%= settings.reverseChat ? '#b' : '' %>" class="nav">
+                <form action="/ch<%= settings.reverseChat ? '#b' : '' %>" class="nav">
                     <input type="hidden" name="id" value="<%= id %>">
                     <input type="hidden" name="cname" value="<%= cname %>">
                     <input type="hidden" name="before" value="<%= settings.reverseChat ? messages[0].id : messages[messages.length - 1].id %>"/>
@@ -52,7 +52,7 @@
         <!-- content (link to send reply) -->
         <% if (m.content) { %>
             <tr><td>
-                <a class="msg" href="/wap/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= m.id %>&recname=<%= encodeURIComponent(m.author.name) %>">
+                <a class="msg" href="/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= m.id %>&recname=<%= encodeURIComponent(m.author.name) %>">
                     <%- fit(m.content) %>
                 </a>
             </td></tr>
@@ -73,7 +73,7 @@
     <% if (page > 0) { %>
         <table>
             <tr><td>
-                <form action="/wap/ch" class="nav">
+                <form action="/ch" class="nav">
                     <input type="hidden" name="id" value="<%= id %>">
                     <input type="hidden" name="cname" value="<%= cname %>">
                     <% if (page > 1) { %>
@@ -90,7 +90,7 @@
     <table id="b">
         <tr><th>Send message</th></tr>
         <tr><td>
-            <form action="/wap/send" method="post">
+            <form action="/send" method="post">
                 <textarea name="text" id="text" maxlength="2000" placeholder="Message <%= cname %>"></textarea> <br/>
                 <input type="hidden" name="id" value="<%= id %>"/>
                 <input type="hidden" name="cname" value="<%= cname %>"/>
@@ -99,7 +99,7 @@
             </form>
         </td></tr>
         <tr><td class="nav">
-            <a href="/wap/send?id=<%= encodeURIComponent(id) %>&cname=<%= encodeURIComponent(cname) %>">Full</a> | <a href="#">Upload</a>
+            <a href="/send?id=<%= encodeURIComponent(id) %>&cname=<%= encodeURIComponent(cname) %>">Full</a> | <a href="#">Upload</a>
         </td></tr>
     </table>
 

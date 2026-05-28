@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= cname %></title>
     <!-- <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>"> -->
-    <link rel="stylesheet" href="dw.css">
+    <link rel="stylesheet" href="/wap/dw.css">
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
     <div class="nav">
-        <a href="/wap/ch?cname=<%= encodeURIComponent(cname) %>&id=<%= id %><%= settings.reverseChat ? '#b' : '' %>">&lt; <%= cname %></a><br/>
+        <a href="/ch?cname=<%= encodeURIComponent(cname) %>&id=<%= id %><%= settings.reverseChat ? '#b' : '' %>">&lt; <%= cname %></a><br/>
     </div>
 
     <table>
         <tr><th>Reply to <%= recname %></th></tr>
         <tr>
             <td>
-                <form action="/wap/send" method="post">
+                <form action="/send" method="post">
                     <input type="hidden" name="id" value="<%= id %>"/>
                     <input type="hidden" name="recipient" value="<%= rec %>"/>
                     <textarea name="text" id="text" rows="5" maxlength="2000"></textarea> <br/>

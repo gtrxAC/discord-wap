@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= gname %></title>
     <!-- <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>"> -->
-    <link rel="stylesheet" href="dw.css">
+    <link rel="stylesheet" href="/wap/dw.css">
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
     <div class="nav" id="t">
-        <a href="/wap/gl">&lt; Servers</a><br/>
+        <a href="/gl">&lt; Servers</a><br/>
     </div>
     <% if (settings.altChannelListLayout) { %>
         <table>
             <tr><th colspan="2"><%- fit(gname) %></th></tr>
             <% channels.forEach(c => { %>
                 <tr>
-                    <td><a href="/wap/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a></td>
+                    <td><a href="/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a></td>
                     <td class="chtime"><%= c.timestamp %></td>
                 </tr>
             <% }) %>
@@ -29,7 +29,7 @@
                 <% cat.children.forEach(c => { %>
                     <tr> 
                         <td class="icon"><img src="/wap/page.png" alt="channel"></td>
-                        <td><a href="/wap/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a></td>
+                        <td><a href="/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a></td>
                     </tr>
                 <% }) %>
             </table>

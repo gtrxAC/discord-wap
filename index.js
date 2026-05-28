@@ -452,22 +452,20 @@ function render(res, viewName, viewVars) {
     });
 }
 
-const index = (req, res) => {
+app.get("/", (req, res) => {
     render(res, "index", {
         userAgent: req.headers['user-agent']
     });
-}
-app.get("/wap", index);
-app.get("/wap/", index);
+});
 
-app.get("/wap/about", (req, res) => {
+app.get("/about", (req, res) => {
     render(res, "about", {
         userAgent: req.headers['user-agent']
     });
 })
 
 // Main menu (including DMs in WML version)
-app.get("/wap/main", getToken, async (req, res) => {
+app.get("/main", getToken, async (req, res) => {
     const dms = (res.locals.format == 'wml') && await fetchDMs(req, res);
 
     render(res, "main", {
@@ -477,7 +475,7 @@ app.get("/wap/main", getToken, async (req, res) => {
 })
 
 // Direct message list (separate page for HTML version)
-app.get("/wap/dm", getToken, async (req, res) => {
+app.get("/dm", getToken, async (req, res) => {
     const dms = await fetchDMs(req, res);
 
     render(res, "dms", {
@@ -489,7 +487,7 @@ app.get("/wap/dm", getToken, async (req, res) => {
 const guildCache = new LRUCache({max: 200, ttl: 10*60*1000, updateAgeOnGet: false})
 
 // Server list
-app.get("/wap/gl", getToken, async (req, res) => {
+app.get("/gl", getToken, async (req, res) => {
     let guilds;
 
     if (guildCache.has(res.locals.userID)) {
@@ -514,7 +512,7 @@ app.get("/wap/gl", getToken, async (req, res) => {
 const channelCache = new LRUCache({max: 400, ttl: 10*60*1000, updateAgeOnGet: false});
 
 // Channel list of a server
-app.get("/wap/g", getToken, async (req, res) => {
+app.get("/g", getToken, async (req, res) => {
     // Channel list cache can be used if last message IDs are not relevant ("Recent channels first" disabled and using HTML version)
     const useCache = (!res.locals.settings.altChannelListLayout && res.locals.format == 'html')
     let channelsGet;
@@ -627,7 +625,7 @@ function shouldShowAuthor(msg, above, clusterStart) {
 }
 
 // Get channel messages
-app.get("/wap/ch", getToken, async (req, res) => {
+app.get("/ch", getToken, async (req, res) => {
     let proxyUrl = `${DEST_BASE}/channels/${decompressID(req.query.id, 'channel')}/messages`;
     let queryParam = [`limit=${res.locals.settings.messageLoadCount}`];
     if (req.query.before) queryParam.push(`before=${decompressID(req.query.before, 'message')}`);
@@ -675,7 +673,7 @@ app.get("/wap/ch", getToken, async (req, res) => {
     });
 })
 
-app.get("/wap/send", getToken, async (req, res) => {
+app.get("/send", getToken, async (req, res) => {
     render(res, "send", {
         id: req.query.id,
         cname: res.locals.channelName,
@@ -683,7 +681,7 @@ app.get("/wap/send", getToken, async (req, res) => {
     })
 })
 
-app.get("/wap/reply", getToken, async (req, res) => {
+app.get("/reply", getToken, async (req, res) => {
     render(res, "reply", {
         id: req.query.id,
         cname: res.locals.channelName,
@@ -694,7 +692,7 @@ app.get("/wap/reply", getToken, async (req, res) => {
 })
 
 // Send message
-app.post("/wap/send", getToken, async (req, res) => {
+app.post("/send", getToken, async (req, res) => {
     const send = {
         content: req.body.text,
         flags: 0,
@@ -724,7 +722,7 @@ app.post("/wap/send", getToken, async (req, res) => {
     });
 })
 
-app.get("/wap/set", getToken, (req, res) => {
+app.get("/set", getToken, (req, res) => {
     render(res, "settings", {
         token: req.query.token
     });

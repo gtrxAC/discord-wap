@@ -6,7 +6,7 @@
     <title>Discord WAP</title>
     <meta name="description" content="Discord proxy client for old mobile browsers with Wireless Application Protocol or HTML support">
     <!-- <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>"> -->
-    <link rel="stylesheet" href="dw.css">
+    <link rel="stylesheet" href="/wap/dw.css">
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
@@ -24,7 +24,7 @@
         <tr><th>Log in</th></tr>
         <tr>
             <td>
-                <form action="/wap/main">
+                <form action="/main">
                     <label for="token">Enter your token:</label> <br/>
                     <input type="text" name="token" id="token" maxlength="75"> <br/>
                     <input type="submit" value="Log in">
@@ -37,7 +37,7 @@
         <tr><th>Import token</th></tr>
         <tr>
             <td>
-                <form action="/wap/main">
+                <form action="/main">
                     <label for="token">Alternatively, if your browser supports it, you can upload a text file containing your token.</label> <br/>
                     <input type="file" name="tokfile" id="tokfile"> 
                     <input type="submit" value="Log in">
@@ -47,7 +47,7 @@
     </table> -->
 
     <div class="nav">
-        <a href="/wap/about">About</a>
+        <a href="/about">About</a>
     </div>
 </body>
 </html>
