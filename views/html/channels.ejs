@@ -14,12 +14,11 @@
     </div>
     <% if (settings.altChannelListLayout) { %>
         <table>
-            <tr><th colspan="3"><%- fit(gname) %></th></tr>
+            <tr><th colspan="2"><%- fit(gname) %></th></tr>
             <% channels.forEach(c => { %>
                 <tr>
-                    <td class="icon"><img src="/wap/page.png" alt="channel"></td>
                     <td><a href="/wap/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a></td>
-                    <td class="reply"><%= c.timestamp %></td>
+                    <td class="chtime"><%= c.timestamp %></td>
                 </tr>
             <% }) %>
         </table>

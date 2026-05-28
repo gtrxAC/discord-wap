@@ -68,3 +68,8 @@ input, button, textarea, select {
     font-size: 9px;
     font-style: italic;
 }
+.chtime {
+    color: #444;
+    font-size: 9px;
+    text-align: right;
+}
