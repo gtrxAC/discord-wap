@@ -663,7 +663,7 @@ app.get("/ch", getToken, async (req, res) => {
         messages.reverse();
     }
 
-    render(res, res.locals.settings.modern ? "channelNew" : "channel", {
+    render(res, "channel", {
         id: req.query.id,
         page: req.query.page ?? 0,
         messages,
