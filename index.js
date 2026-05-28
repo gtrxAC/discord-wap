@@ -128,11 +128,6 @@ function getError(e) {
     return e.message;
 }
 
-function handleError(res, e) {
-    console.log(e);
-    render(res, "error", {error: getError(e)});
-}
-
 function parseMessageObject(req, res, msg) {
     const result = {
         id: compressID(msg.id),
@@ -304,93 +299,88 @@ function getDefaultLayout(req, res) {
 }
 
 function getToken(req, res, next) {
-    try {
-        res.locals.token = req.query?.token ?? req.body?.token ?? req.cookies?.dwtoken;
+    res.locals.token = req.query?.token ?? req.body?.token ?? req.cookies?.dwtoken;
 
-        if (!res.locals.token) throw new Error("Your request does not contain a token. Please return to the Discord WAP front page and try again.");
-        
-        if (process.env.PASSWORD && process.env.PASSWORD_TOKEN && res.locals.token == process.env.PASSWORD) {
-            res.locals.token = process.env.PASSWORD_TOKEN;
-        }
-
-        res.locals.userID = res.locals.token.split('.')[0];
-
-        if (req.query.cn) {
-            // ?cn=example is a shorthand for ?cname=%23example (guild channel with #)
-            res.locals.channelName = "#" + req.query.cn;
-        }
-        else if (req.query.dn) {
-            // ?dn=example is a shorthand for ?cname=%40example (dm user with @)
-            res.locals.channelName = "@" + req.query.dn;
-        }
-        else {
-            res.locals.channelName = req.query.cname ?? "Discord WAP";
-        }
-
-        if (req.query.s0) {
-            res.locals.token = res.locals.token.split('.').slice(0, 3).join('.')
-                + '.' + req.query.s0
-                + '.' + req.query.s1
-                + '.' + req.query.s2
-                + '.' + req.query.s3
-                + '.' + req.query.s4
-                + '.' + req.query.s5
-                + '.' + req.query.s6
-                + '.' + req.query.s7;
-        }
-        const settingsArr = res.locals.token.split('.').slice(3);
-
-        let messageLoadCount = Number(settingsArr[0]) || 10;
-        if (messageLoadCount > 100) messageLoadCount = 100;
-        else if (messageLoadCount < 1) messageLoadCount = 1;
-
-        let timeOffsetHours = Number(settingsArr[2]) || 0;
-        let timeOffsetMinutes = Number(settingsArr[3]) || 0;
-        if (timeOffsetHours < -14) timeOffsetHours = -14;
-        if (timeOffsetHours > 14) timeOffsetHours = 14;
-        if (![0, 15, 30, 45].includes(timeOffsetMinutes)) timeOffsetMinutes = 0;
-
-        let layout = Number(settingsArr[7]);
-        if (![0, 1, 2, 3, 4, 5].includes(layout)) {
-            layout = getDefaultLayout(req, res);
-        }
-        res.locals.format = (layout == 2) ? 'wml' : 'html';
-
-        res.locals.settings = {
-            messageLoadCount,
-            altChannelListLayout: (Number(settingsArr[1]) || 0) != 0,
-            timeOffsetHours,
-            timeOffsetMinutes,
-            use12hTime: (Number(settingsArr[4]) || 0) != 0,
-            limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
-            reverseChat: (Number(settingsArr[6]) || 0) != 0 || layout == 4 || layout == 5,
-            layout: ['standard', 'compact', 'wml', 'dark', 'modern', 'modern-dark'][layout],
-            cssFile: ['style.css', 'style-compact.css', '', 'style-dark.css', 'style.css', 'style-dark.css'][layout],
-            channelCssFile: [null, null, null, null, 'channel.css', 'channel-dark.css'][layout],
-            compact: (layout == 1),
-            modern: (layout == 4 || layout == 5),
-            dark: (layout == 3 || layout == 5),
-        }
+    if (!res.locals.token) throw new Error("Your request does not contain a token. Please return to the Discord WAP front page and try again.");
     
-        res.locals.headers = {
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0",
-            "Accept": "*/*",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Authorization": decompressToken(res.locals.token).split('.').slice(0, 3).join('.'),
-            "X-Discord-Locale": "en-GB",
-            "X-Debug-Options": "bugReporterEnabled",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-origin"
-        };
-        if (req.cookies?.dwtoken != res.locals.token) {
-            res.cookie('dwtoken', res.locals.token, {maxAge: 1000*60*60*24*30});
-        }
-        next();
+    if (process.env.PASSWORD && process.env.PASSWORD_TOKEN && res.locals.token == process.env.PASSWORD) {
+        res.locals.token = process.env.PASSWORD_TOKEN;
     }
-    catch (e) {
-        handleError(res, e);
+
+    res.locals.userID = res.locals.token.split('.')[0];
+
+    if (req.query.cn) {
+        // ?cn=example is a shorthand for ?cname=%23example (guild channel with #)
+        res.locals.channelName = "#" + req.query.cn;
     }
+    else if (req.query.dn) {
+        // ?dn=example is a shorthand for ?cname=%40example (dm user with @)
+        res.locals.channelName = "@" + req.query.dn;
+    }
+    else {
+        res.locals.channelName = req.query.cname ?? "Discord WAP";
+    }
+
+    if (req.query.s0) {
+        res.locals.token = res.locals.token.split('.').slice(0, 3).join('.')
+            + '.' + req.query.s0
+            + '.' + req.query.s1
+            + '.' + req.query.s2
+            + '.' + req.query.s3
+            + '.' + req.query.s4
+            + '.' + req.query.s5
+            + '.' + req.query.s6
+            + '.' + req.query.s7;
+    }
+    const settingsArr = res.locals.token.split('.').slice(3);
+
+    let messageLoadCount = Number(settingsArr[0]) || 10;
+    if (messageLoadCount > 100) messageLoadCount = 100;
+    else if (messageLoadCount < 1) messageLoadCount = 1;
+
+    let timeOffsetHours = Number(settingsArr[2]) || 0;
+    let timeOffsetMinutes = Number(settingsArr[3]) || 0;
+    if (timeOffsetHours < -14) timeOffsetHours = -14;
+    if (timeOffsetHours > 14) timeOffsetHours = 14;
+    if (![0, 15, 30, 45].includes(timeOffsetMinutes)) timeOffsetMinutes = 0;
+
+    let layout = Number(settingsArr[7]);
+    if (![0, 1, 2, 3, 4, 5].includes(layout)) {
+        layout = getDefaultLayout(req, res);
+    }
+    res.locals.format = (layout == 2) ? 'wml' : 'html';
+
+    res.locals.settings = {
+        messageLoadCount,
+        altChannelListLayout: (Number(settingsArr[1]) || 0) != 0,
+        timeOffsetHours,
+        timeOffsetMinutes,
+        use12hTime: (Number(settingsArr[4]) || 0) != 0,
+        limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
+        reverseChat: (Number(settingsArr[6]) || 0) != 0 || layout == 4 || layout == 5,
+        layout: ['standard', 'compact', 'wml', 'dark', 'modern', 'modern-dark'][layout],
+        cssFile: ['style.css', 'style-compact.css', '', 'style-dark.css', 'style.css', 'style-dark.css'][layout],
+        channelCssFile: [null, null, null, null, 'channel.css', 'channel-dark.css'][layout],
+        compact: (layout == 1),
+        modern: (layout == 4 || layout == 5),
+        dark: (layout == 3 || layout == 5),
+    }
+
+    res.locals.headers = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0",
+        "Accept": "*/*",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Authorization": decompressToken(res.locals.token).split('.').slice(0, 3).join('.'),
+        "X-Discord-Locale": "en-GB",
+        "X-Debug-Options": "bugReporterEnabled",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin"
+    };
+    if (req.cookies?.dwtoken != res.locals.token) {
+        res.cookie('dwtoken', res.locals.token, {maxAge: 1000*60*60*24*30});
+    }
+    next();
 }
 
 async function fetchDMs(req, res) {
@@ -478,162 +468,150 @@ app.get("/wap/about", (req, res) => {
 
 // Main menu (including DMs in WML version)
 app.get("/wap/main", getToken, async (req, res) => {
-    try {
-        const dms = (res.locals.format == 'wml') && await fetchDMs(req, res);
+    const dms = (res.locals.format == 'wml') && await fetchDMs(req, res);
 
-        render(res, "main", {
-            token: compressToken(res.locals.token),
-            dms,
-        });
-    }
-    catch (e) {handleError(res, e)}
+    render(res, "main", {
+        token: compressToken(res.locals.token),
+        dms,
+    });
 })
 
 // Direct message list (separate page for HTML version)
 app.get("/wap/dm", getToken, async (req, res) => {
-    try {
-        const dms = await fetchDMs(req, res);
+    const dms = await fetchDMs(req, res);
 
-        render(res, "dms", {
-            token: compressToken(res.locals.token),
-            dms,
-        });
-    }
-    catch (e) {handleError(res, e)}
+    render(res, "dms", {
+        token: compressToken(res.locals.token),
+        dms,
+    });
 })
 
 const guildCache = new LRUCache({max: 200, ttl: 10*60*1000, updateAgeOnGet: false})
 
 // Server list
 app.get("/wap/gl", getToken, async (req, res) => {
-    try {
-        let guilds;
+    let guilds;
 
-        if (guildCache.has(res.locals.userID)) {
-            guilds = guildCache.get(res.locals.userID);
-        } else {
-            const guildsGet = await axios.get(
-                `${DEST_BASE}/users/@me/guilds`,
-                {headers: res.locals.headers}
-            )
-            guilds = guildsGet.data.map(g => ({
-                id: compressID(g.id),
-                name: oneLine(req, g.name)
-            }))
-            guildCache.set(res.locals.userID, guilds);
-        }
-
-        render(res, "guilds", {
-            guilds
-        });
+    if (guildCache.has(res.locals.userID)) {
+        guilds = guildCache.get(res.locals.userID);
+    } else {
+        const guildsGet = await axios.get(
+            `${DEST_BASE}/users/@me/guilds`,
+            {headers: res.locals.headers}
+        )
+        guilds = guildsGet.data.map(g => ({
+            id: compressID(g.id),
+            name: oneLine(req, g.name)
+        }))
+        guildCache.set(res.locals.userID, guilds);
     }
-    catch (e) {handleError(res, e)}
+
+    render(res, "guilds", {
+        guilds
+    });
 })
 
 const channelCache = new LRUCache({max: 400, ttl: 10*60*1000, updateAgeOnGet: false});
 
 // Channel list of a server
 app.get("/wap/g", getToken, async (req, res) => {
-    try {
-        // Channel list cache can be used if last message IDs are not relevant ("Recent channels first" disabled and using HTML version)
-        const useCache = (!res.locals.settings.altChannelListLayout && res.locals.format == 'html')
-        let channelsGet;
+    // Channel list cache can be used if last message IDs are not relevant ("Recent channels first" disabled and using HTML version)
+    const useCache = (!res.locals.settings.altChannelListLayout && res.locals.format == 'html')
+    let channelsGet;
 
-        if (useCache && channelCache.has(req.query.id)) {
-            channelsGet = channelCache.get(req.query.id);
-        } else {
-            channelsGet = await axios.get(
-                `${DEST_BASE}/guilds/${decompressID(req.query.id, 'server')}/channels`,
-                {headers: res.locals.headers}
-            )
-            if (useCache) channelCache.set(req.query.id, channelsGet);
-        }
-
-        // Populate channel name cache
-        channelsGet.data.forEach(ch => {
-            channelNameCache.set(ch.id, ch.name);
-        })
-
-        // Due to page length limitations, limit the amount of channels to be shown:
-
-        // Sort channels by most recently used
-        const allChannels = channelsGet.data.filter(ch => ch.type == 0 || ch.type == 5);
-        allChannels.sort((a, b) => {
-            const a_id = BigInt(a.last_message_id ?? 0);
-            const b_id = BigInt(b.last_message_id ?? 0);
-            return (a_id < b_id ? 1 : a_id > b_id ? -1 : 0)
-        });
-
-        let channels;
-
-        if (res.locals.settings.altChannelListLayout) {
-            // "Recent channels first" option enabled: show up to 15 (WML) or 30 (HTML) channels in order of most recent message
-            channels = allChannels
-                .slice(0, (res.locals.format == 'wml') ? 15 : 30)
-                .map(ch => ({
-                    id: compressID(ch.id),
-                    name: oneLine(req, ch.name),
-                    label: oneLine(req, getIdTimestamp(res, ch.last_message_id) + ' ' + ch.name),
-                    parent_id: ch.parent_id
-                }))
-        } else {
-            // "Recent channels first" disabled: show channels in their original order (still only show 15 most recently used channels in WML)
-            if (res.locals.format == 'wml') {
-                const recentChannelIDs = allChannels
-                    .slice(0, 15)
-                    .map(ch => ch.id);
-        
-                // Also, channels with certain names will always be shown, because those are channels that people might often want to visit.
-                const whitelistedChannelIDs = allChannels
-                    .filter(ch => /^(general|phones|off\S*topic|discord-j2me-wap)$/g.test(ch.name))
-                    .map(ch => ch.id);
-        
-                const shownChannelIDs = [...new Set([...recentChannelIDs, ...whitelistedChannelIDs])]
-        
-                channels = allChannels.filter(ch => shownChannelIDs.includes(ch.id));
-            } else {
-                channels = allChannels;
-            }
-
-            channels = channels
-                .sort((a, b) => a.position - b.position)
-                .map(ch => ({
-                    id: compressID(ch.id),
-                    name: oneLine(req, ch.name),
-                    label: oneLine(req, '#' + ch.name),
-                    parent_id: ch.parent_id
-                }))
-        }
-
-        const allChannelCategories = channelsGet.data.filter(ch => ch.type == 4)
-            .sort((a, b) => a.position - b.position)
-            .map(ch => ({...ch, children: []}));
-
-        // default category for channels that are not in any category (shown at the top both on official clients and on wap)
-        const defaultCategory = {
-            name: req.query.gname,
-            children: []
-        };
-        allChannelCategories.unshift(defaultCategory);
-
-        channels.forEach(ch => {
-            const cat = allChannelCategories.find(cat => cat.id == ch.parent_id);
-            if (cat) {
-                cat.children.push(ch);
-            } else {
-                defaultCategory.children.push(ch);
-            }
-        })
-
-        const channelCategories = allChannelCategories.filter(ch => ch.children.length);
-
-        render(res, "channels", {
-            gname: req.query.gname,
-            channels,
-            channelCategories
-        });
+    if (useCache && channelCache.has(req.query.id)) {
+        channelsGet = channelCache.get(req.query.id);
+    } else {
+        channelsGet = await axios.get(
+            `${DEST_BASE}/guilds/${decompressID(req.query.id, 'server')}/channels`,
+            {headers: res.locals.headers}
+        )
+        if (useCache) channelCache.set(req.query.id, channelsGet);
     }
-    catch (e) {handleError(res, e)}
+
+    // Populate channel name cache
+    channelsGet.data.forEach(ch => {
+        channelNameCache.set(ch.id, ch.name);
+    })
+
+    // Due to page length limitations, limit the amount of channels to be shown:
+
+    // Sort channels by most recently used
+    const allChannels = channelsGet.data.filter(ch => ch.type == 0 || ch.type == 5);
+    allChannels.sort((a, b) => {
+        const a_id = BigInt(a.last_message_id ?? 0);
+        const b_id = BigInt(b.last_message_id ?? 0);
+        return (a_id < b_id ? 1 : a_id > b_id ? -1 : 0)
+    });
+
+    let channels;
+
+    if (res.locals.settings.altChannelListLayout) {
+        // "Recent channels first" option enabled: show up to 15 (WML) or 30 (HTML) channels in order of most recent message
+        channels = allChannels
+            .slice(0, (res.locals.format == 'wml') ? 15 : 30)
+            .map(ch => ({
+                id: compressID(ch.id),
+                name: oneLine(req, ch.name),
+                label: oneLine(req, getIdTimestamp(res, ch.last_message_id) + ' ' + ch.name),
+                parent_id: ch.parent_id
+            }))
+    } else {
+        // "Recent channels first" disabled: show channels in their original order (still only show 15 most recently used channels in WML)
+        if (res.locals.format == 'wml') {
+            const recentChannelIDs = allChannels
+                .slice(0, 15)
+                .map(ch => ch.id);
+    
+            // Also, channels with certain names will always be shown, because those are channels that people might often want to visit.
+            const whitelistedChannelIDs = allChannels
+                .filter(ch => /^(general|phones|off\S*topic|discord-j2me-wap)$/g.test(ch.name))
+                .map(ch => ch.id);
+    
+            const shownChannelIDs = [...new Set([...recentChannelIDs, ...whitelistedChannelIDs])]
+    
+            channels = allChannels.filter(ch => shownChannelIDs.includes(ch.id));
+        } else {
+            channels = allChannels;
+        }
+
+        channels = channels
+            .sort((a, b) => a.position - b.position)
+            .map(ch => ({
+                id: compressID(ch.id),
+                name: oneLine(req, ch.name),
+                label: oneLine(req, '#' + ch.name),
+                parent_id: ch.parent_id
+            }))
+    }
+
+    const allChannelCategories = channelsGet.data.filter(ch => ch.type == 4)
+        .sort((a, b) => a.position - b.position)
+        .map(ch => ({...ch, children: []}));
+
+    // default category for channels that are not in any category (shown at the top both on official clients and on wap)
+    const defaultCategory = {
+        name: req.query.gname,
+        children: []
+    };
+    allChannelCategories.unshift(defaultCategory);
+
+    channels.forEach(ch => {
+        const cat = allChannelCategories.find(cat => cat.id == ch.parent_id);
+        if (cat) {
+            cat.children.push(ch);
+        } else {
+            defaultCategory.children.push(ch);
+        }
+    })
+
+    const channelCategories = allChannelCategories.filter(ch => ch.children.length);
+
+    render(res, "channels", {
+        gname: req.query.gname,
+        channels,
+        channelCategories
+    });
 })
 
 // ported from discord j2me
@@ -649,54 +627,51 @@ function shouldShowAuthor(msg, above, clusterStart) {
 
 // Get channel messages
 app.get("/wap/ch", getToken, async (req, res) => {
-    try {
-        let proxyUrl = `${DEST_BASE}/channels/${decompressID(req.query.id, 'channel')}/messages`;
-        let queryParam = [`limit=${res.locals.settings.messageLoadCount}`];
-        if (req.query.before) queryParam.push(`before=${decompressID(req.query.before, 'message')}`);
-        if (req.query.after) queryParam.push(`after=${decompressID(req.query.after, 'message')}`);
-        proxyUrl += '?' + queryParam.join('&');
-    
-        const messagesGet = await axios.get(proxyUrl, {headers: res.locals.headers});
-    
-        // Populate username cache
-        messagesGet.data.forEach(msg => {
-            userCache.set(msg.author.id, msg.author.username);
-        })
+    let proxyUrl = `${DEST_BASE}/channels/${decompressID(req.query.id, 'channel')}/messages`;
+    let queryParam = [`limit=${res.locals.settings.messageLoadCount}`];
+    if (req.query.before) queryParam.push(`before=${decompressID(req.query.before, 'message')}`);
+    if (req.query.after) queryParam.push(`after=${decompressID(req.query.after, 'message')}`);
+    proxyUrl += '?' + queryParam.join('&');
 
-        // See which messages the author line and profile pic should be shown for
-        messagesGet.data.reverse();
-        let clusterStart = 0;
-        let above = null;
+    const messagesGet = await axios.get(proxyUrl, {headers: res.locals.headers});
 
-        messagesGet.data.forEach(m => {
-            m.showAuthor = shouldShowAuthor(m, above, clusterStart);
-            if (m.showAuthor) {
-                clusterStart = m.id;
+    // Populate username cache
+    messagesGet.data.forEach(msg => {
+        userCache.set(msg.author.id, msg.author.username);
+    })
 
-                if (m.author?.id && m.author?.avatar) {
-                    m.avatar = `http://media.discordapp.net/avatars/${m.author.id}/${m.author.avatar}.png?size=16`
-                }
+    // See which messages the author line and profile pic should be shown for
+    messagesGet.data.reverse();
+    let clusterStart = 0;
+    let above = null;
+
+    messagesGet.data.forEach(m => {
+        m.showAuthor = shouldShowAuthor(m, above, clusterStart);
+        if (m.showAuthor) {
+            clusterStart = m.id;
+
+            if (m.author?.id && m.author?.avatar) {
+                m.avatar = `http://media.discordapp.net/avatars/${m.author.id}/${m.author.avatar}.png?size=16`
             }
-            above = m;
-        })
-        messagesGet.data.reverse();
-    
-        const messages = messagesGet.data.map(m => parseMessageObject(req, res, m));
-
-        if (res.locals.settings.reverseChat && res.locals.format == 'html') {
-            messages.reverse();
         }
-    
-        render(res, res.locals.settings.modern ? "channelNew" : "channel", {
-            id: req.query.id,
-            page: req.query.page ?? 0,
-            messages,
-            textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000,
-            id: req.query.id,
-            cname: res.locals.channelName,
-        });
+        above = m;
+    })
+    messagesGet.data.reverse();
+
+    const messages = messagesGet.data.map(m => parseMessageObject(req, res, m));
+
+    if (res.locals.settings.reverseChat && res.locals.format == 'html') {
+        messages.reverse();
     }
-    catch (e) {handleError(res, e)}
+
+    render(res, res.locals.settings.modern ? "channelNew" : "channel", {
+        id: req.query.id,
+        page: req.query.page ?? 0,
+        messages,
+        textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000,
+        id: req.query.id,
+        cname: res.locals.channelName,
+    });
 })
 
 app.get("/wap/send", getToken, async (req, res) => {
@@ -719,42 +694,45 @@ app.get("/wap/reply", getToken, async (req, res) => {
 
 // Send message
 app.post("/wap/send", getToken, async (req, res) => {
-    try {
-        const send = {
-            content: req.body.text,
-            flags: 0,
-            mobile_network_type: "unknown",
-            tts: false
-        };
-        if (req.body.recipient) {
-            send.message_reference = {
-                message_id: String(decompressID(req.body.recipient, 'message'))
-            }
+    const send = {
+        content: req.body.text,
+        flags: 0,
+        mobile_network_type: "unknown",
+        tts: false
+    };
+    if (req.body.recipient) {
+        send.message_reference = {
+            message_id: String(decompressID(req.body.recipient, 'message'))
         }
-        if (Number(req.body.ping) == 0) {
-            send.allowed_mentions = {
-                replied_user: false
-            }
-        }
-
-        await axios.post(
-            `${DEST_BASE}/channels/${decompressID(req.body.id, 'channel')}/messages`,
-            send,
-            {headers: res.locals.headers}
-        );
-
-        render(res, "sent", {
-            fromChatBar: req.body.fromchatbar,
-            cname: res.locals.channelName 
-        });
     }
-    catch (e) {handleError(res, e)}
+    if (Number(req.body.ping) == 0) {
+        send.allowed_mentions = {
+            replied_user: false
+        }
+    }
+
+    await axios.post(
+        `${DEST_BASE}/channels/${decompressID(req.body.id, 'channel')}/messages`,
+        send,
+        {headers: res.locals.headers}
+    );
+
+    render(res, "sent", {
+        fromChatBar: req.body.fromchatbar,
+        cname: res.locals.channelName 
+    });
 })
 
 app.get("/wap/set", getToken, (req, res) => {
     render(res, "settings", {
         token: req.query.token
     });
+})
+
+// Error handler
+app.use((err, req, res, next) => {
+    console.log(err);
+    render(res, "error", {error: getError(err)});
 })
 
 app.listen(process.env.PORT, () => {
