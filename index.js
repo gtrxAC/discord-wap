@@ -554,6 +554,7 @@ app.get("/wap/g", getToken, async (req, res) => {
                 id: compressID(ch.id),
                 name: oneLine(req, ch.name),
                 label: oneLine(req, getIdTimestamp(res, ch.last_message_id) + ' ' + ch.name),
+                timestamp: getIdTimestamp(res, ch.last_message_id),
                 parent_id: ch.parent_id
             }))
     } else {
