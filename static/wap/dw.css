@@ -1,0 +1,70 @@
+/* Basics */
+* {
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+body {
+    background-color: #eef;
+    font-size: 12px;
+    margin: 2px;
+}
+
+/* Sections (using tables) */
+table {
+    background-color: white;
+    color: black;
+    border: solid 1px #23a;
+    border-collapse: collapse;
+    width: 97%;
+    margin: 4px auto;
+}
+th {
+    background-color: #23a;
+    color: white;
+    font-weight: bold;
+    text-align: left;
+    padding-left: 2px;
+}
+
+/* Table columns for icons and mentions/pings */
+.icon {
+    width: 1px;
+}
+.mention {
+    width: 16px;
+    text-align: right;
+    font-weight: bold;
+    color: #c23;
+}
+/* .gname {
+    color: #444;
+} */
+
+/* Input-related elements */
+input, button, textarea {
+    font-size: 12px;
+    margin: 2px;
+    width: 97%;
+}
+
+/* Navigation links */
+.nav {
+    text-align: center;
+    font-size: 11px;
+}
+
+/* Messages, replies, etc */
+.msg {
+    color: unset;
+    text-decoration: unset;
+}
+
+.time {
+    color: #ddf;
+    font-size: 9px;
+}
+.reply {
+    color: #444;
+    font-size: 9px;
+    font-style: italic;
+}

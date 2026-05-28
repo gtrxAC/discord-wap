@@ -4,67 +4,103 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= cname %></title>
+    <!-- <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>"> -->
+    <link rel="stylesheet" href="dw.css">
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
-    <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>">
-    <link rel="stylesheet" href="/wap/<%= settings?.channelCssFile ?? 'channel.css' %>">
 </head>
 <body>
-    <div class="main">
-        <div style="text-align: center;">
-            <% if (!settings.reverseChat) { %>
-            <%- include('include/sendNew'); %>
-            <% } %>
-            <%- include(settings.reverseChat ? 'include/olderMessages' : 'include/newerMessages'); %>
-        </div>
+    <!-- Top bar with navigation -->
+    <table>
+        <tr><th><%- fit(cname) %></th></tr>
+        <tr><td class="nav"><a href="#">Back</a> | <a href="#b">Bottom</a> | <a href="#">Info</a></td></tr>
 
-        <table>
-            <% messages.forEach(m => { %>
-                <% if (m.referenced_message) { %>
-                    <tr class="replyrow">
-                        <td class="replyicon">
-                            <img src="/wap/<%= settings.dark ? 'reply-dark' : 'reply' %>.gif" alt="reply to">
-                        </td>
-                        <td class="reply">
-                            <%- settings.compact ? ('to ' + m.referenced_message.author.name + ':') : ('<b>' + m.referenced_message.author.name + '</b>') %>
-                            <%- m.referenced_message.content %>
-                        </td>
-                    </tr>
-                <% } %>
-                <tr class="message <%= m.showAuthor ? '' : 'noauthor' %>">
-                    <td>
-                        <% if (m.showAuthor) { %>
-                            <% if (m.avatar) { %>
-                                <img src="/wap/avatar-overlay<%= settings.dark ? '-dark' : '' %>.png" width="28px" height="28px" class="overlay">
-                            <% } %>
-                            <img src="<%= m.avatar ?? '/wap/avatar.png' %>" alt="avatar" width="28px" height="28px">
-                        <% } %>
-                    </td>
-                    <td>
-                        <% if (m.showAuthor) { %>
-                            <a href="#"><%= m.author.name %></a>
-                            <span class="time"><%= m.timestamp %></span>
-                        <% } %>
-                        <% if (m.content) { %>
-                            <p>
-                                <a class="hidelink" href="/wap/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= m.id %>&recname=<%= encodeURIComponent(m.author.name) %>"><%- m.content %></a>
-                            </p>
-                        <% } %>
-                        <% if (m.attachments) { %>
-                            <% m.attachments.forEach(att => { %>
-                                <p><a href="<%= att.url %>"><%- att.filename %></a></p>
-                            <% }) %>
-                        <% } %>
-                    </td>
-                </tr>
-            <% }) %>
-        </table>
-    </div>
-
-    <div id="bottom" style="text-align: center;">
-        <%- include(settings.reverseChat ? 'include/newerMessages' : 'include/olderMessages'); %>
-        <% if (settings.reverseChat) { %>
-        <%- include('include/sendNew'); %>
+        <!-- "View older messages" button -->
+        <% if (messages.length == settings.messageLoadCount) { %>
+            <tr><td>
+                <form action="/wap/ch<%= settings.reverseChat ? '#bottom' : '' %>" class="nav">
+                    <input type="hidden" name="id" value="<%= id %>">
+                    <input type="hidden" name="cname" value="<%= cname %>">
+                    <input type="hidden" name="before" value="<%= settings.reverseChat ? messages[0].id : messages[messages.length - 1].id %>"/>
+                    <input type="hidden" name="page" value="<%= Number(page) + 1 %>"/>
+                    <input type="submit" value="Older messages">
+                </form>
+            </td></tr>
         <% } %>
-    </div>
+    </table>
+
+
+    <% messages.forEach((m, i) => { %>
+        <!-- beginning of section for messages where the author is shown -->
+        <% if (m.showAuthor) { %>
+            <% if (i != 0) { %>
+                </table> <!-- end table of previous message cluster-->
+            <% } %>
+
+            <table>
+                <tr><th><%- fit(m.author.name) %> <span class="time"><%= m.timestamp %></span></th></tr>
+        <% } %>
+
+        <!-- preview of recipient message -->
+        <% if (m.referenced_message) { %>
+            <tr><td class="reply">
+                <img src="/wap/reply.gif" alt="reply to">
+                <strong><%- fit(m.referenced_message.author.name) %></strong>
+                <%- fit(m.referenced_message.content) %>
+            </td></tr>
+        <% } %>
+        
+        <!-- content (link to send reply) -->
+        <% if (m.content) { %>
+            <tr><td>
+                <a class="msg" href="/wap/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= m.id %>&recname=<%= encodeURIComponent(m.author.name) %>">
+                    <%- fit(m.content) %>
+                </a>
+            </td></tr>
+        <% } %>
+
+        <!-- attachments (names/download links) -->
+        <% if (m.attachments) { %>
+            <% m.attachments.forEach(att => { %>
+                <tr><td>
+                    <img src="/wap/page.png" alt="attachment">
+                    <a href="<%= att.url %>"><%- fit(att.filename) %></a>
+                </td></tr>
+            <% }) %>
+        <% } %>
+    <% }) %>
+
+    <!-- "View newer messages" button -->
+    <% if (page > 0) { %>
+        <table>
+            <tr><td>
+                <form action="/wap/ch" class="nav">
+                    <input type="hidden" name="id" value="<%= id %>">
+                    <input type="hidden" name="cname" value="<%= cname %>">
+                    <% if (page > 1) { %>
+                        <input type="hidden" name="after" value="<%= settings.reverseChat ? messages[messages.length - 1].id : messages[0].id %>"/>
+                        <input type="hidden" name="page" value="<%= page - 1 %>"/>
+                    <% } %>
+                    <input type="submit" value="Newer messages" onclick="event.preventDefault(); window.history.back();">
+                </form>
+            </td></tr>
+        </table>
+    <% } %>
+
+    <!-- Bottom bar (send message) -->
+    <table id="b">
+        <tr><th>Send message</th></tr>
+        <tr><td>
+            <form action="/wap/send" method="post">
+                <textarea name="text" id="text" maxlength="2000" placeholder="Message <%= cname %>"></textarea> <br/>
+                <input type="hidden" name="id" value="<%= id %>"/>
+                <input type="hidden" name="cname" value="<%= cname %>"/>
+                <input type="hidden" name="fromchatbar" value="1"/>
+                <input type="submit" value="Send">
+            </form>
+        </td></tr>
+        <tr><td class="nav">
+            <a href="/wap/send?id=<%= encodeURIComponent(id) %>&cname=<%= encodeURIComponent(cname) %>">Full</a> | <a href="#">Upload</a>
+        </td></tr>
+    </table>
 </body>
 </html>

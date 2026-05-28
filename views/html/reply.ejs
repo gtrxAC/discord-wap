@@ -4,21 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= cname %></title>
-    <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>">
+    <!-- <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>"> -->
+    <link rel="stylesheet" href="dw.css">
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
-    <div class="main" style="text-align: center;">
-        <p>Reply to <%= recname %></p>
-        <form action="/wap/send" method="post">
-            <input type="hidden" name="id" value="<%= id %>"/>
-            <input type="hidden" name="recipient" value="<%= rec %>"/>
-            <label for="text">Your message:</label> <br/>
-            <textarea name="text" id="text" cols="30" rows="5" maxlength="2000"></textarea> <br/>
-            <input type="checkbox" name="ping" id="ping" value="1">
-            <label for="ping">Mention author</label> <br/>
-            <input type="submit" value="Send">
-        </form>
-    </div>
+    <table>
+        <tr><th>Reply to <%= recname %></th></tr>
+        <tr> 
+            <td><a href="/wap/gl">Servers</a></td>
+        </tr>
+    </table>
+
+    <table>
+        <tr><th>Your message</th></tr>
+        <tr>
+            <td>
+                <form action="/wap/send" method="post">
+                    <input type="hidden" name="id" value="<%= id %>"/>
+                    <input type="hidden" name="recipient" value="<%= rec %>"/>
+                    <textarea name="text" id="text" rows="5" maxlength="2000"></textarea> <br/>
+                    <input type="checkbox" name="ping" id="ping" value="1">
+                    <label for="ping">Mention author</label> <br/>
+                    <input type="submit" value="Send">
+                </form>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

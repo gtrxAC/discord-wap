@@ -177,7 +177,7 @@ function oneLine(req, str, showEmoji = true) {
     if (str === null || str === undefined) return "(err)";
 
     if (showEmoji) str = parseMessageContentText(String(str));
-    else str = sanitize(String(str));
+    else str = String(str);
 
     const chars = getCharactersPerLine(req);
 
@@ -206,15 +206,6 @@ function getError(e) {
 function handleError(res, e) {
     console.log(e);
     render(res, "error", {error: getError(e)});
-}
-
-function sanitize(str) {
-    return sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
-}
-
-function fixWordBreak(str) {
-    // add CSS "word-break: break-all" to words with at least 15 chars
-    return str.replace(/([^\s]{15,})/g, "<span class='break'>$1</span>")
 }
 
 function parseMessageObject(req, res, msg) {
@@ -282,7 +273,7 @@ function parseMessageObject(req, res, msg) {
             }
 
             return {
-                filename: fixWordBreak(sanitize(att.filename)),
+                filename: att.filename,
                 url
             }
         })
@@ -342,10 +333,9 @@ function parseMessageContentNonStatus(res, msg, singleLine) {
 
     // iOS keyboard (I think it's that) is stupid and replaces apostrophes with this unicode character
     // that shows up as a rectangle/missing character on old phones. Replace it with a normal apostrophe.
-    result = result.replace(/’/g, "'");
-
-    result = fixWordBreak(sanitize(result)).replace(/\n/g, singleLine ? ' ' : '<br/>');
-    return result;
+    return result
+        .replace(/’/g, "'")
+        .replace(/\n/g, singleLine ? ' ' : '<br/>');
 }
 
 function parseMessageContentText(content) {
@@ -515,8 +505,26 @@ async function fetchDMs(req, res) {
 app.use(cookieParser());
 
 app.use((req, res, next) => {
-    const accept = req.headers['accept'] ?? '';
-    res.locals.format = accept.includes('html') ? "html" : "wml";
+    res.locals.format = req.accepts("html") ? "html" : "wml";
+    next();
+})
+
+app.use((req, res, next) => {
+    function sanitize(str) {
+        return sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
+    }
+    res.locals.fit = (str) => {
+        // match long words, at least 16 consecutive letters
+        return sanitize(str).replace(/([^\s]{16,})/g, (match) => {
+            let result = '';
+            match.split('').forEach((chr, i) => {
+                result += chr;
+                // place zero-width spaces (word break opportunities) every 4 characters starting from char position 12 if there are at least 2 more chars left to go
+                if ((i + 1) % 4 == 0 && i >= 11 && str.length > (i + 2)) result += "&#8203;";
+            })
+            return result;
+        })
+    }
     next();
 })
 
@@ -640,7 +648,8 @@ app.get("/wap/g", getToken, async (req, res) => {
                 .map(ch => ({
                     id: compressID(ch.id),
                     name: oneLine(req, ch.name),
-                    label: oneLine(req, getIdTimestamp(res, ch.last_message_id) + ' ' + ch.name)
+                    label: oneLine(req, getIdTimestamp(res, ch.last_message_id) + ' ' + ch.name),
+                    parent_id: ch.parent_id
                 }))
         } else {
             // "Recent channels first" disabled: show channels in their original order (still only show 15 most recently used channels in WML)
@@ -666,13 +675,37 @@ app.get("/wap/g", getToken, async (req, res) => {
                 .map(ch => ({
                     id: compressID(ch.id),
                     name: oneLine(req, ch.name),
-                    label: oneLine(req, '#' + ch.name)
+                    label: oneLine(req, '#' + ch.name),
+                    parent_id: ch.parent_id
                 }))
         }
 
+        const allChannelCategories = channelsGet.data.filter(ch => ch.type == 4)
+            .sort((a, b) => a.position - b.position)
+            .map(ch => ({...ch, children: []}));
+
+        // default category for channels that are not in any category (shown at the top both on official clients and on wap)
+        const defaultCategory = {
+            name: req.query.gname,
+            children: []
+        };
+        allChannelCategories.unshift(defaultCategory);
+
+        channels.forEach(ch => {
+            const cat = allChannelCategories.find(cat => cat.id == ch.parent_id);
+            if (cat) {
+                cat.children.push(ch);
+            } else {
+                defaultCategory.children.push(ch);
+            }
+        })
+
+        const channelCategories = allChannelCategories.filter(ch => ch.children.length);
+
         render(res, "channels", {
             gname: req.query.gname,
-            channels
+            channels,
+            channelCategories
         });
     }
     catch (e) {handleError(res, e)}

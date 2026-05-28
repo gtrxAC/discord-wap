@@ -1,0 +1,43 @@
+
+        <table>
+            <% messages.forEach(m => { %>
+                <% if (m.referenced_message) { %>
+                    <tr class="replyrow">
+                        <td class="replyicon">
+                            <img src="/wap/<%= settings.dark ? 'reply-dark' : 'reply' %>.gif" alt="reply to">
+                        </td>
+                        <td class="reply">
+                            <%- settings.compact ? ('to ' + m.referenced_message.author.name + ':') : ('<b>' + m.referenced_message.author.name + '</b>') %>
+                            <%- m.referenced_message.content %>
+                        </td>
+                    </tr>
+                <% } %>
+                <tr class="message <%= m.showAuthor ? '' : 'noauthor' %>">
+                    <td>
+                        <% if (m.showAuthor) { %>
+                            <% if (m.avatar) { %>
+                                <img src="/wap/avatar-overlay<%= settings.dark ? '-dark' : '' %>.png" width="28px" height="28px" class="overlay">
+                            <% } %>
+                            <img src="<%= m.avatar ?? '/wap/avatar.png' %>" alt="avatar" width="28px" height="28px">
+                        <% } %>
+                    </td>
+                    <td>
+                        <% if (m.showAuthor) { %>
+                            <a href="#"><%= m.author.name %></a>
+                            <span class="time"><%= m.timestamp %></span>
+                        <% } %>
+                        <% if (m.content) { %>
+                            <p>
+                                <a class="hidelink" href="/wap/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= m.id %>&recname=<%= encodeURIComponent(m.author.name) %>"><%- m.content %></a>
+                            </p>
+                        <% } %>
+                        <% if (m.attachments) { %>
+                            <% m.attachments.forEach(att => { %>
+                                <p><a href="<%= att.url %>"><%- att.filename %></a></p>
+                            <% }) %>
+                        <% } %>
+                    </td>
+                </tr>
+            <% }) %>
+        </table>
+    </div>
