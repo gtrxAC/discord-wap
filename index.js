@@ -7,6 +7,8 @@ const { LRUCache } = require('lru-cache');
 const sanitizeHtml = require('sanitize-html');
 const cookieParser = require('cookie-parser');
 
+const { compressID, decompressID, compressToken, decompressToken } = require('./compress');
+
 const emoji = new EmojiConvertor();
 emoji.replace_mode = 'unified';
 
@@ -22,83 +24,6 @@ app.use(express.urlencoded({ extended: true }));
 // ID -> username mapping cache (used for parsing mentions)
 const userCache = new LRUCache({max: 10000});
 const channelNameCache = new LRUCache({max: 10000});
-
-// Base64 but better - instead of '/' and '=' characters, we use '-' and '_', which stay as one character when URL encoded
-function customBase64Decode(str) {
-    return atob(str.replace(/-/g, '+').replace(/_/g, '/'));
-}
-function customBase64Encode(str) {
-    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
-}
-
-function decompressID(id, type) {
-    try {
-        const idStr = customBase64Decode(id);
-
-        return String(
-            BigInt(idStr.charCodeAt(0)) << 56n |
-            BigInt(idStr.charCodeAt(1)) << 48n |
-            BigInt(idStr.charCodeAt(2)) << 40n |
-            BigInt(idStr.charCodeAt(3)) << 32n |
-            BigInt(idStr.charCodeAt(4)) << 24n |
-            BigInt(idStr.charCodeAt(5)) << 16n |
-            BigInt(idStr.charCodeAt(6)) << 8n |
-            BigInt(idStr.charCodeAt(7))
-        );
-    } catch (e) {
-        throw new Error(`A required ${type} ID is missing or invalid. Please return to the Discord WAP front page and try again.`);
-    }
-}
-
-function compressID(id) {
-    id = BigInt(id);
-
-    const arr = [
-        Number(id >> 56n),
-        Number((id >> 48n) & 0xFFn),
-        Number((id >> 40n) & 0xFFn),
-        Number((id >> 32n) & 0xFFn),
-        Number((id >> 24n) & 0xFFn),
-        Number((id >> 16n) & 0xFFn),
-        Number((id >> 8n) & 0xFFn),
-        Number(id & 0xFFn),
-    ];
-    return customBase64Encode(String.fromCharCode(...arr))
-}
-
-function decompressToken(token) {
-    if (!token || !token.trim().length) throw new Error("Token not specified");
-
-    try {
-        let idPart = token.split('.')[0];
-        const rest = '.' + token.split('.').slice(1).join('.');
-    
-        if (idPart.length < 17) {
-            idPart = btoa(decompressID(idPart, 'user'));
-        }
-        return idPart + rest;
-    }
-    catch (e) {
-        throw new Error("Token is invalid");
-    }
-}
-
-function compressToken(token) {
-    if (!token || !token.trim().length) throw new Error("Token not specified");
-
-    try {
-        let idPart = token.split('.')[0];
-        const rest = '.' + token.split('.').slice(1).join('.');
-        
-        if (idPart.length >= 17) {
-            idPart = compressID(atob(idPart));
-        }
-        return idPart + rest;
-    }
-    catch (e) {
-        throw new Error("Token is invalid");
-    }
-}
 
 function getIdTimestamp(res, id) {
     if (!id) return "N/A";
