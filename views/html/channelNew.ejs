@@ -9,15 +9,16 @@
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
-    <!-- Top bar with navigation -->
-    <table>
-        <tr><th><%- fit(cname) %></th></tr>
-        <tr><td class="nav"><a href="#">Back</a> | <a href="#b">Bottom</a> | <a href="#">Info</a></td></tr>
+    <div class="nav">
+        <%- include("include/buttonBottom.ejs") %><br/>
+        <a href="#">&lt; Channels</a><br/>
+    </div>
 
-        <!-- "View older messages" button -->
-        <% if (messages.length == settings.messageLoadCount) { %>
+    <!-- "View older messages" button -->
+    <% if (messages.length == settings.messageLoadCount) { %>
+        <table>
             <tr><td>
-                <form action="/wap/ch<%= settings.reverseChat ? '#bottom' : '' %>" class="nav">
+                <form action="/wap/ch<%= settings.reverseChat ? '#b' : '' %>" class="nav">
                     <input type="hidden" name="id" value="<%= id %>">
                     <input type="hidden" name="cname" value="<%= cname %>">
                     <input type="hidden" name="before" value="<%= settings.reverseChat ? messages[0].id : messages[messages.length - 1].id %>"/>
@@ -25,9 +26,8 @@
                     <input type="submit" value="Older messages">
                 </form>
             </td></tr>
-        <% } %>
-    </table>
-
+        </table>
+    <% } %>
 
     <% messages.forEach((m, i) => { %>
         <!-- beginning of section for messages where the author is shown -->
@@ -102,5 +102,7 @@
             <a href="/wap/send?id=<%= encodeURIComponent(id) %>&cname=<%= encodeURIComponent(cname) %>">Full</a> | <a href="#">Upload</a>
         </td></tr>
     </table>
+
+    <%- include("include/buttonTop.ejs") %>
 </body>
 </html>

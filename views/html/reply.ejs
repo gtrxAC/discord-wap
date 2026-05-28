@@ -9,15 +9,12 @@
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
-    <table>
-        <tr><th>Reply to <%= recname %></th></tr>
-        <tr> 
-            <td><a href="/wap/gl">Servers</a></td>
-        </tr>
-    </table>
+    <div class="nav">
+        <a href="/wap/ch?cname=<%= encodeURIComponent(cname) %>&id=<%= id %><%= settings.reverseChat ? '#b' : '' %>">&lt; <%= cname %></a><br/>
+    </div>
 
     <table>
-        <tr><th>Your message</th></tr>
+        <tr><th>Reply to <%= recname %></th></tr>
         <tr>
             <td>
                 <form action="/wap/send" method="post">

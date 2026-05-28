@@ -41,7 +41,7 @@ th {
 } */
 
 /* Input-related elements */
-input, button, textarea {
+input, button, textarea, select {
     font-size: 12px;
     margin: 2px;
     width: 97%;

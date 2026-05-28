@@ -9,13 +9,16 @@
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
+    <div class="nav" id="t">
+        <a href="/wap/gl">&lt; Servers</a><br/>
+    </div>
     <% if (settings.altChannelListLayout) { %>
         <table>
             <tr><th colspan="2"><%- fit(gname) %></th></tr>
             <% channels.forEach(c => { %>
                 <tr>
                     <td></td>
-                    <td><a href="/wap/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#bottom' : '' %>"><%- fit(c.label) %></a></td>
+                    <td><a href="/wap/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.label) %></a></td>
                 </tr>
             <% }) %>
         </table>
@@ -26,11 +29,14 @@
                 <% cat.children.forEach(c => { %>
                     <tr> 
                         <td class="icon"><img src="/wap/page.png" alt="channel"></td>
-                        <td><a href="/wap/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#bottom' : '' %>"><%- fit(c.name) %></a></td>
+                        <td><a href="/wap/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a></td>
                     </tr>
                 <% }) %>
             </table>
         <% }) %>
     <% } %>
+    <div class="nav">
+        <%- include("include/buttonTop.ejs") %>
+    </div>
 </body>
 </html>

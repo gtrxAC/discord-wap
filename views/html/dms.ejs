@@ -9,12 +9,15 @@
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
+    <div class="nav">
+        <a href="/wap/main">&lt; Home</a><br/>
+    </div>
     <table>
         <tr><th colspan="2">Direct messages</th></tr>
         <% dms.forEach(d => { %>
             <tr> 
                 <td class="icon"><img src="/wap/page.png" alt="DM"></td>
-                <td><a href="/wap/ch?<%= d.isGroup ? 'cname' : 'dn' %>=<%= encodeURIComponent(d.name) %>&id=<%= d.id %><%= settings.reverseChat ? '#bottom' : '' %>"><%- fit(d.name) %></a></td>
+                <td><a href="/wap/ch?<%= d.isGroup ? 'cname' : 'dn' %>=<%= encodeURIComponent(d.name) %>&id=<%= d.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(d.name) %></a></td>
             </tr>
         <% }) %>
     </table>
