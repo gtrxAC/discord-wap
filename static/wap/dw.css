@@ -6,21 +6,50 @@
 body {
     background-color: #eef;
     font-size: 12px;
-    margin: 2px;
+    margin: 0;
 }
 .main {
-    max-width: 120px;
+    /* max-width: 120px; */
     margin: 0 auto;
 }
 
-/* Sections (using tables) */
-table {
+/* Sections */
+/* table {
     background-color: white;
     color: black;
     border: solid 1px #23a;
     border-collapse: collapse;
     margin: 4px auto;
     width: 100%;
+} */
+
+/* td {padding: 2px;}
+
+th {
+    background-color: #23a;
+    color: white;
+    font-weight: bold;
+    text-align: left;
+    padding-left: 2px;
+} */
+
+.sb {
+    background-color: #23a;
+    color: white;
+    font-weight: bold;
+    padding-left: 2px;
+
+    margin: 2px 2px 0 2px;
+}
+.s {
+
+    background-color: white;
+    color: black;
+    border: solid 1px #23a;
+
+    padding: 2px;
+
+    margin: 0 2px 4px 2px;
 }
 
 /* Input-related elements */
@@ -30,17 +59,6 @@ input, button, textarea, select {
     margin: 2px 0;
     width: 100%;
 }
-
-td {padding: 2px;}
-
-th {
-    background-color: #23a;
-    color: white;
-    font-weight: bold;
-    text-align: left;
-    padding-left: 2px;
-}
-
 
 /* Table columns for icons and mentions/pings */
 .icon {
@@ -52,7 +70,6 @@ th {
     font-weight: bold;
     color: #c23;
 }
-
 
 /* Navigation links */
 .nav {
@@ -79,10 +96,4 @@ th {
     color: #444;
     font-size: 9px;
     text-align: right;
-}
-
-img {
-    padding: 0;
-    margin: 0;
-    border: none;
 }

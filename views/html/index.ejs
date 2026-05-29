@@ -11,28 +11,21 @@
 </head>
 <body>
     <div class="main">
-        <table>
-            <tr><th>Welcome</th></tr>
-            <tr>
-                <td>The token can be found from your browser's dev tools - look online for help. Using an alt account is recommended.</td>
-            </tr>
-            <tr>
-                <td>For easy access, add the page to your bookmarks after logging in.</td>
-            </tr>
-        </table>
+        <div class="sb">Welcome</div>
+        <div class="s">
+            The token can be found from your browser's dev tools - look online for help. Using an alt account is recommended.<br/>
+            For easy access, add the page to your bookmarks after logging in.
+        </div>
 
-        <table>
-            <tr><th>Log in</th></tr>
-            <tr>
-                <td>
-                    <form action="/main">
-                        <label for="token">Enter your token:</label> <br/>
-                        <input type="text" name="token" id="token" maxlength="75"> <br/>
-                        <input type="submit" value="Log in">
-                    </form>
-                </td>
-            </tr>
-        </table>
+        <div class="sb">Log in</div>
+        <div class="s">
+            <form action="/main">
+                <label for="token">Enter your token:</label> <br/>
+                <input type="text" name="token" id="token" maxlength="75"> <br/>
+                <input type="submit" value="Log in">
+            </form>
+        </div>
+
     <!-- 
         <table>
             <tr><th>Import token</th></tr>
