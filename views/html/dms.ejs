@@ -8,14 +8,15 @@
     <div class="nav">
         <a href="/main">&lt; Home</a><br/>
     </div>
-    <table>
-        <tr><th colspan="2">Direct messages</th></tr>
+
+    <div class="sb">Direct messages</div>
+    <div class="s">
         <% dms.forEach(d => { %>
-            <tr> 
-                <td class="icon"><img src="/wap/page.png" alt="DM"></td>
-                <td><a href="/ch?<%= d.isGroup ? 'cname' : 'dn' %>=<%= encodeURIComponent(d.name) %>&id=<%= d.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(d.name) %></a></td>
-            </tr>
+            <div>
+                <img src="/wap/page.png" alt="DM">
+                <a href="/ch?<%= d.isGroup ? 'cname' : 'dn' %>=<%= encodeURIComponent(d.name) %>&id=<%= d.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(d.name) %></a>
+            </div>
         <% }) %>
-    </table>
+    </div>
 </body>
 </html>

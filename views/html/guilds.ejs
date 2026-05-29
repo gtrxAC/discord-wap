@@ -9,14 +9,12 @@
         <a href="/main">&lt; Home</a><br/>
     </div>
     
-    <table>
-        <tr><th colspan="2">Servers</th></tr>
-        <% guilds.forEach(g => { %>
-            <tr> 
-                <td class="icon"><img src="/wap/go.png" alt="server"></td>
-                <td><a href="/g?gname=<%= encodeURIComponent(g.name) %>&id=<%= g.id %>"><%- fit(g.name) %></a></td>
-            </tr>
-        <% }) %>
-    </table>
+    <div class="sb">Servers</div>
+    <div class="s">
+        <div>
+            <img src="/wap/go.png" alt="server">
+            <a href="/g?gname=<%= encodeURIComponent(g.name) %>&id=<%= g.id %>"><%- fit(g.name) %></a>
+        </div>
+    </div>
 </body>
 </html>
