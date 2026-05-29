@@ -80,3 +80,9 @@ th {
     font-size: 9px;
     text-align: right;
 }
+
+img {
+    padding: 0;
+    margin: 0;
+    border: none;
+}
