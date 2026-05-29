@@ -57,7 +57,7 @@ input, button, textarea, select {
     font-size: 12px;
     padding: 2px;
     margin: 2px 0;
-    width: 95%;
+    /* width: 95%; */
 }
 
 /* Table columns for icons and mentions/pings */
