@@ -9,11 +9,11 @@
     <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
 </head>
 <body>
-    <table>
-        <tr><th>Oops!</th></tr>
-        <tr><td>An error occurred:</td></tr>
-        <tr><td><%= error %></td></tr>
-        <tr><td><button onclick="window.history.go(-1);">Back</button></td></tr>
-    </table>
+    <div class="sb">Oops!</div>
+    <div class="s">
+        An error occurred:<br/>
+        <%= error %>
+    </div>
+    <!-- <button onclick="window.history.go(-1);">Back</button> -->
 </body>
 </html>
