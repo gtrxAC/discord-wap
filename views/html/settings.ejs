@@ -37,12 +37,15 @@
                     </select> <br/>
 
                     <label for="s6">Latest messages:</label> <br/>
-                    <select name="s6" id="s6">
+                    <input type="hidden" name="s6" value="1">
+                    <!-- <select name="s6" id="s6">
                         <option value="0" <%= settings.reverseChat ? '' : 'selected' %>>On top</option>
                         <option value="1" <%= settings.reverseChat ? 'selected' : '' %>>On bottom</option>
-                    </select> <br/>
+                    </select> <br/> -->
+                    <div>Not currently available. To show newest messages on top, use <a href="http://gtrxac.fi/wap">gtrxac.fi/wap</a></div>
 
                     <label for="s7">Appearance:</label> <br/>
+                    <input type="hidden" name="s7" value="4">
                     <!-- <select name="s7" id="s7">
                         <option value="0" <%= (settings.layout == 'standard') ? 'selected' : '' %>>Standard</option>
                         <option value="3" <%= (settings.layout == 'dark') ? 'selected' : '' %>>Standard Dark</option>
@@ -51,7 +54,7 @@
                         <option value="1" <%= (settings.layout == 'compact') ? 'selected' : '' %>>Compact</option>
                         <option value="2" <%= (settings.layout == 'wml') ? 'selected' : '' %>>WML</option>
                     </select> <br/> -->
-                    <p>Not currently available. To use old appearance, go to <a href="http://gtrxac.fi/wap">gtrxac.fi/wap</a></p>
+                    <div>Not currently available. To use old appearance, use <a href="http://gtrxac.fi/wap">gtrxac.fi/wap</a></div>
 
                     <input type="submit" value="Save">
                 </form>

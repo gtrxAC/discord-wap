@@ -357,7 +357,7 @@ function getToken(req, res, next) {
         timeOffsetMinutes,
         use12hTime: (Number(settingsArr[4]) || 0) != 0,
         limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
-        reverseChat: (Number(settingsArr[6]) || 0) != 0 || layout == 4 || layout == 5,
+        reverseChat: true, //(Number(settingsArr[6]) || 0) != 0 || layout == 4 || layout == 5,
         layout: ['standard', 'compact', 'wml', 'dark', 'modern', 'modern-dark'][layout],
         cssFile: ['style.css', 'style-compact.css', '', 'style-dark.css', 'style.css', 'style-dark.css'][layout],
         channelCssFile: [null, null, null, null, 'channel.css', 'channel-dark.css'][layout],
@@ -659,9 +659,9 @@ app.get("/ch", getToken, async (req, res) => {
 
     const messages = messagesGet.data.map(m => parseMessageObject(req, res, m));
 
-    // if (res.locals.settings.reverseChat && res.locals.format == 'html') {
+    if (res.locals.settings.reverseChat && res.locals.format == 'html') {
         messages.reverse();
-    // }
+    }
 
     render(res, "channel", {
         id: req.query.id,
