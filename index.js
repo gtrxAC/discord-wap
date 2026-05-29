@@ -659,9 +659,9 @@ app.get("/ch", getToken, async (req, res) => {
 
     const messages = messagesGet.data.map(m => parseMessageObject(req, res, m));
 
-    if (res.locals.settings.reverseChat && res.locals.format == 'html') {
+    // if (res.locals.settings.reverseChat && res.locals.format == 'html') {
         messages.reverse();
-    }
+    // }
 
     render(res, "channel", {
         id: req.query.id,

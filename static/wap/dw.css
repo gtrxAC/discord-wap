@@ -54,7 +54,7 @@ input, button, textarea, select {
 .nav {
     text-align: center;
     font-size: 11px;
-    padding: 2px;
+    padding: 1px;
 }
 
 /* Messages, replies, etc */

@@ -44,9 +44,7 @@
         <!-- content -->
         <% if (m.content) { %>
             <!-- <a class="msg" href="/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= m.id %>&recname=<%= encodeURIComponent(m.author.name) %>"> -->
-            <div>
-                <%- fit(m.content) %>
-            </div>
+            <%- fit(m.content) %>
         <% } %>
 
         <!-- attachments (names/download links) -->
@@ -76,11 +74,11 @@
     <% } %>
 
     <form action="/send" method="post" id="b">
-        <textarea name="text" id="text" maxlength="2000" placeholder="Message <%= cname %>"></textarea> <br/>
         <input type="hidden" name="id" value="<%= id %>"/>
         <input type="hidden" name="cname" value="<%= cname %>"/>
         <input type="hidden" name="fromchatbar" value="1"/>
-        <input type="submit" value="Send">
+        <div><textarea name="text" id="text" maxlength="2000" placeholder="Message <%= cname %>"></textarea></div>
+        <div><input type="submit" value="Send"></div>
     </form>
 
     <div class="nav">
