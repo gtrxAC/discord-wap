@@ -8,6 +8,9 @@ body {
     font-size: 12px;
     margin: 2px;
 }
+.main {
+    max-width: 100%;
+}
 
 /* Sections (using tables) */
 table {
@@ -36,9 +39,6 @@ th {
     font-weight: bold;
     color: #c23;
 }
-/* .gname {
-    color: #444;
-} */
 
 /* Input-related elements */
 input, button, textarea, select {
