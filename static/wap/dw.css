@@ -9,7 +9,8 @@ body {
     margin: 2px;
 }
 .main {
-    max-width: 100%;
+    max-width: 120px;
+    margin: 0 auto;
 }
 
 /* Sections (using tables) */
@@ -18,9 +19,20 @@ table {
     color: black;
     border: solid 1px #23a;
     border-collapse: collapse;
-    width: 97%;
     margin: 4px auto;
+    width: 100%;
 }
+
+/* Input-related elements */
+input, button, textarea, select {
+    font-size: 12px;
+    padding: 2px;
+    margin: 2px 0;
+    width: 100%;
+}
+
+td {padding: 2px;}
+
 th {
     background-color: #23a;
     color: white;
@@ -28,6 +40,7 @@ th {
     text-align: left;
     padding-left: 2px;
 }
+
 
 /* Table columns for icons and mentions/pings */
 .icon {
@@ -40,12 +53,6 @@ th {
     color: #c23;
 }
 
-/* Input-related elements */
-input, button, textarea, select {
-    font-size: 12px;
-    margin: 2px;
-    width: 97%;
-}
 
 /* Navigation links */
 .nav {
