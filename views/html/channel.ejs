@@ -34,7 +34,7 @@
 
         <!-- preview of recipient message -->
         <% if (m.referenced_message) { %>
-            <div>
+            <div class="reply">
                 <img src="/wap/reply.gif" alt="reply to">
                 <strong><%- fit(m.referenced_message.author.name) %></strong>
                 <%- fit(m.referenced_message.content) %>
@@ -60,6 +60,8 @@
         <% } %>
     <% }) %>
 
+    </div> <!-- end section of bottom-most message cluster-->
+
     <!-- "View newer messages" button -->
     <% if (page > 0) { %>
         <form action="/ch" class="nav">
@@ -82,7 +84,7 @@
     </form>
 
     <div class="nav">
-        <a href="/send?id=<%= encodeURIComponent(id) %>&cname=<%= encodeURIComponent(cname) %>">Full</a><br/>
+        <a href="/send?id=<%= encodeURIComponent(id) %>&cname=<%= encodeURIComponent(cname) %>">&gt; Full</a><br/>
         <%- include("include/buttonTop.ejs") %>
     </div>
 </body>
