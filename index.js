@@ -802,12 +802,7 @@ app.post(["/d/:channelid/send", "/g/:guildid/c/:channelid/send"], getToken, asyn
         {headers: res.locals.headers}
     );
 
-    render(res, "sent", {
-        // fromChatBar: req.body.fromchatbar,
-        gid: guildID,
-        cid: channelID,
-        gpath: guildPath,
-    });
+    res.redirect(`${guildPath}/${channelID}`);
 })
 
 app.get("/set", getToken, (req, res) => {
