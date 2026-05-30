@@ -32,7 +32,7 @@
                 <% cat.children.forEach((c, i) => { %>
                     <!-- <img src="/wap/page.png" alt="channel"> -->
                     # <a href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a>
-                    <%= (i != cat.children.length - 1) ? '<br/>' : '' %>
+                    <%- (i != cat.children.length - 1) ? '<br/>' : '' %>
                 <% }) %>
             </div>
         <% }) %>

@@ -14,7 +14,7 @@
         <% guilds.forEach((g, i) => { %>
             <!-- <img src="/wap/go.png" alt="server"> -->
             &gt; <a href="/g/<%= g.id %><%= tokenParam %>"><%- fit(g.name) %></a>
-            <%= (i != guilds.length - 1) ? '<br/>' : '' %>
+            <%- (i != guilds.length - 1) ? '<br/>' : '' %>
         <% }) %>
     </div>
 </body>
