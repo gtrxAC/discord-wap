@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title><%= cname %></title>
+</head>
+<body>
+    <div class="nav" id="t">
+        <%- include("include/buttonBottom.ejs") %><br/>
+        <a href="<%= gpath %><%= tokenParam %>">&lt; Channels</a><br/>
+    </div>
+
+    <!-- "View older messages" button -->
+    <% if (messages.length == settings.messageLoadCount) { %>
+        <form action="<%= gpath %>/<%= id %><%= settings.reverseChat ? '#b' : '' %>" class="nav">
+            <input type="hidden" name="t" value="<%= compressedToken %>">
+            <input type="hidden" name="b" value="<%= settings.reverseChat ? messages[0].id : messages[messages.length - 1].id %>"/>
+            <input type="hidden" name="p" value="<%= Number(page) + 1 %>"/>
+            <input type="submit" value="Older messages">
+        </form>
+    <% } %>
+
+    <% messages.forEach((m, i) => { %>
+        <!-- beginning of section for messages where the author is shown -->
+        <% if (m.showAuthor) { %>
+            <% if (i != 0) { %>
+                </div> <!-- end section of previous message cluster-->
+            <% } %>
+
+            <div class="sb"><%- fit(m.author.name) %></div>
+            <div class="s">
+        <% } %>
+
+        <!-- preview of recipient message -->
+        <% if (m.referenced_message) { %>
+            <div class="reply">
+                <!-- <img src="/wap/reply.gif" alt="reply to"> -->
+                <strong>to <%- fit(m.referenced_message.author.name) %>:</strong>
+                <%- fit(m.referenced_message.content) %>
+            </div>
+        <% } %>
+        
+        <!-- content -->
+        <% if (m.content) { %>
+            <div><%- fit(m.content) %></div>
+        <% } %>
+
+        <!-- attachments (names/download links) -->
+        <% if (m.attachments) { %>
+            <% m.attachments.forEach(att => { %>
+                <div>
+                    <img src="/wap/page.png" alt="attachment">
+                    <a href="<%= att.url %>"><%- fit(att.filename) %></a>
+                </div>
+            <% }) %>
+        <% } %>
+
+        <div class="time">
+            <%= m.edited ? '(edited) ' : '' %>
+            <%= m.timestamp %>
+            <a href="<%= gpath %>/<%= id %>/reply/<%= m.id %>?recname=<%= encodeURIComponent(m.author.name) %><%= tokenParam.replace('?', '&') %>">&gt;</a>
+        </div>
+    <% }) %>
+
+    </div> <!-- end section of bottom-most message cluster-->
+
+    <!-- "View newer messages" button -->
+    <% if (page > 0) { %>
+        <form action="<%= gpath %>/<%= id %>" class="nav">
+            <input type="hidden" name="t" value="<%= compressedToken %>">
+            <% if (page > 1) { %>
+                <input type="hidden" name="a" value="<%= settings.reverseChat ? messages[messages.length - 1].id : messages[0].id %>"/>
+                <input type="hidden" name="p" value="<%= page - 1 %>"/>
+            <% } %>
+            <input type="submit" value="Newer messages">
+        </form>
+    <% } %>
+
+    <form action="<%= gpath %>/<%= id %>/send" method="post" id="b">
+        <input type="hidden" name="t" value="<%= compressedToken %>">
+        <div><textarea name="text" id="text" maxlength="2000" placeholder="Message <%= cname %>"></textarea></div>
+        <div><input type="submit" value="Send"></div>
+    </form>
+
+    <div class="nav">
+        <a href="<%= gpath %>/<%= id %>/send<%= tokenParam %>">&gt; Full</a><br/>
+        <%- include("include/buttonTop.ejs") %>
+    </div>
+</body>
+</html>

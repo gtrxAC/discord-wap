@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const { minify } = require('html-minifier-terser');
 const ejs = require('ejs');
 
+const { themes, getDefaultTheme } = require('./themes');
 const { compressID, decompressID, compressToken, decompressToken } = require('./compress');
 
 const emoji = new EmojiConvertor();
@@ -160,7 +161,7 @@ function parseMessageObject(req, res, msg) {
         // Replace newlines with spaces (reply is shown as one line)
         content = content.replace(/\r\n|\r|\n/gm, "  ");
 
-        const limit = (res.locals.settings.layout != 'standard' && !res.locals.settings.modern) ? 30 : 50;
+        const limit = res.locals.theme.replyPreviewLength;
 
         if (content && content.length > limit) {
             content = content.slice(0, limit - 3).trim() + '...';
@@ -174,7 +175,7 @@ function parseMessageObject(req, res, msg) {
         }
     }
 
-    if (res.locals.settings.modern && msg.attachments) {
+    if (res.locals.theme.showAttachments && msg.attachments) {
         result.attachments = msg.attachments.map(att => {
             const isImage = att.content_type?.includes('image');
             let url;
@@ -235,7 +236,7 @@ function parseMessageContentNonStatus(res, msg, singleLine) {
         result = parseMessageContentText(msg.content);
     }
     
-    if (msg.attachments?.length && !res.locals.settings.modern) {
+    if (msg.attachments?.length && !res.locals.theme.showAttachments) {
         msg.attachments.forEach(att => {
             if (result.length) result += "\n";
             result += `(file: ${parseMessageContentText(att.filename)})`;
@@ -292,16 +293,6 @@ function parseMessageContentText(content) {
     return result;
 }
 
-function getDefaultLayout(req, res) {
-    if (res.locals.format == 'wml') return 2;
-
-    // modern layout for modern browsers
-    const ua = (req.headers['user-agent'] ?? '').toLowerCase();
-    if (ua.includes('webkit') || ua.includes('gecko')) return 4;
-
-    return 0;
-}
-
 function makeGetTokenMiddleware(isOptional) {
     return (req, res, next) => {
         res.locals.token = req.query?.t ?? req.query?.token ?? req.body?.t ?? req.body?.token ?? req.cookies?.dwtoken;
@@ -347,11 +338,13 @@ function makeGetTokenMiddleware(isOptional) {
         if (timeOffsetHours > 14) timeOffsetHours = 14;
         if (![0, 15, 30, 45].includes(timeOffsetMinutes)) timeOffsetMinutes = 0;
 
-        let layout = Number(settingsArr[7]);
-        if (![0, 1, 2, 3, 4, 5].includes(layout)) {
-            layout = getDefaultLayout(req, res);
+        const themeIndex = Number(settingsArr[7]);
+        
+        if (themeIndex >= 0 && themeIndex < themes.length) {
+            res.locals.theme = themes[themeIndex];
         }
-        res.locals.format = (layout == 2) ? 'wml' : 'html';
+
+        res.locals.format = (res.locals.theme.id == 'wml') ? 'wml' : 'html';
 
         res.locals.settings = {
             messageLoadCount,
@@ -360,13 +353,7 @@ function makeGetTokenMiddleware(isOptional) {
             timeOffsetMinutes,
             use12hTime: (Number(settingsArr[4]) || 0) != 0,
             limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
-            reverseChat: true, //(Number(settingsArr[6]) || 0) != 0 || layout == 4 || layout == 5,
-            layout: ['standard', 'compact', 'wml', 'dark', 'modern', 'modern-dark'][layout],
-            cssFile: ['style.css', 'style-compact.css', '', 'style-dark.css', 'style.css', 'style-dark.css'][layout],
-            channelCssFile: [null, null, null, null, 'channel.css', 'channel-dark.css'][layout],
-            compact: (layout == 1),
-            modern: (layout == 4 || layout == 5),
-            dark: (layout == 3 || layout == 5),
+            reverseChat: (Number(settingsArr[6]) || 0) != 0,
         }
 
         res.locals.headers = {
@@ -437,6 +424,7 @@ app.use(cookieParser());
 
 app.use((req, res, next) => {
     res.locals.format = req.accepts("html") ? "html" : "wml";
+    res.locals.theme = getDefaultTheme(req, res);
     next();
 })
 
@@ -466,7 +454,7 @@ app.use((req, res, next) => {
 async function render(res, viewName, viewVars) {
     if (res.locals.format == "wml") res.set("Content-Type", "text/vnd.wap.wml");
 
-    const rendered = await ejs.renderFile(`views/${res.locals.format}/${viewName}.ejs`, {
+    const rendered = await ejs.renderFile(`views/${res.locals.theme.id}/${viewName}.ejs`, {
         ...res.locals,
         settings: res.locals.settings,
         ...viewVars
@@ -810,7 +798,8 @@ app.post(["/d/:channelid/send", "/g/:guildid/c/:channelid/send"], getToken, asyn
 
 app.get("/set", getToken, (req, res) => {
     render(res, "settings", {
-        token: req.query.token
+        token: req.query.token,
+        themes
     });
 })
 

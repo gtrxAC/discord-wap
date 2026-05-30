@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title>Servers</title>
+</head>
+<body>
+    <div class="nav">
+        <a href="/main<%= tokenParam %>">&lt; Home</a><br/>
+    </div>
+    
+    <div class="sb">Servers</div>
+    <div class="s">
+        <% guilds.forEach((g, i) => { %>
+            <!-- <img src="/wap/go.png" alt="server"> -->
+            &gt; <a href="/g/<%= g.id %><%= tokenParam %>"><%- fit(g.name) %></a>
+            <%- (i != guilds.length - 1) ? '<br/>' : '' %>
+        <% }) %>
+    </div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% metaDescription = true %>
+    <%- include("include/head.ejs") %>
+    <title>Discord WAP</title>
+    <meta name="description" content="Discord proxy client for old mobile browsers with Wireless Application Protocol or HTML support">
+</head>
+<body>
+    <div class="sb">Welcome</div>
+    <div class="s">
+        The token can be found from your browser's dev tools - look online for help. Using an alt account is recommended.<br/>
+        For easy access, add the page to your bookmarks after logging in.
+    </div>
+
+    <div class="sb">Log in</div>
+    <div class="s">
+        Enter your token:
+    </div>
+
+    <form action="/main">
+        <div><input type="text" name="t" id="t" maxlength="75"></div>
+        <div><input type="submit" value="Log in"></div>
+    </form>
+
+<!-- 
+    <table>
+        <tr><th>Import token</th></tr>
+        <tr>
+            <td>
+                <form action="/main">
+                    <label for="token">Alternatively, if your browser supports it, you can upload a text file containing your token.</label> <br/>
+                    <input type="file" name="tokfile" id="tokfile"> 
+                    <input type="submit" value="Log in">
+                </form>
+            </td>
+        </tr>
+    </table> -->
+
+    <div class="nav">
+        <a href="/about">&gt; About</a>
+    </div>
+</body>
+</html>
