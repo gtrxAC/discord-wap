@@ -10,17 +10,15 @@
     </div>
 
     <div class="sb">Reply to <%- fit(recname) %></div>
-    <div class="s">
-        <form action="/<%= gpath %>/<%= id %>/send" method="post">
-            <input type="hidden" name="t" value="<%= compressedToken %>">
-            <input type="hidden" name="recipient" value="<%= rec %>"/>
-            <div><textarea name="text" id="text" rows="5" maxlength="2000"></textarea></div>
-            <div>
-                <input type="checkbox" name="ping" id="ping" value="1">
-                <label for="ping">Mention author</label>
-            </div>
-            <div><input type="submit" value="Send"></div>
-        </form>
-    </div>
+    <form action="/<%= gpath %>/<%= id %>/send" method="post">
+        <input type="hidden" name="t" value="<%= compressedToken %>">
+        <input type="hidden" name="recipient" value="<%= rec %>"/>
+        <div><textarea name="text" id="text" rows="5" maxlength="2000"></textarea></div>
+        <div>
+            <input type="checkbox" name="ping" id="ping" value="1">
+            <label for="ping">Mention author</label>
+        </div>
+        <div><input type="submit" value="Send"></div>
+    </form>
 </body>
 </html>
