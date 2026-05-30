@@ -416,11 +416,11 @@ async function fetchDMs(req, res) {
             let cacheName;
             result.isGroup = (ch.type == 3);
             if (result.isGroup) {
-                result.name = ch.name;
-                cacheName = '@' + ch.name;
+                result.name = ch.name ?? ch.recipients.map(rec => rec.global_name ?? rec.username).join(", ");
+                cacheName = result.name;
             } else {
                 result.name = ch.recipients[0].global_name ?? ch.recipients[0].username;
-                cacheName = result.name;
+                cacheName = '@' + result.name;
             }
 
             // populate cache
@@ -571,7 +571,7 @@ async function getChannelName(req, res, guildID, channelID) {
         if (!channel) return "(unknown)";
         return channel.name;
     } else {
-        const dmChannels = fetchDMs(req, res);
+        const dmChannels = await fetchDMs(req, res);
         cachedName = channelNameCache.get(decompressID(channelID, "channel"));
         if (!cachedName) return "(unknown)";
         return cachedName;
