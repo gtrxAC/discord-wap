@@ -32,7 +32,8 @@
                 <% cat.children.forEach(c => { %>
                     <div>
                         <!-- <img src="/wap/page.png" alt="channel"> -->
-                        <a href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>"><%- fit('#' + c.name) %></a>
+                        #
+                        <a href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a>
                     </div>
                 <% }) %>
             </div>
