@@ -3,32 +3,39 @@
 <head>
     <%- include("include/head.ejs") %>
     <title><%= gname %></title>
+    <style>
+        td {
+            padding: 0;
+        }
+    </style>
 </head>
 <body>
     <div class="nav" id="t">
         <a href="/gl">&lt; Servers</a><br/>
     </div>
     <% if (settings.altChannelListLayout) { %>
-        <table>
-            <tr><th colspan="2"><%- fit(gname) %></th></tr>
-            <% channels.forEach(c => { %>
-                <tr>
-                    <td><a href="/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a></td>
-                    <td class="chtime"><%= c.timestamp %></td>
-                </tr>
-            <% }) %>
-        </table>
-    <% } else { %>
-        <% channelCategories.forEach(cat => { %>
+        <div class="sb"><%- fit(gname) %></div>
+        <div class="s">
             <table>
-                <tr><th colspan="2"><%- fit(cat.name) %></th></tr>
-                <% cat.children.forEach(c => { %>
-                    <tr> 
-                        <td class="icon"><img src="/wap/page.png" alt="channel"></td>
+                <% channels.forEach(c => { %>
+                    <tr>
                         <td><a href="/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a></td>
+                        <td class="chtime"><%= c.timestamp %></td>
                     </tr>
                 <% }) %>
             </table>
+        </div>
+    <% } else { %>
+        <% channelCategories.forEach(cat => { %>
+            <div class="sb"><%- fit(cat.name) %></div>
+            <div class="s">
+                <% cat.children.forEach(c => { %>
+                    <div>
+                        <img src="/wap/page.png" alt="channel">
+                        <a href="/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a>
+                    </div>
+                <% }) %>
+            </div>
         <% }) %>
     <% } %>
     <div class="nav">
