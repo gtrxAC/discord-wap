@@ -6,6 +6,8 @@ const path = require('path');
 const { LRUCache } = require('lru-cache');
 const sanitizeHtml = require('sanitize-html');
 const cookieParser = require('cookie-parser');
+const { minify } = require('html-minifier-terser');
+const ejs = require('ejs');
 
 const { compressID, decompressID, compressToken, decompressToken } = require('./compress');
 
@@ -443,13 +445,23 @@ app.use((req, res, next) => {
     next();
 })
 
-function render(res, viewName, viewVars) {
+async function render(res, viewName, viewVars) {
     if (res.locals.format == "wml") res.set("Content-Type", "text/vnd.wap.wml");
 
-    res.render(`${res.locals.format}/${viewName}`, {
+    const rendered = await ejs.renderFile(`views/${res.locals.format}/${viewName}.ejs`, {
+        ...res.locals,
         settings: res.locals.settings,
         ...viewVars
+    })
+
+    const minified = await minify(rendered, {
+        collapseWhitespace: true,
+        removeComments: true,
+        minifyCSS: true,
+        minifyJS: true
     });
+
+    res.send(minified);
 }
 
 app.get("/", (req, res) => {
