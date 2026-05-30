@@ -11,10 +11,12 @@
     
     <div class="sb">Servers</div>
     <div class="s">
-        <div>
-            <img src="/wap/go.png" alt="server">
-            <a href="/g?gname=<%= encodeURIComponent(g.name) %>&id=<%= g.id %>"><%- fit(g.name) %></a>
-        </div>
+        <% guilds.forEach(g => { %>
+            <div>
+                <img src="/wap/go.png" alt="server">
+                <a href="/g?gname=<%= encodeURIComponent(g.name) %>&id=<%= g.id %>"><%- fit(g.name) %></a>
+            </div>
+        <% }) %>
     </div>
 </body>
 </html>
