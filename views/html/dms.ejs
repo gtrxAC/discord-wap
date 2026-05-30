@@ -6,7 +6,7 @@
 </head>
 <body>
     <div class="nav">
-        <a href="/main">&lt; Home</a><br/>
+        <a href="/main<%= tokenParam %>">&lt; Home</a><br/>
     </div>
 
     <div class="sb">Direct messages</div>
@@ -14,7 +14,7 @@
         <% dms.forEach(d => { %>
             <div>
                 <img src="/wap/page.png" alt="DM">
-                <a href="/d/<%= d.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(d.name) %></a>
+                <a href="/d/<%= d.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(d.name) %></a>
             </div>
         <% }) %>
     </div>

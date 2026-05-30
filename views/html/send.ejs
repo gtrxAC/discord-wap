@@ -6,14 +6,13 @@
 </head>
 <body>
     <div class="nav">
-        <a href="<%= gpath %>/<%= id %><%= settings.reverseChat ? '#b' : '' %>">&lt; <%= cname %></a><br/>
+        <a href="<%= gpath %>/<%= id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">&lt; <%= cname %></a><br/>
     </div>
 
     <div class="sb">Your message</div>
 
     <form action="<%= gpath %>/<%= id %>/send" method="post">
-        <!-- <input type="hidden" name="id" value="<%= id %>"/>
-        <input type="hidden" name="cname" value="<%= cname %>"/> -->
+        <input type="hidden" name="t" value="<%= compressedToken %>">
         <div><textarea name="text" id="text" rows="5" maxlength="2000"></textarea></div>
         <div><input type="submit" value="Send"></div>
     </form>

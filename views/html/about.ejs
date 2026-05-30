@@ -6,7 +6,11 @@
 </head>
 <body>
     <div class="nav">
-        <a href="/main">&lt; Home</a><br/>
+        <% if (tokenParam) { %>
+            <a href="/main<%= tokenParam %>">&lt; Home</a><br/>
+        <% } else { %>
+            <a href="/">&lt; Login</a><br/>
+        <% } %>
     </div>
 
     <div class="sb">Discord WAP</div>

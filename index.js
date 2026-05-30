@@ -300,90 +300,95 @@ function getDefaultLayout(req, res) {
     return 0;
 }
 
-function getToken(req, res, next) {
-    res.locals.token = req.query?.token ?? req.body?.token ?? req.cookies?.dwtoken;
+function makeGetTokenMiddleware(isOptional) {
+    return (req, res, next) => {
+        res.locals.token = req.query?.t ?? req.query?.token ?? req.body?.t ?? req.body?.token ?? req.cookies?.dwtoken;
 
-    if (!res.locals.token) throw new Error("Your request does not contain a token. Please return to the Discord WAP front page and try again.");
-    
-    if (process.env.PASSWORD && process.env.PASSWORD_TOKEN && res.locals.token == process.env.PASSWORD) {
-        res.locals.token = process.env.PASSWORD_TOKEN;
+        if (!res.locals.token) {
+            if (isOptional) {
+                res.locals.token = "";
+                res.locals.compressedToken = "";
+                res.locals.tokenParam = "";
+                next();
+                return;
+            } else {
+                throw new Error("Your request does not contain a token. Please return to the Discord WAP front page and try again.");
+            }
+        }
+        
+        if (process.env.PASSWORD && process.env.PASSWORD_TOKEN && res.locals.token == process.env.PASSWORD) {
+            res.locals.token = process.env.PASSWORD_TOKEN;
+        }
+
+        res.locals.userID = res.locals.token.split('.')[0];
+
+        if (req.query.s0) {
+            res.locals.token = res.locals.token.split('.').slice(0, 3).join('.')
+                + '.' + req.query.s0
+                + '.' + req.query.s1
+                + '.' + req.query.s2
+                + '.' + req.query.s3
+                + '.' + req.query.s4
+                + '.' + req.query.s5
+                + '.' + req.query.s6
+                + '.' + req.query.s7;
+        }
+        const settingsArr = res.locals.token.split('.').slice(3);
+
+        let messageLoadCount = Number(settingsArr[0]) || 10;
+        if (messageLoadCount > 100) messageLoadCount = 100;
+        else if (messageLoadCount < 1) messageLoadCount = 1;
+
+        let timeOffsetHours = Number(settingsArr[2]) || 0;
+        let timeOffsetMinutes = Number(settingsArr[3]) || 0;
+        if (timeOffsetHours < -14) timeOffsetHours = -14;
+        if (timeOffsetHours > 14) timeOffsetHours = 14;
+        if (![0, 15, 30, 45].includes(timeOffsetMinutes)) timeOffsetMinutes = 0;
+
+        let layout = Number(settingsArr[7]);
+        if (![0, 1, 2, 3, 4, 5].includes(layout)) {
+            layout = getDefaultLayout(req, res);
+        }
+        res.locals.format = (layout == 2) ? 'wml' : 'html';
+
+        res.locals.settings = {
+            messageLoadCount,
+            altChannelListLayout: (Number(settingsArr[1]) || 0) != 0,
+            timeOffsetHours,
+            timeOffsetMinutes,
+            use12hTime: (Number(settingsArr[4]) || 0) != 0,
+            limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
+            reverseChat: true, //(Number(settingsArr[6]) || 0) != 0 || layout == 4 || layout == 5,
+            layout: ['standard', 'compact', 'wml', 'dark', 'modern', 'modern-dark'][layout],
+            cssFile: ['style.css', 'style-compact.css', '', 'style-dark.css', 'style.css', 'style-dark.css'][layout],
+            channelCssFile: [null, null, null, null, 'channel.css', 'channel-dark.css'][layout],
+            compact: (layout == 1),
+            modern: (layout == 4 || layout == 5),
+            dark: (layout == 3 || layout == 5),
+        }
+
+        res.locals.headers = {
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0",
+            "Accept": "*/*",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Authorization": decompressToken(res.locals.token).split('.').slice(0, 3).join('.'),
+            "X-Discord-Locale": "en-GB",
+            "X-Debug-Options": "bugReporterEnabled",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin"
+        };
+        if (req.cookies?.dwtoken != res.locals.token) {
+            res.cookie('dwtoken', res.locals.token, {maxAge: 1000*60*60*24*30});
+        }
+        res.locals.compressedToken = compressToken(res.locals.token);
+        res.locals.tokenParam = '?t=' + res.locals.compressedToken;
+        next();
     }
-
-    res.locals.userID = res.locals.token.split('.')[0];
-
-    if (req.query.cn) {
-        // ?cn=example is a shorthand for ?cname=%23example (guild channel with #)
-        res.locals.channelName = "#" + req.query.cn;
-    }
-    else if (req.query.dn) {
-        // ?dn=example is a shorthand for ?cname=%40example (dm user with @)
-        res.locals.channelName = "@" + req.query.dn;
-    }
-    else {
-        res.locals.channelName = req.query.cname ?? "Discord WAP";
-    }
-
-    if (req.query.s0) {
-        res.locals.token = res.locals.token.split('.').slice(0, 3).join('.')
-            + '.' + req.query.s0
-            + '.' + req.query.s1
-            + '.' + req.query.s2
-            + '.' + req.query.s3
-            + '.' + req.query.s4
-            + '.' + req.query.s5
-            + '.' + req.query.s6
-            + '.' + req.query.s7;
-    }
-    const settingsArr = res.locals.token.split('.').slice(3);
-
-    let messageLoadCount = Number(settingsArr[0]) || 10;
-    if (messageLoadCount > 100) messageLoadCount = 100;
-    else if (messageLoadCount < 1) messageLoadCount = 1;
-
-    let timeOffsetHours = Number(settingsArr[2]) || 0;
-    let timeOffsetMinutes = Number(settingsArr[3]) || 0;
-    if (timeOffsetHours < -14) timeOffsetHours = -14;
-    if (timeOffsetHours > 14) timeOffsetHours = 14;
-    if (![0, 15, 30, 45].includes(timeOffsetMinutes)) timeOffsetMinutes = 0;
-
-    let layout = Number(settingsArr[7]);
-    if (![0, 1, 2, 3, 4, 5].includes(layout)) {
-        layout = getDefaultLayout(req, res);
-    }
-    res.locals.format = (layout == 2) ? 'wml' : 'html';
-
-    res.locals.settings = {
-        messageLoadCount,
-        altChannelListLayout: (Number(settingsArr[1]) || 0) != 0,
-        timeOffsetHours,
-        timeOffsetMinutes,
-        use12hTime: (Number(settingsArr[4]) || 0) != 0,
-        limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
-        reverseChat: true, //(Number(settingsArr[6]) || 0) != 0 || layout == 4 || layout == 5,
-        layout: ['standard', 'compact', 'wml', 'dark', 'modern', 'modern-dark'][layout],
-        cssFile: ['style.css', 'style-compact.css', '', 'style-dark.css', 'style.css', 'style-dark.css'][layout],
-        channelCssFile: [null, null, null, null, 'channel.css', 'channel-dark.css'][layout],
-        compact: (layout == 1),
-        modern: (layout == 4 || layout == 5),
-        dark: (layout == 3 || layout == 5),
-    }
-
-    res.locals.headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0",
-        "Accept": "*/*",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Authorization": decompressToken(res.locals.token).split('.').slice(0, 3).join('.'),
-        "X-Discord-Locale": "en-GB",
-        "X-Debug-Options": "bugReporterEnabled",
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-origin"
-    };
-    if (req.cookies?.dwtoken != res.locals.token) {
-        res.cookie('dwtoken', res.locals.token, {maxAge: 1000*60*60*24*30});
-    }
-    next();
 }
+
+const getToken = makeGetTokenMiddleware(false);
+const getTokenOptional = makeGetTokenMiddleware(true);
 
 async function fetchDMs(req, res) {
     const dmsGet = await axios.get(
@@ -477,7 +482,7 @@ app.get("/", (req, res) => {
     });
 });
 
-app.get("/about", (req, res) => {
+app.get("/about", getTokenOptional, (req, res) => {
     render(res, "about", {
         userAgent: req.headers['user-agent']
     });
@@ -485,22 +490,14 @@ app.get("/about", (req, res) => {
 
 // Main menu (including DMs in WML version)
 app.get("/main", getToken, async (req, res) => {
-    const dms = (res.locals.format == 'wml') && await fetchDMs(req, res);
-
-    render(res, "main", {
-        token: compressToken(res.locals.token),
-        dms,
-    });
+    res.locals.dms = (res.locals.format == 'wml') && await fetchDMs(req, res);
+    render(res, "main");
 })
 
 // Direct message list (separate page for HTML version)
 app.get("/d", getToken, async (req, res) => {
-    const dms = await fetchDMs(req, res);
-
-    render(res, "dms", {
-        token: compressToken(res.locals.token),
-        dms,
-    });
+    res.locals.dms = await fetchDMs(req, res);
+    render(res, "dms");
 })
 
 const guildCache = new LRUCache({max: 200, ttl: 10*60*1000, updateAgeOnGet: false})
@@ -752,7 +749,6 @@ app.get(["/d/:channelid/send", "/g/:guildid/c/:channelid/send"], getToken, async
         cname: channelName,
         gid: guildID,
         gpath: guildPath
-        // token: req.query.token,
     })
 })
 
@@ -766,7 +762,6 @@ app.get(["/d/:channelid/reply/:messageid", "/g/:guildid/c/:channelid/reply/:mess
     render(res, "reply", {
         id: channelID,
         cname: channelName,
-        // token: req.query.token,
         rec: messageID,
         gpath: guildPath,
         recname: req.query.recname,
