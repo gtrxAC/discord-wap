@@ -255,9 +255,10 @@ function parseMessageContentNonStatus(res, msg, singleLine) {
 
     // iOS keyboard (I think it's that) is stupid and replaces apostrophes with this unicode character
     // that shows up as a rectangle/missing character on old phones. Replace it with a normal apostrophe.
-    return result
-        .replace(/’/g, "'")
-        .replace(/\n/g, singleLine ? ' ' : '<br/>');
+    result = result.replace(/’/g, "'");
+
+    if (singleLine) result = result.replace(/\n/g, " ");
+    return result;
 }
 
 function parseMessageContentText(content) {
@@ -443,8 +444,10 @@ app.use((req, res, next) => {
         return sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
     }
     res.locals.fit = (str) => {
+        str = sanitize(str);
+        
         // match long words, at least 16 consecutive letters
-        return sanitize(str).replace(/([^\s]{16,})/g, (match) => {
+        str = str.replace(/([^\s]{16,})/g, (match) => {
             let result = '';
             match.split('').forEach((chr, i) => {
                 result += chr;
@@ -453,6 +456,8 @@ app.use((req, res, next) => {
             })
             return result;
         })
+        str = str.replace(/\n/g, "<br/>");
+        return str;
     }
     next();
 })
