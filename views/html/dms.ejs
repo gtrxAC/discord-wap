@@ -14,7 +14,7 @@
         <% dms.forEach(d => { %>
             <div>
                 <img src="/wap/page.png" alt="DM">
-                <a href="/ch?<%= d.isGroup ? 'cname' : 'dn' %>=<%= encodeURIComponent(d.name) %>&id=<%= d.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(d.name) %></a>
+                <a href="/d/<%= d.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(d.name) %></a>
             </div>
         <% }) %>
     </div>

@@ -270,7 +270,7 @@ function parseMessageContentText(content) {
         })
         // try to convert <#12345...> format into #channelname
         .replace(/<#(\d{15,})>/gm, (mention, id) => {
-            if (channelNameCache.has(id)) return `#${channelNameCache.get(id)}`;
+            if (channelNameCache.has(id)) return channelNameCache.get(id);
             else return mention;
         })
         // replace <:name:12345...> emoji format with :name:
@@ -408,12 +408,19 @@ async function fetchDMs(req, res) {
             }
 
             // Add group name for group DMs, recipient name for normal DMs
+            let cacheName;
             result.isGroup = (ch.type == 3);
             if (result.isGroup) {
                 result.name = ch.name;
+                cacheName = '@' + ch.name;
             } else {
                 result.name = ch.recipients[0].global_name ?? ch.recipients[0].username;
+                cacheName = result.name;
             }
+
+            // populate cache
+            channelNameCache.set(ch.id, cacheName);
+
             result.name = oneLine(req, result.name);
             return result;
         })
@@ -487,7 +494,7 @@ app.get("/main", getToken, async (req, res) => {
 })
 
 // Direct message list (separate page for HTML version)
-app.get("/dm", getToken, async (req, res) => {
+app.get("/d", getToken, async (req, res) => {
     const dms = await fetchDMs(req, res);
 
     render(res, "dms", {
@@ -498,56 +505,96 @@ app.get("/dm", getToken, async (req, res) => {
 
 const guildCache = new LRUCache({max: 200, ttl: 10*60*1000, updateAgeOnGet: false})
 
-// Server list
-app.get("/gl", getToken, async (req, res) => {
-    let guilds;
-
+async function getGuilds(req, res) {
     if (guildCache.has(res.locals.userID)) {
-        guilds = guildCache.get(res.locals.userID);
+        return guildCache.get(res.locals.userID);
     } else {
         const guildsGet = await axios.get(
             `${DEST_BASE}/users/@me/guilds`,
             {headers: res.locals.headers}
         )
-        guilds = guildsGet.data.map(g => ({
+        const guilds = guildsGet.data.map(g => ({
             id: compressID(g.id),
             name: oneLine(req, g.name)
         }))
         guildCache.set(res.locals.userID, guilds);
+        return guilds;
     }
+}
 
-    render(res, "guilds", {
-        guilds
-    });
+async function getGuildName(req, res, guildID) {
+    if (!guildID) return null;
+    const guilds = await getGuilds(req, res);
+    const guild = guilds.find(g => g.id == guildID);
+    if (!guild) return "(unknown)";
+    return guild.name;
+}
+
+// get prefix for routes that can be used with both guilds and DMs
+function getGuildPath(guildID) {
+    if (guildID) return `/g/${guildID}/c`;
+    return '/d';  // no guild -> is DM
+}
+
+// Server list
+app.get("/g", getToken, async (req, res) => {
+    res.locals.guilds = await getGuilds(req, res);
+    render(res, "guilds");
 })
 
 const channelCache = new LRUCache({max: 400, ttl: 10*60*1000, updateAgeOnGet: false});
 
-// Channel list of a server
-app.get("/g", getToken, async (req, res) => {
-    // Channel list cache can be used if last message IDs are not relevant ("Recent channels first" disabled and using HTML version)
-    const useCache = (!res.locals.settings.altChannelListLayout && res.locals.format == 'html')
-    let channelsGet;
+async function getChannels(req, res, guildID, useCache) {
+    if (!guildID) guildID = res.locals.userID;
 
-    if (useCache && channelCache.has(req.query.id)) {
-        channelsGet = channelCache.get(req.query.id);
+    if (useCache && channelCache.has(guildID)) {
+        return channelCache.get(guildID);
     } else {
-        channelsGet = await axios.get(
-            `${DEST_BASE}/guilds/${decompressID(req.query.id, 'server')}/channels`,
+        const channels = await axios.get(
+            `${DEST_BASE}/guilds/${decompressID(guildID, 'server')}/channels`,
             {headers: res.locals.headers}
         )
-        if (useCache) channelCache.set(req.query.id, channelsGet);
-    }
+        if (useCache) channelCache.set(guildID, channels.data);
 
-    // Populate channel name cache
-    channelsGet.data.forEach(ch => {
-        channelNameCache.set(ch.id, ch.name);
-    })
+        // Populate channel name cache
+        channels.data.forEach(ch => {
+            channelNameCache.set(ch.id, '#' + ch.name);
+        })
+        return channels.data;
+    }
+}
+
+async function getChannelName(req, res, guildID, channelID) {
+    let cachedName = channelNameCache.get(decompressID(channelID, "channel"));
+    if (cachedName) return cachedName;
+
+    if (guildID) {
+        const channels = await getChannels(req, res, guildID, true);
+        const channel = channels.find(c => c.id == channelID);
+        if (!channel) return "(unknown)";
+        return channel.name;
+    } else {
+        const dmChannels = fetchDMs(req, res);
+        cachedName = channelNameCache.get(decompressID(channelID, "channel"));
+        if (!cachedName) return "(unknown)";
+        return cachedName;
+    }
+}
+
+// Channel list of a server
+app.get(["/g/:guildid", "/g/:guildid/c"], getToken, async (req, res) => {
+    const guildID = req.params.guildid;
+    const guildName = await getGuildName(req, res, guildID);
+
+    // Channel list cache can be used if last message IDs are not relevant ("Recent channels first" disabled and using HTML version)
+    const useCache = (!res.locals.settings.altChannelListLayout && res.locals.format == 'html');
+
+    const channelsGet = await getChannels(req, res, guildID, useCache);
 
     // Due to page length limitations, limit the amount of channels to be shown:
 
     // Sort channels by most recently used
-    const allChannels = channelsGet.data.filter(ch => ch.type == 0 || ch.type == 5);
+    const allChannels = channelsGet.filter(ch => ch.type == 0 || ch.type == 5);
     allChannels.sort((a, b) => {
         const a_id = BigInt(a.last_message_id ?? 0);
         const b_id = BigInt(b.last_message_id ?? 0);
@@ -596,13 +643,13 @@ app.get("/g", getToken, async (req, res) => {
             }))
     }
 
-    const allChannelCategories = channelsGet.data.filter(ch => ch.type == 4)
+    const allChannelCategories = channelsGet.filter(ch => ch.type == 4)
         .sort((a, b) => a.position - b.position)
         .map(ch => ({...ch, children: []}));
 
     // default category for channels that are not in any category (shown at the top both on official clients and on wap)
     const defaultCategory = {
-        name: req.query.gname,
+        name: guildName,
         children: []
     };
     allChannelCategories.unshift(defaultCategory);
@@ -619,7 +666,8 @@ app.get("/g", getToken, async (req, res) => {
     const channelCategories = allChannelCategories.filter(ch => ch.children.length);
 
     render(res, "channels", {
-        gname: req.query.gname,
+        gname: guildName,
+        gid: guildID,
         channels,
         channelCategories
     });
@@ -637,26 +685,32 @@ function shouldShowAuthor(msg, above, clusterStart) {
 }
 
 // Get channel messages
-app.get("/ch", getToken, async (req, res) => {
-    let proxyUrl = `${DEST_BASE}/channels/${decompressID(req.query.id, 'channel')}/messages`;
+app.get(["/d/:channelid", "/g/:guildid/c/:channelid"], getToken, async (req, res) => {
+    const guildID = req.params.guildid;
+    const channelID = req.params.channelid;
+    const guildName = await getGuildName(req, res, guildID);
+    const guildPath = getGuildPath(guildID);
+    const channelName = await getChannelName(req, res, guildID, channelID);
+
+    let proxyUrl = `${DEST_BASE}/channels/${decompressID(channelID, 'channel')}/messages`;
     let queryParam = [`limit=${res.locals.settings.messageLoadCount}`];
-    if (req.query.before) queryParam.push(`before=${decompressID(req.query.before, 'message')}`);
-    if (req.query.after) queryParam.push(`after=${decompressID(req.query.after, 'message')}`);
+    if (req.query.b) queryParam.push(`before=${decompressID(req.query.b, 'message')}`);
+    if (req.query.a) queryParam.push(`after=${decompressID(req.query.a, 'message')}`);
     proxyUrl += '?' + queryParam.join('&');
 
-    const messagesGet = await axios.get(proxyUrl, {headers: res.locals.headers});
+    const messagesGet = (await axios.get(proxyUrl, {headers: res.locals.headers})).data;
 
     // Populate username cache
-    messagesGet.data.forEach(msg => {
+    messagesGet.forEach(msg => {
         userCache.set(msg.author.id, msg.author.username);
     })
 
     // See which messages the author line and profile pic should be shown for
-    messagesGet.data.reverse();
+    messagesGet.reverse();
     let clusterStart = 0;
     let above = null;
 
-    messagesGet.data.forEach(m => {
+    messagesGet.forEach(m => {
         m.showAuthor = shouldShowAuthor(m, above, clusterStart);
         if (m.showAuthor) {
             clusterStart = m.id;
@@ -667,44 +721,64 @@ app.get("/ch", getToken, async (req, res) => {
         }
         above = m;
     })
-    messagesGet.data.reverse();
+    messagesGet.reverse();
 
-    const messages = messagesGet.data.map(m => parseMessageObject(req, res, m));
+    const messages = messagesGet.map(m => parseMessageObject(req, res, m));
 
     if (res.locals.settings.reverseChat && res.locals.format == 'html') {
         messages.reverse();
     }
 
     render(res, "channel", {
-        id: req.query.id,
-        page: req.query.page ?? 0,
+        page: req.query.p ?? 0,
         messages,
         textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000,
-        id: req.query.id,
-        cname: res.locals.channelName,
+        id: channelID,
+        cname: channelName,
+        gid: guildID,
+        gname: guildName,
+        gpath: guildPath,
     });
 })
 
-app.get("/send", getToken, async (req, res) => {
+app.get(["/d/:channelid/send", "/g/:guildid/c/:channelid/send"], getToken, async (req, res) => {
+    const guildID = req.params.guildid;
+    const channelID = req.params.channelid;
+    const guildPath = getGuildPath(guildID);
+    const channelName = await getChannelName(req, res, guildID, channelID);
+
     render(res, "send", {
-        id: req.query.id,
-        cname: res.locals.channelName,
-        token: req.query.token,
+        id: channelID,
+        cname: channelName,
+        gid: guildID,
+        gpath: guildPath
+        // token: req.query.token,
     })
 })
 
-app.get("/reply", getToken, async (req, res) => {
+app.get(["/d/:channelid/reply/:messageid", "/g/:guildid/c/:channelid/reply/:messageid"], getToken, async (req, res) => {
+    const guildID = req.params.guildid;
+    const channelID = req.params.channelid;
+    const messageID = req.params.messageid;
+    const guildPath = getGuildPath(guildID);
+    const channelName = await getChannelName(req, res, guildID, channelID);
+
     render(res, "reply", {
-        id: req.query.id,
-        cname: res.locals.channelName,
-        token: req.query.token,
-        rec: req.query.rec,
+        id: channelID,
+        cname: channelName,
+        // token: req.query.token,
+        rec: messageID,
+        gpath: guildPath,
         recname: req.query.recname,
     })
 })
 
 // Send message
-app.post("/send", getToken, async (req, res) => {
+app.post(["/d/:channelid/send", "/g/:guildid/c/:channelid/send"], getToken, async (req, res) => {
+    const guildID = req.params.guildid;
+    const channelID = req.params.channelid;
+    const guildPath = getGuildPath(guildID);
+
     const send = {
         content: req.body.text,
         flags: 0,
@@ -723,14 +797,16 @@ app.post("/send", getToken, async (req, res) => {
     }
 
     await axios.post(
-        `${DEST_BASE}/channels/${decompressID(req.body.id, 'channel')}/messages`,
+        `${DEST_BASE}/channels/${decompressID(channelID, 'channel')}/messages`,
         send,
         {headers: res.locals.headers}
     );
 
     render(res, "sent", {
-        fromChatBar: req.body.fromchatbar,
-        cname: res.locals.channelName 
+        // fromChatBar: req.body.fromchatbar,
+        gid: guildID,
+        cid: channelID,
+        gpath: guildPath,
     });
 })
 

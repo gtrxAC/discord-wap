@@ -11,7 +11,7 @@
 </head>
 <body>
     <div class="nav" id="t">
-        <a href="/gl">&lt; Servers</a><br/>
+        <a href="/g">&lt; Servers</a><br/>
     </div>
     <% if (settings.altChannelListLayout) { %>
         <div class="sb"><%- fit(gname) %></div>
@@ -19,7 +19,7 @@
             <table>
                 <% channels.forEach(c => { %>
                     <tr>
-                        <td><a href="/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a></td>
+                        <td><a href="/g/<%= gid %>/c/<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a></td>
                         <td class="chtime"><%= c.timestamp %></td>
                     </tr>
                 <% }) %>
@@ -32,7 +32,7 @@
                 <% cat.children.forEach(c => { %>
                     <div>
                         <img src="/wap/page.png" alt="channel">
-                        <a href="/ch?cn=<%= encodeURIComponent(c.name) %>&id=<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a>
+                        <a href="/g/<%= gid %>/c/<%= c.id %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a>
                     </div>
                 <% }) %>
             </div>
