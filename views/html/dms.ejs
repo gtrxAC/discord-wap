@@ -13,8 +13,10 @@
     <div class="s">
         <% dms.forEach(d => { %>
             <div>
-                <img src="/wap/page.png" alt="DM">
-                <a href="/d/<%= d.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(d.name) %></a>
+                <!-- <img src="/wap/page.png" alt="DM"> -->
+                <a href="/d/<%= d.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
+                    <%- fit((d.isGroup ? '' : '@') + d.name) %>
+                </a>
             </div>
         <% }) %>
     </div>
