@@ -134,7 +134,8 @@ function parseMessageObject(req, res, msg) {
     const result = {
         id: compressID(msg.id),
         showAuthor: msg.showAuthor,
-        avatar: msg.avatar
+        avatar: msg.avatar,
+        edited: msg.edited_timestamp
     }
     if (msg.author) {
         const author = msg.author.global_name ?? msg.author.username;
@@ -445,7 +446,7 @@ app.use((req, res, next) => {
     }
     res.locals.fit = (str) => {
         str = sanitize(str);
-        
+
         // match long words, at least 16 consecutive letters
         str = str.replace(/([^\s]{16,})/g, (match) => {
             let result = '';

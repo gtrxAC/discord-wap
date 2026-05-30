@@ -27,7 +27,7 @@
                 </div> <!-- end section of previous message cluster-->
             <% } %>
 
-            <div class="sb"><%- fit(m.author.name) %> <span class="time"><%= m.timestamp %></span></div>
+            <div class="sb"><%- fit(m.author.name) %></div>
             <div class="s">
         <% } %>
 
@@ -42,8 +42,7 @@
         
         <!-- content -->
         <% if (m.content) { %>
-            <!-- <a class="msg" href="/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= m.id %>&recname=<%= encodeURIComponent(m.author.name) %>"> -->
-            <%- fit(m.content) %>
+            <div><%- fit(m.content) %></div>
         <% } %>
 
         <!-- attachments (names/download links) -->
@@ -55,6 +54,12 @@
                 </div>
             <% }) %>
         <% } %>
+
+        <div class="time">
+            <%= m.edited ? '(edited) ' : '' %>
+            <%= m.timestamp %>
+            <a href="<%= gpath %>/<%= id %>/reply/<%= m.id %>?recname=<%= encodeURIComponent(m.author.name) %><%= tokenParam.replace('?', '&') %>">&gt;</a>
+        </div>
     <% }) %>
 
     </div> <!-- end section of bottom-most message cluster-->
