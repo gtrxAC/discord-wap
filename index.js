@@ -568,17 +568,19 @@ async function getChannels(req, res, guildID, useCache) {
 }
 
 async function getChannelName(req, res, guildID, channelID) {
-    let cachedName = channelNameCache.get(decompressID(channelID, "channel"));
+    const decompressedID = decompressID(channelID, "channel");
+    
+    let cachedName = channelNameCache.get(decompressedID);
     if (cachedName) return cachedName;
 
     if (guildID) {
         const channels = await getChannels(req, res, guildID, true);
-        const channel = channels.find(c => c.id == channelID);
+        const channel = channels.find(c => c.id == decompressedID);
         if (!channel) return "(unknown)";
         return channel.name;
     } else {
         const dmChannels = await fetchDMs(req, res);
-        cachedName = channelNameCache.get(decompressID(channelID, "channel"));
+        cachedName = channelNameCache.get(decompressedID);
         if (!cachedName) return "(unknown)";
         return cachedName;
     }
