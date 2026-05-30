@@ -7,9 +7,7 @@ body {
     background-color: #eef;
     font-size: 12px;
     margin: 0;
-}
-.main {
-    /* max-width: 120px; */
+    max-width: 600px;
     margin: 0 auto;
 }
 
@@ -34,9 +32,8 @@ body {
 /* Input-related elements */
 input, button, textarea, select {
     font-size: 12px;
-    max-width: 100%;
-    /* padding: 2px;
-    margin: 2px 0; */
+    width: 100%;
+    margin: 1px 0;
 }
 
 /* Table columns for icons and mentions/pings */
