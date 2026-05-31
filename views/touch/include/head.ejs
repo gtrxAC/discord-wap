@@ -8,79 +8,77 @@
         font-family: sans-serif;
     }
     body {
-        background-color: #eef;
-        font-size: 12px;
-        max-width: 400px;
-        margin: 0 auto;
+        margin: 0;
+        background-color: #fff;
     }
+
+    .nav {
+        width: 100%;
+        background-color: #ddd;
+        padding: 0.5em;
+        /* vertical-align: middle; */
+    }
+    .nav img, .chatbar img, .chatbar input {
+        display: inline;
+        width: 24px;
+        height: 24px;
+    }
+    .chatbar td {
+        padding: 0 0.3em 0 0.3em;
+    }
+    .title {
+        width: 100%;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .chatbar {
+        width: 100%;
+        background-color: #ddd;
+        padding: 0.4em 0.2em;
+    }
+    /* .chatbar td {
+        text-align: center;
+    } */
+    .chatbar textarea {
+        width: 100%;
+    }
+
+    .pagebtn {
+        text-align: center;
+        padding: 0.3em;
+    }
+    .pagebtn input {
+        width: 70%;
+        font-size: 1em;
+        padding: 0.3em;
+    }
+
 
     /* Align icons with text */
-    img {
+    img, input[type="image"] {
         vertical-align: bottom;
-    }
-
-    /* Section beginning (title) */
-    .sb {
-        background-color: #23a;
-        color: white;
-        font-weight: bold;
-        padding: 1px 0 0 2px;
-        margin: 1px 1px 0 1px;
-    }
-
-    /* Section content */
-    .s {
-        background-color: white;
-        color: black;
-        border: solid 1px #23a;
-        padding: 1px 1px 1px 2px;
-        margin: 0 1px 3px 1px;
-    }
-
-    /* Input-related elements */
-    input, button, textarea, select {
-        font-size: 12px;
-        width: 100%;
-        margin: 1px 0;
-    }
-
-    /* Table columns for icons and mentions/pings */
-    /* .icon {
-        width: 1px;
-    }
-    .mention {
-        width: 16px;
-        text-align: right;
-        font-weight: bold;
-        color: #c23;
-    } */
-
-    /* Navigation links */
-    .nav {
-        text-align: center;
-        font-size: 11px;
-        padding: 1px;
-    }
-
-    /* Messages, replies, etc */
-    /* .msg {
-        color: unset;
-        text-decoration: unset;
-    } */
-
-    /* Message timestamp */
-    .time {
-        color: #444;
-        font-size: 8px;
-        text-align: right;
-        line-height: 1;
     }
 
     /* Recipient message */
     .reply {
-        color: #444;
-        font-size: 9px;
-        font-style: italic;
+        color: #555;
+        font-size: 12px;
+        margin: 0.3em 0 0 0;
+    }
+    .replyrow {
+        overflow: hidden;
+        line-height: 1.1;
+        vertical-align: bottom;
+    }
+    .replyicon {
+        text-align: right;
+    }
+    .reply {
+        padding-top: 0.4em;
+    }
+    .replyrow img {
+        vertical-align: middle;
     }
 
     /* Last message timestamp in channel list */
@@ -88,5 +86,88 @@
         color: #444;
         font-size: 9px;
         text-align: right;
+    }
+
+
+    .time {
+        color: #777;
+        font-size: 12px;
+    }
+
+    .replyrow {
+        overflow: hidden;
+        line-height: 1.1;
+        vertical-align: bottom;
+    }
+    .replyicon {
+        text-align: right;
+    }
+    .reply {
+        padding-top: 0.4em;
+    }
+
+    .message td {
+        vertical-align: top;
+        padding: 0.2em 0.2em 0.2em 0;
+    }
+    .message.noauthor td {
+        padding-top: 0;
+    }
+    .message p a {
+        font-weight: inherit;
+    }
+    .hidelink {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .overlay {
+        position: absolute;
+    }
+
+    a img {
+        border: inherit;
+    }
+    .break {
+        word-break: break-all;
+    }
+
+    .messages {
+        margin: 0.3em;
+    }
+
+    .channel {
+        margin: 0.5em;
+    }
+    .channelhash {
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0 0.3em;
+    }
+    .guild {
+        margin: 0.6em;
+    }
+
+    .categorytitle {
+        background-color: #eee;
+        font-weight: bold;
+        padding: 0.2em;
+        margin: 0.2em;
+    }
+    .category {
+        margin-bottom: 0.8em;
+    }
+
+    .section {
+        margin: 0.5em 0.5em 0.8em 0.5em;
+    }
+    .section input, .section select, .section textarea {
+        width: 100%;
+        padding: 0.4em;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+    }
+    .section input[type="checkbox"] {
+        width: unset;
     }
 </style>

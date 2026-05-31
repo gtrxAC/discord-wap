@@ -10,9 +10,14 @@
     </style>
 </head>
 <body>
-    <div class="nav" id="t">
-        <a href="/g<%= tokenParam %>">&lt; Servers</a><br/>
-    </div>
+    <table class="nav" id="t">
+        <tr>
+            <td><a href="/g<%= tokenParam %>"><img src="/back.png" alt="Back"></a></td>
+            <td class="title"><%- fit(gname) %></td>
+            <td style="min-width: 24px"></td>
+        </tr>
+    </table>
+
     <% if (settings.altChannelListLayout) { %>
         <div class="sb"><%- fit(gname) %></div>
         <div class="s">
@@ -27,18 +32,21 @@
         </div>
     <% } else { %>
         <% channelCategories.forEach(cat => { %>
-            <div class="sb"><%- fit(cat.name) %></div>
-            <div class="s">
+            <div class="categorytitle"><%- fit(cat.name) %></div>
+            <div class="category">
                 <% cat.children.forEach((c, i) => { %>
-                    <!-- <img src="/wap/page.png" alt="channel"> -->
-                    # <a href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a>
-                    <%- (i != cat.children.length - 1) ? '<br/>' : '' %>
+                    <div class="channel">
+                        <a class="hidelink" href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
+                            <span class="channelhash">#</span> <%- fit(c.name) %>
+                        </a>
+                    </div>
                 <% }) %>
             </div>
         <% }) %>
     <% } %>
-    <div class="nav">
-        <%- include("include/buttonTop.ejs") %>
+
+    <div class="nav" style="text-align: right;">
+        <a href="#t"><img src="/top.png" alt="Top"></a>
     </div>
 </body>
 </html>

@@ -5,12 +5,15 @@
     <title>Settings</title>
 </head>
 <body>
-    <div class="nav">
-        <a href="/main">&lt; Home</a><br/>
-    </div>
+    <table class="nav" id="t">
+        <tr>
+            <td><a href="/main<%= tokenParam %>"><img src="/back.png" alt="Back"></a></td>
+            <td class="title">Settings</td>
+            <td style="min-width: 24px"></td>
+        </tr>
+    </table>
 
-    <div class="sb">Settings</div>
-    <div class="s">
+    <div class="section">
         <form action="/main">
             <input type="hidden" name="t" value="<%= compressedToken %>">
             <input type="hidden" name="s5" value="0"/>
@@ -47,7 +50,7 @@
                 <% themes.forEach((th, i) => { %>
                     <option value="<%= i %>" <%= (theme.id == th.id) ? 'selected' : '' %>><%= th.name %></option>
                 <% }) %>
-            </select>
+            </select> <br/>
 
             <input type="submit" value="Save">
         </form>

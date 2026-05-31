@@ -2,23 +2,27 @@
 <html lang="en">
 <head>
     <%- include("include/head.ejs") %>
-    <title>Direct msgs.</title>
+    <title>Direct messages</title>
 </head>
 <body>
-    <div class="nav">
-        <a href="/main<%= tokenParam %>">&lt; Home</a><br/>
-    </div>
-
-    <div class="sb">Direct messages</div>
-    <div class="s">
-        <% dms.forEach((d, i) => { %>
-            <!-- <img src="/wap/page.png" alt="DM"> -->
-            &gt;
-            <a href="/d/<%= d.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
+    <table class="nav" id="t">
+        <tr>
+            <td><a href="/main<%= tokenParam %>"><img src="/back.png" alt="Back"></a></td>
+            <td class="title">Direct messages</td>
+            <td style="min-width: 24px"></td>
+        </tr>
+    </table>
+    
+    <% dms.forEach((d, i) => { %>
+        <div class="guild">
+            <a class="hidelink" href="/d/<%= d.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
                 <%- fit(d.name) %>
             </a>
-            <%- (i != dms.length - 1) ? '<br/>' : '' %>
-        <% }) %>
+        </div>
+    <% }) %>
+
+    <div class="nav" style="text-align: right;">
+        <a href="#t"><img src="/top.png" alt="Top"></a>
     </div>
 </body>
 </html>

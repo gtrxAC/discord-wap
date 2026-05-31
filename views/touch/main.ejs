@@ -5,13 +5,38 @@
     <title>Discord WAP</title>
 </head>
 <body>
-    <div class="sb">Main menu</div>
-    <div class="s">
-        <!-- <img src="/wap/play.png" alt="arrow"> -->&gt; <a href="/g<%= tokenParam %>">Servers</a><br/>
-        <!-- <img src="/wap/play.png" alt="arrow"> -->&gt; <a href="/d<%= tokenParam %>">Direct msgs.</a><br/>
-        <!-- <img src="/wap/play.png" alt="arrow"> -->&gt; <a href="/set<%= tokenParam %>">Settings</a><br/>
-        <!-- <img src="/wap/play.png" alt="arrow"> -->&gt; <a href="/about<%= tokenParam %>">About</a><br/>
-        <!-- <img src="/wap/play.png" alt="arrow"> -->&gt; <a href="/">Log out</a>
+    <table class="nav">
+        <tr>
+            <td style="height: 24px"></td>
+            <td class="title">Discord WAP</td>
+            <td style="height: 24px"></td>
+        </tr>
+    </table>
+
+    <div class="guild">
+        <a class="hidelink" href="/g<%= tokenParam %>">
+            Servers
+        </a>
+    </div>
+    <div class="guild">
+        <a class="hidelink" href="/d<%= tokenParam %>">
+            Direct messages
+        </a>
+    </div>
+    <div class="guild">
+        <a class="hidelink" href="/set<%= tokenParam %>">
+            Settings
+        </a>
+    </div>
+    <div class="guild">
+        <a class="hidelink" href="/about<%= tokenParam %>">
+            About
+        </a>
+    </div>
+    <div class="guild">
+        <a class="hidelink" href="/">
+            Log out
+        </a>
     </div>
 </body>
 </html>

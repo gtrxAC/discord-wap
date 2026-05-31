@@ -47,7 +47,7 @@
                 <% themes.forEach((th, i) => { %>
                     <option value="<%= i %>" <%= (theme.id == th.id) ? 'selected' : '' %>><%= th.name %></option>
                 <% }) %>
-            </select>
+            </select> <br/>
 
             <input type="submit" value="Save">
         </form>

@@ -5,20 +5,27 @@
     <title><%= cname %></title>
 </head>
 <body>
-    <div class="nav">
-        <a href="<%= gpath %>/<%= id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">&lt; <%= cname %></a><br/>
-    </div>
+    <table class="nav" id="t">
+        <tr>
+            <td><a href="<%= gpath %>/<%= id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>"><img src="/back.png" alt="Back"></a></td>
+            <td class="title"><%- fit(cname) %></td>
+            <td><a href="#b"><img src="/btm.png" alt="Bottom"></a></td>
+        </tr>
+    </table>
 
-    <div class="sb">Reply to <%- fit(recname) %></div>
-    <form action="/<%= gpath %>/<%= id %>/send" method="post">
-        <input type="hidden" name="t" value="<%= compressedToken %>">
-        <input type="hidden" name="recipient" value="<%= rec %>"/>
-        <div><textarea name="text" id="text" rows="5" maxlength="2000"></textarea></div>
-        <div>
-            <input type="checkbox" name="ping" id="ping" value="1">
-            <label for="ping">Mention author</label>
-        </div>
-        <div><input type="submit" value="Send"></div>
-    </form>
+    <div class="section">
+        <div>Replying to <%- fit(recname) %></div>
+        <form action="<%= gpath %>/<%= id %>/send" method="post">
+            <input type="hidden" name="t" value="<%= compressedToken %>">
+            <input type="hidden" name="recipient" value="<%= rec %>"/>
+            <label for="text">Your message:</label>
+            <div><textarea name="text" id="text" rows="5" maxlength="2000"></textarea></div>
+            <div>
+                <input type="checkbox" name="ping" id="ping" value="1">
+                <label for="ping">Mention author</label>
+            </div>
+            <div><input type="submit" value="Send"></div>
+        </form>
+    </div>
 </body>
 </html>

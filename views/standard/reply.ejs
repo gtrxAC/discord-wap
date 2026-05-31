@@ -10,7 +10,7 @@
     </div>
 
     <div class="sb">Reply to <%- fit(recname) %></div>
-    <form action="/<%= gpath %>/<%= id %>/send" method="post">
+    <form action="<%= gpath %>/<%= id %>/send" method="post">
         <input type="hidden" name="t" value="<%= compressedToken %>">
         <input type="hidden" name="recipient" value="<%= rec %>"/>
         <div><textarea name="text" id="text" rows="5" maxlength="2000"></textarea></div>
