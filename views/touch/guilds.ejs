@@ -14,11 +14,11 @@
     </table>
     
     <% guilds.forEach((g, i) => { %>
-        <div class="guild">
-            <a class="hidelink" href="/g/<%= g.id %><%= tokenParam %>">
+        <a class="hidelink" href="/g/<%= g.id %><%= tokenParam %>">
+            <div class="guild">
                 <%- fit(g.name) %>
-            </a>
-        </div>
+            </div>
+        </a>
     <% }) %>
 
     <div class="nav" style="text-align: right;">

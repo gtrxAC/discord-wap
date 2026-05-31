@@ -14,11 +14,11 @@
     </table>
     
     <% dms.forEach((d, i) => { %>
-        <div class="guild">
-            <a class="hidelink" href="/d/<%= d.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
+        <a class="hidelink" href="/d/<%= d.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
+            <div class="guild">
                 <%- fit(d.name) %>
-            </a>
-        </div>
+            </div>
+        </a>
     <% }) %>
 
     <div class="nav" style="text-align: right;">
