@@ -19,27 +19,28 @@
     </table>
 
     <% if (settings.altChannelListLayout) { %>
-        <div class="sb"><%- fit(gname) %></div>
-        <div class="s">
-            <table>
-                <% channels.forEach(c => { %>
-                    <tr>
-                        <td><a href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a></td>
-                        <td class="chtime"><%= c.timestamp %></td>
-                    </tr>
-                <% }) %>
-            </table>
+        <div class="category">
+            <% channels.forEach((c, i) => { %>
+                <a class="hidelink" href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
+                    <table class="channel">
+                        <tr>
+                            <td class="chname"><span class="channelhash">#</span> <%- fit(c.name) %></td>
+                            <td class="chtime"><%= c.timestamp %></td>
+                        </tr>
+                    </table>
+                </a>
+            <% }) %>
         </div>
     <% } else { %>
         <% channelCategories.forEach(cat => { %>
             <div class="categorytitle"><%- fit(cat.name) %></div>
             <div class="category">
                 <% cat.children.forEach((c, i) => { %>
-                    <div class="channel">
-                        <a class="hidelink" href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
+                    <a class="hidelink" href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
+                        <div class="channel">
                             <span class="channelhash">#</span> <%- fit(c.name) %>
-                        </a>
-                    </div>
+                        </div>
+                    </a>
                 <% }) %>
             </div>
         <% }) %>
