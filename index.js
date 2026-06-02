@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const { minify } = require('html-minifier-terser');
 const ejs = require('ejs');
 
+const { testGateway, getNotifications } = require('./gateway');
 const { themes, getDefaultTheme } = require('./themes');
 const { compressID, decompressID, compressToken, decompressToken } = require('./compress');
 
@@ -356,11 +357,13 @@ function makeGetTokenMiddleware(isOptional) {
             reverseChat: (Number(settingsArr[6]) || 0) != 0,
         }
 
+        res.locals.authToken = decompressToken(res.locals.token).split('.').slice(0, 3).join('.');
+
         res.locals.headers = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0",
             "Accept": "*/*",
             "Accept-Language": "en-US,en;q=0.5",
-            "Authorization": decompressToken(res.locals.token).split('.').slice(0, 3).join('.'),
+            "Authorization": res.locals.authToken,
             "X-Discord-Locale": "en-GB",
             "X-Debug-Options": "bugReporterEnabled",
             "Sec-Fetch-Dest": "empty",
@@ -484,8 +487,11 @@ app.get("/about", getTokenOptional, (req, res) => {
 
 // Main menu (including DMs in WML version)
 app.get("/main", getToken, async (req, res) => {
-    res.locals.dms = (res.locals.format == 'wml') && await fetchDMs(req, res);
-    render(res, "main");
+    render(res, "main", {
+        dms: (res.locals.format == 'wml') && await fetchDMs(req, res),
+        notifications: await getNotifications(res.locals.authToken),
+        compressID
+    });
 })
 
 // Direct message list (separate page for HTML version)
@@ -812,3 +818,5 @@ app.use((err, req, res, next) => {
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on http://localhost:${process.env.PORT}`);
 });
+
+testGateway();
