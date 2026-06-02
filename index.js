@@ -457,7 +457,7 @@ app.use((req, res, next) => {
 async function render(res, viewName, viewVars) {
     if (res.locals.format == "wml") res.set("Content-Type", "text/vnd.wap.wml");
 
-    const rendered = await ejs.renderFile(`views/${res.locals.theme.id}/${viewName}.ejs`, {
+    const rendered = await ejs.renderFile(`views/${res.locals.theme.viewsDir}/${viewName}.ejs`, {
         ...res.locals,
         settings: res.locals.settings,
         ...viewVars

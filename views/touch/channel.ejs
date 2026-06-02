@@ -29,7 +29,7 @@
             <% if (m.referenced_message) { %>
                 <tr class="replyrow">
                     <td class="replyicon">
-                        <img src="/wap/<%= settings.dark ? 'reply-dark' : 'reply' %>.gif" alt="reply to">
+                        <img src="/wap/<%= (theme.id == 'touch_dark') ? 'reply-dark' : 'reply' %>.gif" alt="reply to">
                     </td>
                     <td class="reply">
                         <strong><%- fit(m.referenced_message.author.name) %></strong>
@@ -41,7 +41,7 @@
                 <td>
                     <% if (m.showAuthor) { %>
                         <% if (m.avatar) { %>
-                            <img src="/wap/avatar-overlay<%= settings.dark ? '-dark' : '' %>.png" width="28px" height="28px" class="overlay">
+                            <img src="/wap/avatar-overlay<%= (theme.id == 'touch_dark') ? '-dark' : '' %>.png" width="28px" height="28px" class="overlay">
                         <% } %>
                         <img src="<%= m.avatar ?? '/wap/avatar.png' %>" alt="avatar" width="28px" height="28px">
                     <% } %>

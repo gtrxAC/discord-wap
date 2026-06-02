@@ -14,12 +14,19 @@ const themes = [
         showAttachments: true,
     },
     {
-        id: "wml",
-        name: "WML",
-        viewsDir: "wml",
-        replyPreviewLength: 20,
-        showAttachments: false,
-    }
+        id: "touch_dark",
+        name: "Touch Dark",
+        viewsDir: "touch",
+        replyPreviewLength: 50,
+        showAttachments: true,
+    },
+    // {
+    //     id: "wml",
+    //     name: "WML",
+    //     viewsDir: "wml",
+    //     replyPreviewLength: 20,
+    //     showAttachments: false,
+    // }
 ]
 
 function getDefaultThemeName(req, res) {
