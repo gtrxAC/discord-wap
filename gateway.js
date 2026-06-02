@@ -111,7 +111,7 @@ class GatewaySession {
                     op: -1,
                     t: "GATEWAY_CONNECT",
                     d: {
-                        supported_events: ["READY", "J2ME_MESSAGE_CREATE"],
+                        supported_events: ["READY", "J2ME_MESSAGE_CREATE", "MESSAGE_ACK"],
                         url: "wss://gateway.discord.gg/?v=9&encoding=json"
                     }
                 });
@@ -135,6 +135,33 @@ class GatewaySession {
                 }
 
                 this.notifications.push(mention);
+                break;
+            }
+            case "MESSAGE_ACK": {
+                if (msg.d.ack_type) break;  // was not a channel being marked as read
+
+                const existingNotification = this.notifications.find(n => n.channelID == msg.d.channel_id);
+                
+                // no existing notification
+                // -> if pings were added by this event (e.g. by selecting "mark unread" in another client), add notification
+                if (!existingNotification) {
+                    if (msg.d.mention_count) {
+                        const info = this.getGuildAndChannelInfo(msg.d.channel_id);
+                        this.notifications.push({...info, mentionCount: msg.d.mention_count});
+                    }
+                    break;
+                }
+
+                // existing notification and now channel has no more mentions
+                // -> remove notification
+                if (!msg.d.mention_count) {
+                    this.notifications = this.notifications.filter(n => n.channelID != msg.d.channel_id);
+                    break;
+                }
+
+                // existing notification and channel's mention count changed
+                // -> update notification
+                existingNotification.mentionCount = msg.d.mention_count;
                 break;
             }
             case "GATEWAY_DISCONNECT": {

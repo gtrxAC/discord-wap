@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title>Inbox</title>
+    <style>
+        td {
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav" id="t">
+        <a href="/main<%= tokenParam %>">&lt; Home</a><br/>
+    </div>
+
+    <div class="sb">Inbox</div>
+    <div class="s">
+        <% if (notifications.length) { %>
+            <table style="width: 100%;">
+                <% notifications.forEach((n, i) => { %>
+                    <% path = n.guildName ? `/g/${compressID(n.guildID)}/c/${compressID(n.channelID)}` : `/d/${compressID(n.channelID)}` %>
+
+                    <tr>
+                        <td>
+                            <a href="<%= path %>">
+                                <% if (n.guildName) { %>
+                                    #<%- fit(n.channelName) %> <!--<br/><div class="inboxguild"><%- fit(n.guildName) %></div> -->
+                                <% } else { %>
+                                    <%- fit(n.channelName) %>
+                                <% } %>
+                            </a>
+                        </td>
+                        <td class="mention">
+                            <%= n.mentionCount %>
+                        </td>
+                    </tr>
+                <% }) %>
+            </table>
+
+        <% } else { %>
+            <div>You're all caught up!</div>
+        <% } %>
+    </div>
+
+    <% if (notifications.length > 1) { %>
+        <div class="nav">
+            <%- include("include/buttonTop.ejs") %>
+        </div>
+    <% } %>
+</body>
+</html>

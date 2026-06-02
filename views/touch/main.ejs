@@ -13,19 +13,6 @@
         </tr>
     </table>
 
-    <div class="section">
-        Notifications:
-        <%= JSON.stringify(notifications) %>
-        <% notifications.forEach(notif => { %>
-            <div>
-                <% path = notif.guildName ? `/g/${compressID(notif.guildID)}/c/${compressID(notif.channelID)}` : `/d/${compressID(notif.channelID)}` %>
-                <% label = notif.guildName ? `${notif.guildName} #${notif.channelName}` : notif.channelName %>
-                <a href="<%= path %>"><%- fit(label) %> (<%= notif.mentionCount %>)</a>
-            </div>
-
-        <% }) %>
-    </div>
-
     <a class="hidelink" href="/g<%= tokenParam %>">
         <div class="guild">
             Servers
@@ -34,6 +21,11 @@
     <a class="hidelink" href="/d<%= tokenParam %>">
         <div class="guild">
             Direct messages
+        </div>
+    </a>
+    <a class="hidelink" href="/i<%= tokenParam %>">
+        <div class="guild">
+            Inbox
         </div>
     </a>
     <a class="hidelink" href="/set<%= tokenParam %>">

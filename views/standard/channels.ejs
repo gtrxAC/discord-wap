@@ -13,10 +13,11 @@
     <div class="nav" id="t">
         <a href="/g<%= tokenParam %>">&lt; Servers</a><br/>
     </div>
+
     <% if (settings.altChannelListLayout) { %>
         <div class="sb"><%- fit(gname) %></div>
         <div class="s">
-            <table>
+            <table style="width: 100%;">
                 <% channels.forEach(c => { %>
                     <tr>
                         <td><a href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>"><%- fit(c.name) %></a></td>
@@ -37,6 +38,7 @@
             </div>
         <% }) %>
     <% } %>
+
     <div class="nav">
         <%- include("include/buttonTop.ejs") %>
     </div>

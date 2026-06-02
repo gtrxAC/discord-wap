@@ -5,7 +5,7 @@
     <title>Servers</title>
 </head>
 <body>
-    <div class="nav">
+    <div class="nav" id="t">
         <a href="/main<%= tokenParam %>">&lt; Home</a><br/>
     </div>
     
@@ -16,6 +16,10 @@
             &gt; <a href="/g/<%= g.id %><%= tokenParam %>"><%- fit(g.name) %></a>
             <%- (i != guilds.length - 1) ? '<br/>' : '' %>
         <% }) %>
+    </div>
+
+    <div class="nav">
+        <%- include("include/buttonTop.ejs") %>
     </div>
 </body>
 </html>

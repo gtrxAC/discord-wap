@@ -5,7 +5,7 @@
     <title>Direct msgs.</title>
 </head>
 <body>
-    <div class="nav">
+    <div class="nav" id="t">
         <a href="/main<%= tokenParam %>">&lt; Home</a><br/>
     </div>
 
@@ -19,6 +19,10 @@
             </a>
             <%- (i != dms.length - 1) ? '<br/>' : '' %>
         <% }) %>
+    </div>
+
+    <div class="nav">
+        <%- include("include/buttonTop.ejs") %>
     </div>
 </body>
 </html>

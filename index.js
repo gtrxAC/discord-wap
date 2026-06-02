@@ -489,8 +489,6 @@ app.get("/about", getTokenOptional, (req, res) => {
 app.get("/main", getToken, async (req, res) => {
     render(res, "main", {
         dms: (res.locals.format == 'wml') && await fetchDMs(req, res),
-        notifications: await getNotifications(res.locals.authToken),
-        compressID
     });
 })
 
@@ -498,6 +496,27 @@ app.get("/main", getToken, async (req, res) => {
 app.get("/d", getToken, async (req, res) => {
     res.locals.dms = await fetchDMs(req, res);
     render(res, "dms");
+})
+
+// Inbox (mentions and received DMs)
+app.get("/i", getToken, async (req, res) => {
+    const notifications = await getNotifications(res.locals.authToken);
+
+    notifications.sort((a, b) => {
+        // DMs first
+        if (!a.guildName && b.guildName) return -1;
+        if (!b.guildName && a.guildName) return 1;
+
+        // otherwise sort by channel name alphabetically
+        if (a.channelName < b.channelName) return -1;
+        if (b.channelName < a.channelName) return 1;
+        return 0;
+    });
+
+    render(res, "inbox", {
+        notifications,
+        compressID
+    });
 })
 
 const guildCache = new LRUCache({max: 200, ttl: 10*60*1000, updateAgeOnGet: false})
