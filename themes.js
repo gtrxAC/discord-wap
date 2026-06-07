@@ -5,6 +5,8 @@ const themes = [
         viewsDir: "standard",
         replyPreviewLength: 50,
         showAttachments: true,
+        messageCountDefault: 15,
+        messagesOnBottomDefault: true
     },
     {
         id: "touch",
@@ -12,6 +14,8 @@ const themes = [
         viewsDir: "touch",
         replyPreviewLength: 50,
         showAttachments: true,
+        messageCountDefault: 20,
+        messagesOnBottomDefault: true
     },
     {
         id: "touch_dark",
@@ -19,6 +23,8 @@ const themes = [
         viewsDir: "touch",
         replyPreviewLength: 50,
         showAttachments: true,
+        messageCountDefault: 20,
+        messagesOnBottomDefault: true
     },
     // {
     //     id: "wml",
@@ -26,6 +32,8 @@ const themes = [
     //     viewsDir: "wml",
     //     replyPreviewLength: 20,
     //     showAttachments: false,
+    //     messageCountDefault: 10,
+    //     messagesOnBottomDefault: false,
     // }
 ]
 

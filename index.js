@@ -329,7 +329,15 @@ function makeGetTokenMiddleware(isOptional) {
         }
         const settingsArr = res.locals.token.split('.').slice(3);
 
-        let messageLoadCount = Number(settingsArr[0]) || 10;
+        const themeIndex = Number(settingsArr[7]);
+        
+        if (themeIndex >= 0 && themeIndex < themes.length) {
+            res.locals.theme = themes[themeIndex];
+        }
+
+        res.locals.format = (res.locals.theme.id == 'wml') ? 'wml' : 'html';
+
+        let messageLoadCount = Number(settingsArr[0]) || res.locals.theme.messageCountDefault;
         if (messageLoadCount > 100) messageLoadCount = 100;
         else if (messageLoadCount < 1) messageLoadCount = 1;
 
@@ -339,14 +347,6 @@ function makeGetTokenMiddleware(isOptional) {
         if (timeOffsetHours > 14) timeOffsetHours = 14;
         if (![0, 15, 30, 45].includes(timeOffsetMinutes)) timeOffsetMinutes = 0;
 
-        const themeIndex = Number(settingsArr[7]);
-        
-        if (themeIndex >= 0 && themeIndex < themes.length) {
-            res.locals.theme = themes[themeIndex];
-        }
-
-        res.locals.format = (res.locals.theme.id == 'wml') ? 'wml' : 'html';
-
         res.locals.settings = {
             messageLoadCount,
             altChannelListLayout: (Number(settingsArr[1]) || 0) != 0,
@@ -354,7 +354,7 @@ function makeGetTokenMiddleware(isOptional) {
             timeOffsetMinutes,
             use12hTime: (Number(settingsArr[4]) || 0) != 0,
             limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
-            reverseChat: (Number(settingsArr[6]) || 0) != 0,
+            reverseChat: (Number(settingsArr[6]) || res.locals.theme.messagesOnBottomDefault) != 0,
         }
 
         res.locals.authToken = decompressToken(res.locals.token).split('.').slice(0, 3).join('.');
