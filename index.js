@@ -441,10 +441,17 @@ app.use((req, res, next) => {
         // match long words, at least 16 consecutive letters
         str = str.replace(/([^\s]{16,})/g, (match) => {
             let result = '';
+            let canPlace = true;
+            
             match.split('').forEach((chr, i) => {
                 result += chr;
+
+                // don't break apart other html entities
+                if (chr == '&') canPlace = false;
+                else if (chr == ';') canPlace = true;
+
                 // place zero-width spaces (word break opportunities) every 4 characters starting from char position 12 if there are at least 2 more chars left to go
-                if ((i + 1) % 4 == 0 && i >= 11 && str.length > (i + 2)) result += "&#8203;";
+                if (canPlace && (i + 1) % 4 == 0 && i >= 11 && str.length > (i + 2)) result += "&#8203;";
             })
             return result;
         })
