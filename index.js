@@ -828,7 +828,8 @@ app.post(["/d/:channelid/send", "/g/:guildid/c/:channelid/send"], getToken, asyn
 app.get("/set", getToken, (req, res) => {
     render(res, "settings", {
         token: req.query.token,
-        themes
+        themes,
+        timePreview: getIdTimestamp(res, ((BigInt(Date.now()) - 1420070400000n) << 22n).toString())
     });
 })
 
