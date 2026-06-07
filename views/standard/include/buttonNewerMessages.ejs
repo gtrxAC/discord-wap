@@ -1,0 +1,10 @@
+<% if (page > 0) { %>
+    <form action="<%= gpath %>/<%= id %><%= settings.reverseChat ? '' : '#b' %>" class="nav">
+        <input type="hidden" name="t" value="<%= compressedToken %>">
+        <% if (page > 1) { %>
+            <input type="hidden" name="a" value="<%= settings.reverseChat ? messages[messages.length - 1].id : messages[0].id %>"/>
+            <input type="hidden" name="p" value="<%= page - 1 %>"/>
+        <% } %>
+        <input type="submit" value="Newer messages">
+    </form>
+<% } %>

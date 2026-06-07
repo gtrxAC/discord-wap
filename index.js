@@ -354,7 +354,7 @@ function makeGetTokenMiddleware(isOptional) {
             timeOffsetMinutes,
             use12hTime: (Number(settingsArr[4]) || 0) != 0,
             limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
-            reverseChat: (Number(settingsArr[6]) || res.locals.theme.messagesOnBottomDefault) != 0,
+            reverseChat: (Number(settingsArr[6] ?? res.locals.theme.messagesOnBottomDefault)) != 0,
         }
 
         res.locals.authToken = decompressToken(res.locals.token).split('.').slice(0, 3).join('.');
@@ -731,7 +731,9 @@ app.get(["/d/:channelid", "/g/:guildid/c/:channelid"], getToken, async (req, res
     })
 
     // See which messages the author line and profile pic should be shown for
-    messagesGet.reverse();
+    if (res.locals.settings.reverseChat && res.locals.format == 'html') {
+        messagesGet.reverse();
+    }
     let clusterStart = 0;
     let above = null;
 
@@ -746,13 +748,8 @@ app.get(["/d/:channelid", "/g/:guildid/c/:channelid"], getToken, async (req, res
         }
         above = m;
     })
-    messagesGet.reverse();
 
     const messages = messagesGet.map(m => parseMessageObject(req, res, m));
-
-    if (res.locals.settings.reverseChat && res.locals.format == 'html') {
-        messages.reverse();
-    }
 
     render(res, "channel", {
         page: req.query.p ?? 0,
