@@ -730,6 +730,10 @@ app.get(["/d/:channelid", "/g/:guildid/c/:channelid"], getToken, async (req, res
         userCache.set(msg.author.id, msg.author.username);
     })
 
+    // Message ID that should be marked as read
+    // (don't mark as read if reading an older page of messages)
+    const markReadID = !req.query.p && messagesGet.length && messagesGet[0].id;
+
     // See which messages the author line and profile pic should be shown for
     if (res.locals.settings.reverseChat && res.locals.format == 'html') {
         messagesGet.reverse();
@@ -761,6 +765,18 @@ app.get(["/d/:channelid", "/g/:guildid/c/:channelid"], getToken, async (req, res
         gname: guildName,
         gpath: guildPath,
     });
+
+    // Mark latest message as read
+    if (markReadID) {
+        axios.post(
+            `${DEST_BASE}/channels/${decompressID(channelID, 'channel')}/messages/${markReadID}/ack`,
+            {token: null},
+            {headers: res.locals.headers}
+        )
+        .catch(e => {
+            console.log(e);
+        })
+    }
 })
 
 app.get(["/d/:channelid/send", "/g/:guildid/c/:channelid/send"], getToken, async (req, res) => {
