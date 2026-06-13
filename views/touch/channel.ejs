@@ -63,7 +63,7 @@
                     <% } %>
                     <% if (m.attachments) { %>
                         <% m.attachments.forEach(att => { %>
-                            <div><a href="<%= att.url %>"><%- att.filename %></a></div>
+                            <div><a href="<%= att.url %>"><%- fit(att.filename) %></a></div>
                         <% }) %>
                     <% } %>
                 </td>

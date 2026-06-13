@@ -431,6 +431,33 @@ app.use((req, res, next) => {
     next();
 })
 
+function allowZeroWidthSpaces(req) {
+    const ua = (req.headers["user-agent"] ?? '').toLowerCase();
+
+    // SE Z600 displays zero-width spaces as visible spaces, so don't use them
+    return !(ua.startsWith('sonyericsson') && /midp-1/.test(ua))
+}
+
+function placeZeroWidthSpaces(str) {
+    // match long words, at least 16 consecutive letters
+    return str.replace(/([^\s]{16,})/g, (match) => {
+        let result = '';
+        let canPlace = true;
+        
+        match.split('').forEach((chr, i) => {
+            result += chr;
+
+            // don't break apart other html entities
+            if (chr == '&') canPlace = false;
+            else if (chr == ';') canPlace = true;
+
+            // place zero-width spaces (word break opportunities) every 4 characters starting from char position 12 if there are at least 2 more chars left to go
+            if (canPlace && (i + 1) % 4 == 0 && i >= 11 && str.length > (i + 2)) result += "&#8203;";
+        })
+        return result;
+    })
+}
+
 app.use((req, res, next) => {
     function sanitize(str) {
         return sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
@@ -438,23 +465,9 @@ app.use((req, res, next) => {
     res.locals.fit = (str) => {
         str = sanitize(str);
 
-        // match long words, at least 16 consecutive letters
-        str = str.replace(/([^\s]{16,})/g, (match) => {
-            let result = '';
-            let canPlace = true;
-            
-            match.split('').forEach((chr, i) => {
-                result += chr;
-
-                // don't break apart other html entities
-                if (chr == '&') canPlace = false;
-                else if (chr == ';') canPlace = true;
-
-                // place zero-width spaces (word break opportunities) every 4 characters starting from char position 12 if there are at least 2 more chars left to go
-                if (canPlace && (i + 1) % 4 == 0 && i >= 11 && str.length > (i + 2)) result += "&#8203;";
-            })
-            return result;
-        })
+        if (allowZeroWidthSpaces(req)) {
+            str = placeZeroWidthSpaces(str);
+        }
         str = str.replace(/\n/g, "<br/>");
         return str;
     }

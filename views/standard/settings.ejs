@@ -6,7 +6,7 @@
 </head>
 <body>
     <div class="nav">
-        <a href="/main">&lt; Home</a><br/>
+        <a href="/main">&lt; Home</a>
     </div>
 
     <form action="/main">
@@ -39,6 +39,9 @@
 
 
         <div class="sb">Time format</div>
+        <div class="s">
+            Current time: <strong><%= timePreview %></strong>
+        </div>
 
         <label for="s2">Time offset (h):</label> <br/>
         <input type="number" name="s2" id="s2" min="-20" max="20" value="<%= settings.timeOffsetHours %>"/> <br/>
@@ -52,7 +55,7 @@
             <option value="1" <%= settings.use12hTime ? 'selected' : '' %>>12 hours</option>
         </select> <br/>
 
-        <input type="submit" value="Save">
+        <input type="submit" value="Save"><br/>
 
         <small>To save your settings, press 'save', then add the page to your bookmarks again.</small>
     </form>
