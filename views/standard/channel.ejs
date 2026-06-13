@@ -51,7 +51,7 @@
         <% if (m.attachments) { %>
             <% m.attachments.forEach(att => { %>
                 <div>
-                    <img src="/wap/page.png" alt="attachment">
+                    <!-- <img src="/wap/page.png" alt="attachment"> -->
                     <a href="<%= att.url %>"><%- fit(att.filename) %></a>
                 </div>
             <% }) %>
@@ -59,8 +59,7 @@
 
         <div class="time">
             <%= m.edited ? '(edited) ' : '' %>
-            <%= m.timestamp %>
-            <a href="<%= gpath %>/<%= id %>/reply/<%= m.id %>?recname=<%= encodeURIComponent(m.author.name) %><%= tokenParam.replace('?', '&') %>">&gt;</a>
+            <%= m.timestamp %> <a href="<%= gpath %>/<%= id %>/reply/<%= m.id %>?recname=<%= encodeURIComponent(m.author.name) %><%= tokenParam.replace('?', '&') %>">&gt;</a>
         </div>
     <% }) %>
 
