@@ -25,7 +25,7 @@ function testGateway() {
 
 class GatewaySession {
     constructor(token) {
-        console.log("Connected");
+        // console.log("Connected");
 
         this.token = token;
         this.userID = atob(token.split('.')[0]);
@@ -37,20 +37,20 @@ class GatewaySession {
 
         this.socket.on('data', (msg) => {
             msg = msg.toString();
-            console.log("Received", msg);
+            // console.log("Received", msg);
             this.receiveBuffer += msg;
 
             while (this.receiveBuffer.length) {
-                console.log("REcbuf: '", this.receiveBuffer + "'")
+                // console.log("REcbuf: '", this.receiveBuffer + "'")
                 const receivedMessage = this.receiveBuffer.split('\n')[0];
                 try {
                     const msgJson = JSON.parse(receivedMessage);
                     this.receiveBuffer = this.receiveBuffer.slice(receivedMessage.length + 1).trim();//this.receiveBuffer.split('\n').slice(1).join('\n');
                     this.handleMessage(msgJson);
-                    console.log("MSG: " + msgJson)
+                    // console.log("MSG: " + msgJson)
                 } catch (e) {
                     // message got cut off (happens at 65536 characters), wait for the next chunk
-                    console.log(e);
+                    // console.log(e);
                     return;
                 }
             }
@@ -62,7 +62,7 @@ class GatewaySession {
     }
 
     send(json) {
-        console.log("Sending", json);
+        // console.log("Sending", json);
         this.socket.write(JSON.stringify(json) + '\n');
     }
 
@@ -80,7 +80,7 @@ class GatewaySession {
                     return;
                 }
 
-                console.log("Heartbeat");
+                // console.log("Heartbeat");
 
                 this.send({
                     op: 1,
@@ -103,7 +103,7 @@ class GatewaySession {
             return;
         }
 
-        console.log(msg.t);
+        // console.log(msg.t);
 
         switch (msg.t) {
             case "GATEWAY_HELLO": {
@@ -172,7 +172,7 @@ class GatewaySession {
     }
 
     handleError(err) {
-        console.log(err);
+        // console.log(err);
         this.error = err;
         this.close();
     }
@@ -186,13 +186,13 @@ class GatewaySession {
     }
 
     close() {
-        console.log("Disconnected");
+        // console.log("Disconnected");
         this.socket.destroy();
         this.socket = null;
     }
 
     getNotifications() {
-        console.log("Requested notifications");
+        // console.log("Requested notifications");
 
         this.updateExpiration();
 
