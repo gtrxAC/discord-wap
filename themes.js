@@ -10,6 +10,7 @@ const themes = [
         basic: false,
         oneLineTruncate: false,
         guildsPageSize: 30,
+        stripEmoji: true,
     },
     {
         id: "basic",
@@ -22,6 +23,7 @@ const themes = [
         basic: true,
         oneLineTruncate: true,
         guildsPageSize: 20,
+        stripEmoji: true,
     },
     {
         id: "touch",
@@ -33,6 +35,7 @@ const themes = [
         messagesOnBottomDefault: true,
         oneLineTruncate: false,
         guildsPageSize: 999,
+        stripEmoji: false,
     },
     {
         id: "touch_dark",
@@ -44,6 +47,7 @@ const themes = [
         messagesOnBottomDefault: true,
         oneLineTruncate: false,
         guildsPageSize: 999,
+        stripEmoji: false,
     },
     // {
     //     id: "wml",

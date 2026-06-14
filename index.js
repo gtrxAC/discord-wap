@@ -79,8 +79,11 @@ function normalizeStr(str, convertEmoji = false) {
     return str;
 }
 
-function normalizeStrRemoveEmoji(str) {
+function normalizeStripEmoji(req, str) {
     str = normalizeStr(str);
+
+    if (!req.res.locals.theme.stripEmoji) return str;
+
     const strConvEmoji = normalizeStr(str, true);
     if (str == strConvEmoji) return str;
 
@@ -118,9 +121,9 @@ function parseMessageObject(req, res, msg) {
         const author = msg.author.global_name ?? msg.author.username;
         result.author = {
             id: compressID(msg.author.id),
-            name: normalizeStrRemoveEmoji(author),
+            name: normalizeStripEmoji(req, author),
         }
-        result.authorLine = normalizeStrRemoveEmoji(author + " " + getIdTimestamp(res, msg.id));
+        result.authorLine = normalizeStripEmoji(req, author + " " + getIdTimestamp(res, msg.id));
         result.timestamp = getIdTimestamp(res, msg.id);  // separate timestamp for html version
     }
     if (msg.type >= 1 && msg.type <= 11) {
@@ -144,7 +147,7 @@ function parseMessageObject(req, res, msg) {
         }
         result.referenced_message = {
             author: {
-                name: normalizeStrRemoveEmoji(msg.referenced_message.author.global_name ?? msg.referenced_message.author.username),
+                name: normalizeStripEmoji(req, msg.referenced_message.author.global_name ?? msg.referenced_message.author.username),
                 id: compressID(msg.referenced_message.author.id),
             },
             content
@@ -393,7 +396,7 @@ async function fetchDMs(req, res) {
             // populate cache
             channelNameCache.set(ch.id, cacheName);
 
-            result.name = normalizeStrRemoveEmoji(result.name, true);
+            result.name = normalizeStripEmoji(req, result.name);
             return result;
         })
 }
@@ -500,7 +503,7 @@ async function getGuilds(req, res) {
 
         const guilds = sortedGuildsGet.map(g => ({
             id: compressID(g.id),
-            name: normalizeStrRemoveEmoji(g.name, true),
+            name: normalizeStripEmoji(req, g.name, true),
         }))
         guildCache.set(res.locals.userID, guilds);
         return guilds;
@@ -607,8 +610,8 @@ app.get(["/g/:guildid", "/g/:guildid/c"], getToken, async (req, res) => {
             .slice(0, (res.locals.format == 'wml') ? 15 : 30)
             .map(ch => ({
                 id: compressID(ch.id),
-                name: normalizeStrRemoveEmoji(ch.name),
-                label: normalizeStrRemoveEmoji(getIdTimestamp(res, ch.last_message_id) + ' ' + ch.name),
+                name: normalizeStripEmoji(req, ch.name),
+                label: normalizeStripEmoji(req, getIdTimestamp(res, ch.last_message_id) + ' ' + ch.name),
                 timestamp: getIdTimestamp(res, ch.last_message_id),
                 parent_id: ch.parent_id
             }))
@@ -635,8 +638,8 @@ app.get(["/g/:guildid", "/g/:guildid/c"], getToken, async (req, res) => {
             .sort((a, b) => a.position - b.position)
             .map(ch => ({
                 id: compressID(ch.id),
-                name: normalizeStrRemoveEmoji(ch.name),
-                label: normalizeStrRemoveEmoji('#' + ch.name),
+                name: normalizeStripEmoji(req, ch.name),
+                label: normalizeStripEmoji(req, '#' + ch.name),
                 parent_id: ch.parent_id
             }))
     }
@@ -645,7 +648,7 @@ app.get(["/g/:guildid", "/g/:guildid/c"], getToken, async (req, res) => {
         .sort((a, b) => a.position - b.position)
         .map(ch => ({
             ...ch,
-            name: normalizeStrRemoveEmoji(ch.name),
+            name: normalizeStripEmoji(req, ch.name),
             children: []
         }));
 
