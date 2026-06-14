@@ -490,16 +490,16 @@ async function getGuilds(req, res) {
         )
 
         const folders = userSettingsGet.data.guild_folders;
-        const unsortedGuildsGet = [...guildsGet.data];
-        const sortedGuildsGet = [];
+        let unsortedGuildsGet = [...guildsGet.data];
+        let sortedGuildsGet = [];
 
         folders.forEach(f => {
             f.guild_ids.forEach(gid => {
                 sortedGuildsGet.push(guildsGet.data.find(g => g.id == gid));
-                unsortedGuildsGet.filter(g => g.id != gid);
+                unsortedGuildsGet = unsortedGuildsGet.filter(g => g.id != gid);
             })
         })
-        sortedGuildsGet.concat(...unsortedGuildsGet);
+        sortedGuildsGet = sortedGuildsGet.concat(...unsortedGuildsGet);
 
         const guilds = sortedGuildsGet.map(g => ({
             id: compressID(g.id),
