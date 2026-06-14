@@ -15,7 +15,7 @@
             <!-- <img src="/wap/page.png" alt="DM"> -->
             &gt;
             <a href="/d/<%= d.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
-                <%- fit(d.name) %>
+                <%- oneLine(d.name) %>
             </a>
             <%- (i != dms.length - 1) ? '<br/>' : '' %>
         <% }) %>

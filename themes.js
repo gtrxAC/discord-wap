@@ -7,17 +7,19 @@ const themes = [
         showAttachments: true,
         messageCountDefault: 15,
         messagesOnBottomDefault: true,
-        basic: false
+        basic: false,
+        oneLineTruncate: false,
     },
     {
         id: "basic",
         name: "Basic",
         viewsDir: "standard",
-        replyPreviewLength: 30,
+        replyPreviewLength: 25,
         showAttachments: false,
         messageCountDefault: 10,
         messagesOnBottomDefault: false,
-        basic: true
+        basic: true,
+        oneLineTruncate: true,
     },
     {
         id: "touch",
@@ -26,7 +28,8 @@ const themes = [
         replyPreviewLength: 50,
         showAttachments: true,
         messageCountDefault: 20,
-        messagesOnBottomDefault: true
+        messagesOnBottomDefault: true,
+        oneLineTruncate: false,
     },
     {
         id: "touch_dark",
@@ -35,7 +38,8 @@ const themes = [
         replyPreviewLength: 50,
         showAttachments: true,
         messageCountDefault: 20,
-        messagesOnBottomDefault: true
+        messagesOnBottomDefault: true,
+        oneLineTruncate: false,
     },
     // {
     //     id: "wml",
@@ -45,6 +49,7 @@ const themes = [
     //     showAttachments: false,
     //     messageCountDefault: 10,
     //     messagesOnBottomDefault: false,
+    //     oneLineTruncate: false,
     // }
 ]
 

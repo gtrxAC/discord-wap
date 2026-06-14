@@ -4,7 +4,6 @@ const axios = require('axios');
 const EmojiConvertor = require('emoji-js');
 const path = require('path');
 const { LRUCache } = require('lru-cache');
-const sanitizeHtml = require('sanitize-html');
 const cookieParser = require('cookie-parser');
 const { minify } = require('html-minifier-terser');
 const ejs = require('ejs');
@@ -12,6 +11,7 @@ const ejs = require('ejs');
 const { testGateway, getNotifications } = require('./gateway');
 const { themes, getDefaultTheme } = require('./themes');
 const { compressID, decompressID, compressToken, decompressToken } = require('./compress');
+const stringFormatMiddleware = require('./format');
 
 const emoji = new EmojiConvertor();
 emoji.replace_mode = 'unified';
@@ -24,6 +24,8 @@ app.set('views', './views');
 
 app.use(express.static(path.join(__dirname, 'static')));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(stringFormatMiddleware);
 
 // ID -> username mapping cache (used for parsing mentions)
 const userCache = new LRUCache({max: 10000});
@@ -70,48 +72,21 @@ function getIdTimestamp(res, id) {
     }
 }
 
-/**
- * Get an approximation of how many characters can fit on one line on the requester's device's display.
- * @param {express.Request} req The express request to check
- * @returns A rough and somewhat conservative estimate of how many columns the user's device's screen has
- */
-function getCharactersPerLine(req) {
-    const ua = req.headers['user-agent'];
-    if (!ua) return 16;
-
-    // don't limit on modern devices
-    if (req.res.locals.format == "html") return 999;
-
-    // siemens: assume 101 pixel wide display (there are larger ones too, but most of them have decent j2me support anyway)
-    // small font size, tested on siemens a65. a55 seems to use the same font
-    // for medium font size, a suitable number would be 15
-    if (ua.startsWith('SIE-')) return 18;
-    
-    // could check some non-nokia models, for now, make a safe assumption of 16 chars
-    // could also use uaprof on devices that have that
-    if (!ua.startsWith('Nokia')) return 16;
-
-    // models with 84×48 display
-    if (/^Nokia(3330|5510|8265|8310)/.test(ua)) return 16;
-
-    // models with 96×65 or similar display (list may be incomplete)
-    if (/^Nokia(1101|3350|3410|35[^0]\d|3610|6010|6210|6310|6510|7110|8910)/.test(ua)) return 19;
-
-    // other nokias, assume a 128×128 or 128×160 display
-    return 21;
+function normalizeStr(str, convertEmoji = false) {
+    if (str === null || str === undefined) return "(err)";
+    str = String(str);
+    if (convertEmoji) str = parseMessageContentText(str);
+    return str;
 }
 
-function oneLine(req, str, showEmoji = true) {
-    // Make sure string fits on one line on the screen
-    if (str === null || str === undefined) return "(err)";
+function normalizeStrRemoveEmoji(str) {
+    str = normalizeStr(str);
+    const strConvEmoji = normalizeStr(str, true);
+    if (str == strConvEmoji) return str;
 
-    if (showEmoji) str = parseMessageContentText(String(str));
-    else str = String(str);
-
-    const chars = getCharactersPerLine(req);
-
-    if (str.length > chars) return str.substring(0, chars - 1).trimEnd() + "...";
-    return str;
+    const strNoEmoji = strConvEmoji.replace(/:\w+:/g, '');
+    if (strNoEmoji.length) return strNoEmoji;
+    return strConvEmoji;
 }
 
 function getError(e) {
@@ -143,9 +118,9 @@ function parseMessageObject(req, res, msg) {
         const author = msg.author.global_name ?? msg.author.username;
         result.author = {
             id: compressID(msg.author.id),
-            name: oneLine(req, author, false)
+            name: normalizeStrRemoveEmoji(author),
         }
-        result.authorLine = oneLine(req, author + " " + getIdTimestamp(res, msg.id), false);
+        result.authorLine = normalizeStrRemoveEmoji(author + " " + getIdTimestamp(res, msg.id));
         result.timestamp = getIdTimestamp(res, msg.id);  // separate timestamp for html version
     }
     if (msg.type >= 1 && msg.type <= 11) {
@@ -169,7 +144,7 @@ function parseMessageObject(req, res, msg) {
         }
         result.referenced_message = {
             author: {
-                name: oneLine(req, msg.referenced_message.author.global_name ?? msg.referenced_message.author.username, false),
+                name: normalizeStrRemoveEmoji(msg.referenced_message.author.global_name ?? msg.referenced_message.author.username),
                 id: compressID(msg.referenced_message.author.id),
             },
             content
@@ -418,59 +393,15 @@ async function fetchDMs(req, res) {
             // populate cache
             channelNameCache.set(ch.id, cacheName);
 
-            result.name = oneLine(req, result.name);
+            result.name = normalizeStrRemoveEmoji(result.name, true);
             return result;
         })
 }
 
-app.use(cookieParser());
 
 app.use((req, res, next) => {
     res.locals.format = req.accepts("html") ? "html" : "wml";
     res.locals.theme = getDefaultTheme(req, res);
-    next();
-})
-
-function allowZeroWidthSpaces(req) {
-    const ua = (req.headers["user-agent"] ?? '').toLowerCase();
-
-    // SE Z600 displays zero-width spaces as visible spaces, so don't use them
-    return !(ua.startsWith('sonyericsson') && /midp-1/.test(ua))
-}
-
-function placeZeroWidthSpaces(str) {
-    // match long words, at least 16 consecutive letters
-    return str.replace(/([^\s]{16,})/g, (match) => {
-        let result = '';
-        let canPlace = true;
-        
-        match.split('').forEach((chr, i) => {
-            result += chr;
-
-            // don't break apart other html entities
-            if (chr == '&') canPlace = false;
-            else if (chr == ';') canPlace = true;
-
-            // place zero-width spaces (word break opportunities) every 4 characters starting from char position 12 if there are at least 2 more chars left to go
-            if (canPlace && (i + 1) % 4 == 0 && i >= 11 && str.length > (i + 2)) result += "&#8203;";
-        })
-        return result;
-    })
-}
-
-app.use((req, res, next) => {
-    function sanitize(str) {
-        return sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
-    }
-    res.locals.fit = (str) => {
-        str = sanitize(str);
-
-        if (allowZeroWidthSpaces(req)) {
-            str = placeZeroWidthSpaces(str);
-        }
-        str = str.replace(/\n/g, "<br/>");
-        return str;
-    }
     next();
 })
 
@@ -551,7 +482,7 @@ async function getGuilds(req, res) {
         )
         const guilds = guildsGet.data.map(g => ({
             id: compressID(g.id),
-            name: oneLine(req, g.name)
+            name: normalizeStrRemoveEmoji(g.name, true),
         }))
         guildCache.set(res.locals.userID, guilds);
         return guilds;
@@ -647,8 +578,8 @@ app.get(["/g/:guildid", "/g/:guildid/c"], getToken, async (req, res) => {
             .slice(0, (res.locals.format == 'wml') ? 15 : 30)
             .map(ch => ({
                 id: compressID(ch.id),
-                name: oneLine(req, ch.name),
-                label: oneLine(req, getIdTimestamp(res, ch.last_message_id) + ' ' + ch.name),
+                name: normalizeStrRemoveEmoji(ch.name),
+                label: normalizeStrRemoveEmoji(getIdTimestamp(res, ch.last_message_id) + ' ' + ch.name),
                 timestamp: getIdTimestamp(res, ch.last_message_id),
                 parent_id: ch.parent_id
             }))
@@ -675,15 +606,19 @@ app.get(["/g/:guildid", "/g/:guildid/c"], getToken, async (req, res) => {
             .sort((a, b) => a.position - b.position)
             .map(ch => ({
                 id: compressID(ch.id),
-                name: oneLine(req, ch.name),
-                label: oneLine(req, '#' + ch.name),
+                name: normalizeStrRemoveEmoji(ch.name),
+                label: normalizeStrRemoveEmoji('#' + ch.name),
                 parent_id: ch.parent_id
             }))
     }
 
     const allChannelCategories = channelsGet.filter(ch => ch.type == 4)
         .sort((a, b) => a.position - b.position)
-        .map(ch => ({...ch, children: []}));
+        .map(ch => ({
+            ...ch,
+            name: normalizeStrRemoveEmoji(ch.name),
+            children: []
+        }));
 
     // default category for channels that are not in any category (shown at the top both on official clients and on wap)
     const defaultCategory = {

@@ -1,0 +1,101 @@
+/**
+ * String formatting functions
+ */
+
+const sanitizeHtml = require('sanitize-html');
+
+function sanitize(str) {
+    return sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
+}
+
+/**
+ * Get an approximation of how many characters can fit on one line on the requester's device's display.
+ * @param {express.Request} req The express request to check
+ * @returns A rough and somewhat conservative estimate of how many columns the user's device's screen has
+ */
+function getCharactersPerLine(req) {
+    const ua = req.headers['user-agent'];
+    if (!ua) return 16;
+
+    // siemens: assume 101 pixel wide display (there are larger ones too, but most of them have decent j2me support anyway)
+    // small font size, tested on siemens a65. a55 seems to use the same font
+    // for medium font size, a suitable number would be 15
+    if (ua.startsWith('SIE-')) return 18;
+    
+    // could check some non-nokia models, for now, make a safe assumption of 16 chars
+    // could also use uaprof on devices that have that
+    if (!ua.startsWith('Nokia')) return 16;
+
+    // models with 84×48 display
+    if (/^Nokia(3330|5510|8265|8310)/.test(ua)) return 16;
+
+    // models with 96×65 or similar display (list may be incomplete)
+    if (/^Nokia(1101|3350|3410|35[^0]\d|3610|6010|6210|6310|6510|7110|8910)/.test(ua)) return 19;
+
+    // other nokias, assume a 128×128 or 128×160 display
+    return 21;
+}
+
+function allowZeroWidthSpaces(req) {
+    const ua = (req.headers["user-agent"] ?? '').toLowerCase();
+
+    // SE Z600 displays zero-width spaces as visible spaces, so don't use them
+    return !(ua.startsWith('sonyericsson') && /midp-1/.test(ua))
+}
+
+function placeZeroWidthSpaces(str) {
+    // match long words, at least 16 consecutive letters
+    return str.replace(/([^\s]{16,})/g, (match) => {
+        let result = '';
+        let canPlace = true;
+        
+        match.split('').forEach((chr, i) => {
+            result += chr;
+
+            // don't break apart other html entities
+            if (chr == '&') canPlace = false;
+            else if (chr == ';') canPlace = true;
+
+            // place zero-width spaces (word break opportunities) every 4 characters starting from char position 12 if there are at least 2 more chars left to go
+            if (canPlace && (i + 1) % 4 == 0 && i >= 11 && str.length > (i + 2)) result += "&#8203;";
+        })
+        return result;
+    })
+}
+
+// In views, strings must be formatted in any of the following ways:
+// <%= var %>  normal HTML sanitize
+// <%- fit(var) %>  sanitize and place zero-width spaces to prevent page width from increasing due to long words
+// <%- oneLine(var) %>  sanitize and truncate string to fit on one line on the screen
+
+function fit(req, res, str) {
+    str = sanitize(str);
+
+    if (allowZeroWidthSpaces(req)) {
+        str = placeZeroWidthSpaces(str);
+    }
+    str = str.replace(/\n/g, "<br/>");
+    return str;
+}
+
+/**
+ * Make sure string fits on one line on the screen, truncate with ... at the end
+ */
+function oneLine(req, res, str, charsUsed = 0) {
+    str = sanitize(str);
+
+    if (!res.locals.theme.oneLineTruncate) return str;
+
+    const chars = getCharactersPerLine(req) - charsUsed
+
+    if (str.length > chars) return str.substring(0, chars - 1).trimEnd() + "...";
+    return str;
+}
+
+function stringFormatMiddleware(req, res, next) {
+    res.locals.fit = (str) => fit(req, res, str);
+    res.locals.oneLine = (str, charsUsed) => oneLine(req, res, str, charsUsed);
+    next();
+}
+
+module.exports = stringFormatMiddleware;

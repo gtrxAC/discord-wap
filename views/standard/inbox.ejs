@@ -25,9 +25,9 @@
                         <td>
                             <a href="<%= path %>">
                                 <% if (n.guildName) { %>
-                                    #<%- fit(n.channelName) %> <!--<br/><div class="inboxguild"><%- fit(n.guildName) %></div> -->
+                                    #<%- oneLine(n.channelName) %> <!--<br/><div class="inboxguild"><%- fit(n.guildName) %></div> -->
                                 <% } else { %>
-                                    <%- fit(n.channelName) %>
+                                    <%- oneLine(n.channelName) %>
                                 <% } %>
                             </a>
                         </td>
