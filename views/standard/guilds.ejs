@@ -7,6 +7,10 @@
 <body>
     <div class="nav" id="t">
         <a href="/main<%= tokenParam %>">&lt; Home</a>
+        <% if (hasMoreAbove) { %>
+            <br/>
+            <a href="/g?p=<%= previousPage %><%= tokenParam.replace('?', '&') %>">&lt; Previous</a>
+        <% } %>
     </div>
     
     <div class="sb">Servers</div>
@@ -19,6 +23,10 @@
     </div>
 
     <div class="nav">
+        <% if (hasMoreBelow) { %>
+            <a href="/g?p=<%= nextPage %><%= tokenParam.replace('?', '&') %>">&gt; Next</a>
+            <br/>
+        <% } %>
         <%- include("include/buttonTop.ejs") %>
     </div>
 </body>

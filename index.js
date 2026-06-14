@@ -470,7 +470,7 @@ app.get("/i", getToken, async (req, res) => {
     });
 })
 
-const guildCache = new LRUCache({max: 200, ttl: 10*60*1000, updateAgeOnGet: false})
+const guildCache = new LRUCache({max: 500, ttl: 60*60*1000, updateAgeOnGet: false})
 
 async function getGuilds(req, res) {
     if (guildCache.has(res.locals.userID)) {
@@ -480,7 +480,25 @@ async function getGuilds(req, res) {
             `${DEST_BASE}/users/@me/guilds`,
             {headers: res.locals.headers}
         )
-        const guilds = guildsGet.data.map(g => ({
+        // Get user settings which contains the order of servers
+        const userSettingsGet = await axios.get(
+            `${DEST_BASE}/users/@me/settings`,
+            {headers: res.locals.headers}
+        )
+
+        const folders = userSettingsGet.data.guild_folders;
+        const unsortedGuildsGet = [...guildsGet.data];
+        const sortedGuildsGet = [];
+
+        folders.forEach(f => {
+            f.guild_ids.forEach(gid => {
+                sortedGuildsGet.push(guildsGet.data.find(g => g.id == gid));
+                unsortedGuildsGet.filter(g => g.id != gid);
+            })
+        })
+        sortedGuildsGet.concat(...unsortedGuildsGet);
+
+        const guilds = sortedGuildsGet.map(g => ({
             id: compressID(g.id),
             name: normalizeStrRemoveEmoji(g.name, true),
         }))
@@ -505,7 +523,18 @@ function getGuildPath(guildID) {
 
 // Server list
 app.get("/g", getToken, async (req, res) => {
-    res.locals.guilds = await getGuilds(req, res);
+    const guilds = await getGuilds(req, res);
+
+    const pageSize = res.locals.theme.guildsPageSize;
+    const pageBegin = Number(req.query.p ?? 0);
+    const pageEnd = pageBegin + pageSize;
+
+    res.locals.hasMoreAbove = (pageBegin != 0);
+    res.locals.hasMoreBelow = (guilds.length > pageEnd);
+    res.locals.nextPage = pageEnd;
+    res.locals.previousPage = Math.max(0, pageBegin - pageSize);
+    res.locals.guilds = guilds.slice(pageBegin, pageEnd);
+
     render(res, "guilds");
 })
 
