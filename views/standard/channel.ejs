@@ -58,8 +58,16 @@
         <% } %>
 
         <div class="time">
-            <%= m.edited ? '(edited) ' : '' %>
-            <%= m.timestamp %> <a href="<%= gpath %>/<%= id %>/reply/<%= m.id %>?recname=<%= encodeURIComponent(m.author.name) %><%= tokenParam.replace('?', '&') %>">&gt;</a>
+            <% replyPath = `${gpath}/${id}/reply/${m.id}?recname=${encodeURIComponent(m.author.name)}${tokenParam.replace('?', '&')}` %>
+
+            <% if (theme.basic) { %>
+                <a href="<%= replyPath %>">
+                    <%= m.edited ? 'edited' : '' %> <%= m.timestamp %>
+                </a>
+            <% } else { %>
+                <%= m.edited ? '(edited) ' : '' %>
+                <%= m.timestamp %> <a href="<%= replyPath %>">&gt;</a>
+            <% } %>
         </div>
     <% }) %>
 

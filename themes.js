@@ -6,7 +6,18 @@ const themes = [
         replyPreviewLength: 50,
         showAttachments: true,
         messageCountDefault: 15,
-        messagesOnBottomDefault: true
+        messagesOnBottomDefault: true,
+        basic: false
+    },
+    {
+        id: "basic",
+        name: "Basic",
+        viewsDir: "standard",
+        replyPreviewLength: 30,
+        showAttachments: false,
+        messageCountDefault: 10,
+        messagesOnBottomDefault: false,
+        basic: true
     },
     {
         id: "touch",
@@ -42,6 +53,8 @@ function getDefaultThemeName(req, res) {
 
     const ua = (req.headers['user-agent'] ?? '').toLowerCase();
     if (/android|iphone|ipod|maemo|meego/g.test(ua)) return 'touch';
+
+    if (ua.startsWith('sonyericsson') && !/midp-2/.test(ua)) return 'basic';
 
     return 'standard';
 }
