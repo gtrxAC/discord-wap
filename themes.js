@@ -57,7 +57,7 @@ const themes = [
         showAttachments: false,
         messageCountDefault: 10,
         messagesOnBottomDefault: false,
-        oneLineTruncate: false,
+        oneLineTruncate: true,
         guildsPageSize: 10,
         stripEmoji: true,
     }
