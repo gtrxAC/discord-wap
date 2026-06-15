@@ -17,12 +17,11 @@
             <% if (page > 0) { %>
                 <br/>
                 <anchor>
-                    <go method="get" href="/wap/ch">
+                    <go method="get" href="<%= gpath %>/<%= id %>">
                         <postfield name="token" value="$(token)"/>
-                        <postfield name="id" value="<%= id %>"/>
                         <% if (page > 1) { %>
-                            <postfield name="page" value="<%= page - 1 %>"/>
-                            <postfield name="after" value="<%= messages[0].id %>"/>
+                            <postfield name="p" value="<%= page - 1 %>"/>
+                            <postfield name="a" value="<%= messages[0].id %>"/>
                         <% } %>
                     </go>
                     Newer messages
@@ -49,11 +48,10 @@
         <% if (messages.length == settings.messageLoadCount) { %>
             <p align="center">
                 <anchor>
-                    <go method="get" href="/wap/ch">
+                    <go method="get" href="<%= gpath %>/<%= id %>">
                         <postfield name="token" value="$(token)"/>
-                        <postfield name="id" value="<%= id %>"/>
-                        <postfield name="page" value="<%= page + 1 %>"/>
-                        <postfield name="before" value="<%= messages[messages.length - 1].id %>"/>
+                        <postfield name="p" value="<%= page + 1 %>"/>
+                        <postfield name="b" value="<%= messages[messages.length - 1].id %>"/>
                     </go>
                     Older messages
                 </anchor>
@@ -71,12 +69,10 @@
             <br/>
             <input name="message" size="<%= textBoxSize %>"/>
         </p>
-        
         <p align="center">
             <anchor>
-                <go method="post" href="/wap/send">
+                <go method="post" href="<%= gpath %>/<%= id %>/send">
                     <postfield name="token" value="$(token)"/>
-                    <postfield name="id" value="<%= id %>"/>
                     <postfield name="text" value="$(message)"/>
                 </go>
                 Send
@@ -102,9 +98,8 @@
 
         <p align="center">
             <anchor>
-                <go method="post" href="/wap/send">
+                <go method="post" href="<%= gpath %>/<%= id %>/send">
                     <postfield name="token" value="$(token)"/>
-                    <postfield name="id" value="<%= id %>"/>
                     <postfield name="text" value="$(message)"/>
                     <postfield name="recipient" value="$(rec)"/>
                 </go>
@@ -112,9 +107,8 @@
             </anchor>
             <br/>
             <anchor>
-                <go method="post" href="/wap/send">
+                <go method="post" href="<%= gpath %>/<%= id %>/send">
                     <postfield name="token" value="$(token)"/>
-                    <postfield name="id" value="<%= id %>"/>
                     <postfield name="text" value="$(message)"/>
                     <postfield name="recipient" value="$(rec)"/>
                     <postfield name="ping" value="0"/>
