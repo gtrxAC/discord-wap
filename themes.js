@@ -49,16 +49,18 @@ const themes = [
         guildsPageSize: 999,
         stripEmoji: false,
     },
-    // {
-    //     id: "wml",
-    //     name: "WML",
-    //     viewsDir: "wml",
-    //     replyPreviewLength: 20,
-    //     showAttachments: false,
-    //     messageCountDefault: 10,
-    //     messagesOnBottomDefault: false,
-    //     oneLineTruncate: false,
-    // }
+    {
+        id: "wml",
+        name: "WML",
+        viewsDir: "wml",
+        replyPreviewLength: 20,
+        showAttachments: false,
+        messageCountDefault: 10,
+        messagesOnBottomDefault: false,
+        oneLineTruncate: false,
+        guildsPageSize: 10,
+        stripEmoji: true,
+    }
 ]
 
 function getDefaultThemeName(req, res) {
