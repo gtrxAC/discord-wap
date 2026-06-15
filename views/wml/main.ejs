@@ -9,23 +9,23 @@
         </onevent>
 
         <p>
-            &gt; <anchor>
+            <anchor>
                 <go method="get" href="/g">
                     <postfield name="token" value="$(token)"/>
                 </go>
                 Servers
             </anchor>
             <br/>
-            &gt; <a href="#dms">Direct msgs.</a>
+            <a href="#dms">Direct messages</a>
             <br/>
-            &gt; <anchor>
+            <anchor>
                 <go method="get" href="/set">
                     <postfield name="token" value="$(token)"/>
                 </go>
                 Settings
             </anchor>
             <br/>
-            &gt; <a href="/">Log out</a>
+            <a href="/">Log out</a>
         </p>
     </card>
 
@@ -42,7 +42,7 @@
                     <go method="get" href="/d/<%= d.id %>">
                         <postfield name="token" value="$(token)"/>
                     </go>
-                    <%= d.name %>
+                    <%- oneLine(d.name) %>
                 </anchor>
                 <br/>
             <% }) %>

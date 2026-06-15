@@ -16,7 +16,7 @@
                         <postfield name="token" value="$(token)"/>
                         <postfield name="id" value="<%= g.id %>"/>
                     </go>
-                    <%= g.name %>
+                    <%- oneLine(g.name) %>
                 </anchor>
                 <br/>
             <% }) %>
