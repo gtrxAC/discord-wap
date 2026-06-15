@@ -9,23 +9,23 @@
         </onevent>
 
         <p>
-            <anchor>
-                <go method="get" href="/wap/gl">
+            &gt; <anchor>
+                <go method="get" href="/g">
                     <postfield name="token" value="$(token)"/>
                 </go>
                 Servers
             </anchor>
             <br/>
-            <a href="#dms">Direct messages</a>
+            &gt; <a href="#dms">Direct msgs.</a>
             <br/>
-            <anchor>
-                <go method="get" href="/wap/set">
+            &gt; <anchor>
+                <go method="get" href="/set">
                     <postfield name="token" value="$(token)"/>
                 </go>
                 Settings
             </anchor>
             <br/>
-            <a href="/wap">Log out</a>
+            &gt; <a href="/">Log out</a>
         </p>
     </card>
 
@@ -33,16 +33,14 @@
         <p align="center">
             <anchor>
                 <prev/>
-                Back
+                &lt; Back
             </anchor>
         </p>
         <p>
             <% dms.forEach(d => { %>
                 <anchor>
-                    <go method="get" href="/wap/ch">
-                        <setvar name="<%= d.isGroup ? 'cname' : 'dn' %>" value="<%= d.name %>"/>
+                    <go method="get" href="/d/<%= d.id %>">
                         <postfield name="token" value="$(token)"/>
-                        <postfield name="id" value="<%= d.id %>"/>
                     </go>
                     <%= d.name %>
                 </anchor>
