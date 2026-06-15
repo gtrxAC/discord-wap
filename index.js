@@ -417,12 +417,14 @@ async function render(res, viewName, viewVars) {
         ...viewVars
     })
 
-    const minified = await minify(rendered, {
-        collapseWhitespace: true,
-        removeComments: true,
-        minifyCSS: true,
-        minifyJS: true
-    });
+    // Don't minify for WML, causes WMLC compilation error
+    const minified = (res.locals.format == "wml") ? rendered :
+        await minify(rendered, {
+            collapseWhitespace: true,
+            removeComments: true,
+            minifyCSS: true,
+            minifyJS: true
+        });
 
     res.send(minified);
 }
