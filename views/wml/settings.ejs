@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
 <wml>
-    <card title="Settings">
+    <card id="main" title="Settings">
         <p align="center">
             <anchor>
                 <prev/>
@@ -40,6 +40,16 @@
                 <% }) %>
             </select>
         </p>
+        <p align="center">
+            <a href="#time">Time format</a>
+            <a href="#save">&gt; Done</a>
+        </p>
+    </card>
+
+    <card id="time" title="Time format">
+        <p align="center">
+            <a href="#main">&lt; Back</a>
+        </p>
         <p>
             Current time:
             <br/>
@@ -63,10 +73,18 @@
                 <option value="1">12 hours</option>
             </select>
         </p>
+        <p align="center">
+            <a href="#main">&lt; Back</a>
+        </p>
+    </card>
+
+    <card id="save" title="Settings">
         <p>
-            <small>To save your settings, press 'save', then add the page to your bookmarks again.</small>
+            To save your settings, press 'save', then add the main page to your bookmarks again.
         </p>
         <p align="center">
+            <a href="#main">&lt; Back</a>
+            <br/>
             <anchor>
                <go method="get" href="/main">
                    <postfield name="token" value="$(token)"/>
