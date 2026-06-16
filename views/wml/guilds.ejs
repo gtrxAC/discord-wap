@@ -5,16 +5,14 @@
         <p align="center">
             <anchor>
                 <prev/>
-                Back
+                &lt; Back
             </anchor>
         </p>
         <p>
             <% guilds.forEach(g => { %>
                 <anchor>
-                    <go method="get" href="/wap/g">
-                        <setvar name="gname" value="<%= g.name %>"/>
+                    <go method="get" href="/g/<%= g.id %>">
                         <postfield name="token" value="$(token)"/>
-                        <postfield name="id" value="<%= g.id %>"/>
                     </go>
                     <%- oneLine(g.name) %>
                 </anchor>
