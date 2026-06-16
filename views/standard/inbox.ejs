@@ -19,11 +19,9 @@
         <% if (notifications.length) { %>
             <table style="width: 100%;">
                 <% notifications.forEach((n, i) => { %>
-                    <% path = n.guildName ? `/g/${compressID(n.guildID)}/c/${compressID(n.channelID)}` : `/d/${compressID(n.channelID)}` %>
-
                     <tr>
                         <td>
-                            <a href="<%= path %>">
+                            <a href="<%= n.path %>">
                                 <% if (n.guildName) { %>
                                     #<%- oneLine(n.channelName) %> <!--<br/><div class="inboxguild"><%- fit(n.guildName) %></div> -->
                                 <% } else { %>

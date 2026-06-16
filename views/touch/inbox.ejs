@@ -20,9 +20,7 @@
     <% } %>
     
     <% notifications.forEach((n, i) => { %>
-        <% path = n.guildName ? `/g/${compressID(n.guildID)}/c/${compressID(n.channelID)}` : `/d/${compressID(n.channelID)}` %>
-
-        <a class="hidelink" href="<%= path %>">
+        <a class="hidelink" href="<%= n.path %>">
             <table class="guild">
                 <tr>
                     <td class="chname">

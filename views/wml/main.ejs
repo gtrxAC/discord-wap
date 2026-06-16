@@ -19,6 +19,13 @@
             <a href="#dms">Direct messages</a>
             <br/>
             <anchor>
+                <go method="get" href="/i">
+                    <postfield name="token" value="$(token)"/>
+                </go>
+                Inbox
+            </anchor>
+            <br/>
+            <anchor>
                 <go method="get" href="/set">
                     <postfield name="token" value="$(token)"/>
                 </go>

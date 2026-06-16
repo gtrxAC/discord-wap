@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+    <card title="Inbox">
+        <p align="center">
+            <anchor>
+                <prev/>
+                &lt; Back
+            </anchor>
+        </p>
+        <p>
+            <% notifications.forEach((n, i) => { %>
+                <anchor>
+                    <go method="get" href="<%= n.path %>">
+                        <postfield name="token" value="$(token)"/>
+                    </go>
+                    <% if (n.guildName) { %>
+                        #<%- oneLine(n.channelName) %>
+                    <% } else { %>
+                        <%- oneLine(n.channelName) %>
+                    <% } %>
+                    (<%= n.mentionCount %>)
+                </anchor>
+                <br/>
+            <% }) %>
+        </p>
+    </card>
+</wml>

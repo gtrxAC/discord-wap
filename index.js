@@ -456,7 +456,7 @@ app.get("/d", getToken, async (req, res) => {
 
 // Inbox (mentions and received DMs)
 app.get("/i", getToken, async (req, res) => {
-    const notifications = await getNotifications(res.locals.authToken);
+    let notifications = await getNotifications(res.locals.authToken);
 
     notifications.sort((a, b) => {
         // DMs first
@@ -468,6 +468,13 @@ app.get("/i", getToken, async (req, res) => {
         if (b.channelName < a.channelName) return 1;
         return 0;
     });
+
+    notifications = notifications.map(n => ({
+        ...n,
+        path: n.guildName ?
+            `/g/${compressID(n.guildID)}/c/${compressID(n.channelID)}` :
+            `/d/${compressID(n.channelID)}`
+    }))
 
     render(res, "inbox", {
         notifications,
