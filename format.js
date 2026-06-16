@@ -8,7 +8,10 @@ function sanitize(res, str) {
     const result = sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
 
     if (res.locals.format == "wml") {
-        result = result.replaceAll('$', '&#36;');  // WML variables
+        // WML variables
+        result = result.replace(/(\s*)$(\s*)/, (_, preSpace, postSpace) => {
+            return (preSpace ?? ' ') + 'dollar' + (postSpace ?? ' ');
+        });
     }
     return result;
 }
