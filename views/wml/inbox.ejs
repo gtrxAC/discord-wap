@@ -15,9 +15,9 @@
                         <postfield name="token" value="$(token)"/>
                     </go>
                     <% if (n.guildName) { %>
-                        #<%- oneLine(n.channelName) %>
+                        #<%- oneLine(n.channelName, 5) %>
                     <% } else { %>
-                        <%- oneLine(n.channelName) %>
+                        <%- oneLine(n.channelName, 4) %>
                     <% } %>
                     (<%= n.mentionCount %>)
                 </anchor>
