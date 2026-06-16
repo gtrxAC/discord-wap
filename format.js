@@ -4,8 +4,13 @@
 
 const sanitizeHtml = require('sanitize-html');
 
-function sanitize(str) {
-    return sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
+function sanitize(res, str) {
+    const result = sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
+
+    if (res.locals.format == "wml") {
+        result = result.replaceAll('$', '&#36;');  // WML variables
+    }
+    return result;
 }
 
 /**
@@ -72,7 +77,7 @@ function placeZeroWidthSpaces(str) {
 // <%- oneLine(var) %>  sanitize and truncate string to fit on one line on the screen
 
 function fit(req, res, str) {
-    str = sanitize(str);
+    str = sanitize(res, str);
 
     if (allowZeroWidthSpaces(req)) {
         str = placeZeroWidthSpaces(str);
@@ -85,7 +90,7 @@ function fit(req, res, str) {
  * Make sure string fits on one line on the screen, truncate with ... at the end
  */
 function oneLine(req, res, str, charsUsed = 0) {
-    str = sanitize(str);
+    str = sanitize(res, str);
 
     if (!res.locals.theme.oneLineTruncate) return str;
 
