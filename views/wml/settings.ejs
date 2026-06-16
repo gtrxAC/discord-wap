@@ -24,15 +24,13 @@
             </select>
         </p>
         <p>
-            Appearance:
+            Theme:
             <br/>
-            <% wmlThemeIndex = themes.findIndex(t => t.id == 'wml') %> 
-            <select name="lay" value="<%= wmlThemeIndex %>">
-                <option value="<%= wmlThemeIndex %>">WML</option>
+            <select name="lay" value="<%= themes.findIndex(t => t.id == 'wml') %>">
                 <% themes.forEach((th, i) => { %>
-                    <% if (th.id != "wml") { %>
-                        <option value="<%= i %>">HTML <%= th.name %></option>
-                    <% } %>
+                    <option value="<%= i %>">
+                        <%= (th.id == 'wml') ? '' : 'HTML ' %><%= th.name %>
+                    </option>
                 <% }) %>
             </select>
         </p>
