@@ -13,7 +13,7 @@ function sanitize(str) {
  * @param {express.Request} req The express request to check
  * @returns A rough and somewhat conservative estimate of how many columns the user's device's screen has
  */
-function getCharactersPerLine(req) {
+function getCharactersPerLine(req, res) {
     const ua = req.headers['user-agent'];
     if (!ua) return 16;
 
@@ -89,7 +89,7 @@ function oneLine(req, res, str, charsUsed = 0) {
 
     if (!res.locals.theme.oneLineTruncate) return str;
 
-    const chars = getCharactersPerLine(req) - charsUsed;
+    const chars = getCharactersPerLine(req, res) - charsUsed;
 
     if (str.length > chars) return str.substring(0, chars - 1).trimEnd() + "...";
     return str;
