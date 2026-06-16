@@ -504,7 +504,9 @@ async function getGuilds(req, res) {
 
         folders.forEach(f => {
             f.guild_ids.forEach(gid => {
-                sortedGuildsGet.push(guildsGet.data.find(g => g.id == gid));
+                const guild = guildsGet.data.find(g => g.id == gid);
+                if (!guild) return;
+                sortedGuildsGet.push(guild);
                 unsortedGuildsGet = unsortedGuildsGet.filter(g => g.id != gid);
             })
         })

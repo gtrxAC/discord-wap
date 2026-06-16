@@ -6,6 +6,16 @@
             <anchor>
                 <prev/>
                 &lt; Back
+                <% if (hasMoreAbove) { %>
+                    <br/>
+                    <anchor>
+                        <go method="get" href="/g">
+                            <postfield name="token" value="$(token)"/>
+                            <postfield name="p" value="<%= previousPage %>"/>
+                        </go>
+                        &lt; Previous
+                    </anchor>
+                <% } %>
             </anchor>
         </p>
         <p>
@@ -19,5 +29,16 @@
                 <br/>
             <% }) %>
         </p>
+        <% if (hasMoreBelow) { %>
+            <p align="center">
+                <anchor>
+                    <go method="get" href="/g">
+                        <postfield name="token" value="$(token)"/>
+                        <postfield name="p" value="<%= nextPage %>"/>
+                    </go>
+                    &gt; Next
+                </anchor>
+            </p>
+        <% } %>
     </card>
 </wml>
