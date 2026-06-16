@@ -5,7 +5,7 @@
 const sanitizeHtml = require('sanitize-html');
 
 function sanitize(res, str) {
-    const result = sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
+    let result = sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
 
     if (res.locals.format == "wml") {
         // WML variables
