@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
 <wml>
-    <card id="channel" title="$(cname)">
+    <card id="channel" title="<%= cname %>">
         <p align="center">
             <anchor>
                 <prev/>
@@ -59,7 +59,7 @@
         <% } %>
     </card>
 
-    <card id="send" title="$(cname)">
+    <card id="send" title="<%= cname %>">
         <onevent type="onenterbackward">
             <prev/>
         </onevent>
@@ -85,7 +85,7 @@
         </p>
     </card>
 
-    <card id="reply" title="$(cname)">
+    <card id="reply" title="<%= cname %>">
         <onevent type="onenterbackward">
             <prev/>
         </onevent>
