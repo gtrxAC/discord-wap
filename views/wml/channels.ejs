@@ -14,7 +14,7 @@
                     <go method="get" href="/g/<%= gid %>/c/<%= c.id %>">
                         <postfield name="token" value="$(token)"/>
                     </go>
-                    <%= c.label %>
+                    <%- oneLine(c.label) %>
                 </anchor>
                 <br/>
             <% }) %>
