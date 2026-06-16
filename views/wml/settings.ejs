@@ -16,6 +16,32 @@
             </select>
         </p>
         <p>
+            Textbox size:
+            <br/>
+            <select name="tbs" value="<%= settings.limitTextBoxSize ? 1 : 0 %>">
+                <option value="0">Full</option>
+                <option value="1">Limited</option>
+            </select>
+        </p>
+        <p>
+            Appearance:
+            <br/>
+            <% wmlThemeIndex = themes.findIndex(t => t.id == 'wml') %> 
+            <select name="lay" value="<%= wmlThemeIndex %>">
+                <option value="<%= wmlThemeIndex %>">WML</option>
+                <% themes.forEach((th, i) => { %>
+                    <% if (th.id != "wml") { %>
+                        <option value="<%= i %>">HTML <%= th.name %></option>
+                    <% } %>
+                <% }) %>
+            </select>
+        </p>
+        <p>
+            Current time:
+            <br/>
+            <%= timePreview %>
+        </p>
+        <p>
             Time offset (h):
             <br/>
             <input name="tzh" size="3" value="<%= settings.timeOffsetHours %>"/>
@@ -31,26 +57,6 @@
             <select name="time" value="<%= settings.use12hTime ? 1 : 0 %>">
                 <option value="0">24 hours</option>
                 <option value="1">12 hours</option>
-            </select>
-        </p>
-        <p>
-            Textbox size:
-            <br/>
-            <select name="tbs" value="<%= settings.limitTextBoxSize ? 1 : 0 %>">
-                <option value="0">Full</option>
-                <option value="1">Limited</option>
-            </select>
-        </p>
-        <p>
-            Appearance:
-            <br/>
-            <select name="lay" value="<%= settings.layout %>">
-                <option value="2">WML</option>
-                <option value="0">Standard (HTML)</option>
-                <option value="3">Standard Dark (HTML)</option>
-                <option value="4">Modern (HTML)</option>
-                <option value="5">Modern Dark (HTML)</option>
-                <option value="1">Compact (HTML)</option>
             </select>
         </p>
         <p>
