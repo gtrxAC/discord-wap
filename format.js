@@ -9,7 +9,7 @@ function sanitize(res, str) {
 
     if (res.locals.format == "wml") {
         // WML variables
-        result = result.replace(/(\s*)$(\s*)/, (_, preSpace, postSpace) => {
+        result = result.replace(/(\s*)\$(\s*)/, (_, preSpace, postSpace) => {
             return (preSpace ?? ' ') + 'dollar' + (postSpace ?? ' ');
         });
     }
