@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
 <wml>
-    <card id="channel" title="<%= cname %>">
+    <card id="channel" title="<%- sanitize(cname) %>">
         <p align="center">
             <anchor>
                 <prev/>
@@ -37,11 +37,11 @@
                         <setvar name="rec" value="<%= m.id %>"/>
                         <setvar name="recname" value="<%= m.author.name %>"/>
                     </go>
-                    <%= m.authorLine %>
+                    <%- sanitize(m.authorLine) %>
                 </anchor>
             </p>
             <p>
-                <%= m.content %>
+                <%- sanitize(m.content) %>
             </p>
         <% }) %>
 
@@ -59,7 +59,7 @@
         <% } %>
     </card>
 
-    <card id="send" title="<%= cname %>">
+    <card id="send" title="<%- sanitize(cname) %>">
         <onevent type="onenterbackward">
             <prev/>
         </onevent>
@@ -85,7 +85,7 @@
         </p>
     </card>
 
-    <card id="reply" title="<%= cname %>">
+    <card id="reply" title="<%- sanitize(cname) %>">
         <onevent type="onenterbackward">
             <prev/>
         </onevent>

@@ -75,7 +75,8 @@ function placeZeroWidthSpaces(str) {
 }
 
 // In views, strings must be formatted in any of the following ways:
-// <%= var %>  normal HTML sanitize
+// <%= var %>  normal HTML sanitize (do not use for user inputs in WML)
+// <%- sanitize(var) %>  safer sanitize for WML
 // <%- fit(var) %>  sanitize and place zero-width spaces to prevent page width from increasing due to long words
 // <%- oneLine(var) %>  sanitize and truncate string to fit on one line on the screen
 
@@ -104,6 +105,7 @@ function oneLine(req, res, str, charsUsed = 0) {
 }
 
 function stringFormatMiddleware(req, res, next) {
+    res.locals.sanitize = (str) => sanitize(res, str);
     res.locals.fit = (str) => fit(req, res, str);
     res.locals.oneLine = (str, charsUsed) => oneLine(req, res, str, charsUsed);
     next();
