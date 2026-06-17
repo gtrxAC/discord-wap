@@ -6,7 +6,7 @@ const sanitizeHtml = require('sanitize-html');
 const anyAscii = require('any-ascii').default;
 
 function sanitize(res, str) {
-    if (res.locals.settings.useAnyAscii) {
+    if (res.locals.settings?.useAnyAscii ?? res.locals.format == "wml") {
         str = anyAscii(str);
     }
     str = sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
