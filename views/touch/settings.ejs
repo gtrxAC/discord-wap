@@ -35,6 +35,12 @@
                 <option value="0" <%= settings.altChannelListLayout ? '' : 'selected' %>>Position</option>
                 <option value="1" <%= settings.altChannelListLayout ? 'selected' : '' %>>Last message</option>
             </select> <br/>
+
+            <label for="s8">Character set:</label> <br/>
+            <select name="s8" id="s8">
+                <option value="0" <%= settings.useAnyAscii ? '' : 'selected' %>>Full</option>
+                <option value="1" <%= settings.useAnyAscii ? 'selected' : '' %>>Reduced</option>
+            </select> <br/>
         </div>
 
         <div class="categorytitle">Time format</div>

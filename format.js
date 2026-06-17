@@ -3,17 +3,21 @@
  */
 
 const sanitizeHtml = require('sanitize-html');
+const anyAscii = require('any-ascii').default;
 
 function sanitize(res, str) {
-    let result = sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
+    if (res.locals.settings.useAnyAscii) {
+        str = anyAscii(str);
+    }
+    str = sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
 
     if (res.locals.format == "wml") {
         // WML variables
-        result = result.replace(/(\s*)\$(\s*)/g, (_, preSpace, postSpace) => {
+        str = str.replace(/(\s*)\$(\s*)/g, (_, preSpace, postSpace) => {
             return (preSpace || ' ') + 'dollar' + (postSpace || ' ');
         });
     }
-    return result;
+    return str;
 }
 
 /**

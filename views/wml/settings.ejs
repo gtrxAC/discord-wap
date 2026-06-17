@@ -26,7 +26,7 @@
             <br/>
             <select name="tbs" value="<%= settings.limitTextBoxSize ? 1 : 0 %>">
                 <option value="0">Full</option>
-                <option value="1">Limited</option>
+                <option value="1">Reduced</option>
             </select>
         </p>
         <p>
@@ -38,6 +38,14 @@
                         <%= (th.id == 'wml') ? '' : 'HTML ' %><%= th.name %>
                     </option>
                 <% }) %>
+            </select>
+        </p>
+        <p>
+            Character set:
+            <br/>
+            <select name="asc" value="<%= settings.useAnyAscii ? 1 : 0 %>">
+                <option value="0">Full</option>
+                <option value="1">Reduced</option>
             </select>
         </p>
         <p align="center">
@@ -96,6 +104,7 @@
                    <postfield name="s5" value="$(tbs)"/>
                    <postfield name="s6" value="0"/>
                    <postfield name="s7" value="$(lay)"/>
+                   <postfield name="s8" value="$(asc)"/>
                </go>
                &gt; Save
             </anchor>

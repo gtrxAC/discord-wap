@@ -303,7 +303,8 @@ function makeGetTokenMiddleware(isOptional) {
                 + '.' + req.query.s4
                 + '.' + req.query.s5
                 + '.' + req.query.s6
-                + '.' + req.query.s7;
+                + '.' + req.query.s7
+                + '.' + req.query.s8;
         }
         const settingsArr = res.locals.token.split('.').slice(3);
 
@@ -333,6 +334,7 @@ function makeGetTokenMiddleware(isOptional) {
             use12hTime: (Number(settingsArr[4]) || 0) != 0,
             limitTextBoxSize: (Number(settingsArr[5]) || 0) != 0,
             reverseChat: (Number(settingsArr[6] ?? res.locals.theme.messagesOnBottomDefault)) != 0,
+            useAnyAscii: (Number(settingsArr[8] ?? (res.locals.format == 'wml'))) != 0,
         }
 
         res.locals.authToken = decompressToken(res.locals.token).split('.').slice(0, 3).join('.');

@@ -12,9 +12,11 @@ Also see [Discord J2ME](https://github.com/gtrxAC/discord-j2me), a client for de
 * Message history with pagination
 * Settings (e.g. message load count)
 * Message timestamps
-* Attachments and profile pictures (HTML "modern" layout only)
-### Not implemented
+* Attachments and profile pictures (HTML "touch" layout only)
+### Planned
+* File uploads
 * Message editing and deleting
+### Not implemented
 * Threads
 * Emojis
 
@@ -22,8 +24,6 @@ Also see [Discord J2ME](https://github.com/gtrxAC/discord-j2me), a client for de
 A public instance is hosted at http://gtrxac.fi/wap or http://146.59.80.3/wap, but it is recommended to host your own instance if possible.
 
 Using a secondary/alt account is recommended for safety, especially when using public instances hosted by unknown people. However, when using third-party clients, Discord has been known to sometimes restrict or temporarily disable newly created accounts. This may also affect accounts that don't have two-factor authentication or a verified phone number. If your alt account is likely to get restricted, it may be worth using your main account instead.
-
-Additionally, the servers list may fail to load on older devices if the account is a member of too many servers.
 
 You will need:
 * A Discord account

@@ -37,6 +37,11 @@
             <% }) %>
         </select> <br/>
 
+        <label for="s8">Character set:</label> <br/>
+        <select name="s8" id="s8">
+            <option value="0" <%= settings.useAnyAscii ? '' : 'selected' %>>Full</option>
+            <option value="1" <%= settings.useAnyAscii ? 'selected' : '' %>>Reduced</option>
+        </select> <br/>
 
         <div class="sb">Time format</div>
         <div class="s">
