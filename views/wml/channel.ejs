@@ -45,6 +45,7 @@
                 </anchor>
             </p>
             <p>
+                <%- m.referenced_message ? (oneLine(m.referenced_message.author.name, 2) + ': ') : '' %>
                 <%- sanitize(m.content) %>
             </p>
         <% }) %>
