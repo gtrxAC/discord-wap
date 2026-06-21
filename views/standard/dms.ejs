@@ -11,6 +11,10 @@
 
     <div class="sb">Direct messages</div>
     <div class="s">
+        <% if (!dms.length) { %>
+            <div>Nothing to see here...</div>
+        <% } %>
+        
         <% dms.forEach((d, i) => { %>
             <!-- <img src="/wap/page.png" alt="DM"> -->
             &gt;

@@ -29,6 +29,10 @@
             <% } %>
         </p>
 
+        <% if (!messages.length) { %>
+            <p>Nothing to see here...</p>
+        <% } %>
+
         <% messages.forEach(m => { %>
             <p>
                 <anchor>

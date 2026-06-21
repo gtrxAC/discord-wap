@@ -74,6 +74,12 @@
         </div>
     <% }) %>
 
+    <% if (!messages.length) { %>
+        <div class="sb"><%- oneLine(cname) %></div>
+        <div class="s">
+            Nothing to see here...
+    <% } %>
+
     </div> <!-- end section of bottom-most message cluster-->
 
     <!-- Pagination button (and chat bar if newest messages shown on bottom) -->

@@ -44,6 +44,10 @@
             </anchor>
         </p>
         <p>
+            <% if (!dms.length) { %>
+                Nothing to see here...
+            <% } %>
+
             <% dms.forEach(d => { %>
                 <anchor>
                     <go method="get" href="/d/<%= d.id %>">

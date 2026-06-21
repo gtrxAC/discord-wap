@@ -23,6 +23,13 @@
         </form>
     <% } %>
 
+    <!-- Text for empty channel -->
+    <% if (!messages.length) { %>
+        <div class="center">
+            Nothing to see here
+        </div>
+    <% } %>
+
     <!-- Messages -->
     <table class="messages">
         <% messages.forEach(m => { %>

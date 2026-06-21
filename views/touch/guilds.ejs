@@ -12,6 +12,12 @@
             <td style="min-width: 28px"></td>
         </tr>
     </table>
+
+    <% if (!guilds.length) { %>
+        <div class="center">
+            Nothing to see here
+        </div>
+    <% } %>
     
     <% guilds.forEach((g, i) => { %>
         <a class="hidelink" href="/g/<%= g.id %><%= tokenParam %>">

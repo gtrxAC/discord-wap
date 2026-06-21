@@ -9,6 +9,10 @@
             </anchor>
         </p>
         <p>
+            <% if (!notifications.length) { %>
+                You're all caught up!
+            <% } %>
+
             <% notifications.forEach((n, i) => { %>
                 <anchor>
                     <go method="get" href="<%= n.path %>">

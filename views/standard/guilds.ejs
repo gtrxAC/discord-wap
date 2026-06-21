@@ -15,6 +15,10 @@
     
     <div class="sb">Servers</div>
     <div class="s">
+        <% if (!guilds.length) { %>
+            <div>Nothing to see here...</div>
+        <% } %>
+        
         <% guilds.forEach((g, i) => { %>
             <!-- <img src="/wap/go.png" alt="server"> -->
             &gt; <a href="/g/<%= g.id %><%= tokenParam %>"><%- oneLine(g.name) %></a>

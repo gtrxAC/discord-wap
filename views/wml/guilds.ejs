@@ -19,6 +19,10 @@
             </anchor>
         </p>
         <p>
+            <% if (!guilds.length) { %>
+                Nothing to see here...
+            <% } %>
+
             <% guilds.forEach(g => { %>
                 <anchor>
                     <go method="get" href="/g/<%= g.id %>">

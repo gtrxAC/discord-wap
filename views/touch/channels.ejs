@@ -18,6 +18,12 @@
         </tr>
     </table>
 
+    <% if (!channels.length) { %>
+        <div class="center">
+            Nothing to see here
+        </div>
+    <% } %>
+
     <% if (settings.altChannelListLayout) { %>
         <div class="category">
             <% channels.forEach((c, i) => { %>

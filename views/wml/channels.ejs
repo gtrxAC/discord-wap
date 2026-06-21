@@ -9,6 +9,10 @@
             </anchor>
         </p>
         <p>
+            <% if (!channels.length) { %>
+                Nothing to see here...
+            <% } %>
+
             <% channels.forEach(c => { %>
                 <anchor>
                     <go method="get" href="/g/<%= gid %>/c/<%= c.id %>">

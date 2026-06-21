@@ -12,6 +12,12 @@
             <td style="min-width: 28px"></td>
         </tr>
     </table>
+
+    <% if (!dms.length) { %>
+        <div class="center">
+            Nothing to see here
+        </div>
+    <% } %>
     
     <% dms.forEach((d, i) => { %>
         <a class="hidelink" href="/d/<%= d.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
