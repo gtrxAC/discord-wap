@@ -248,12 +248,12 @@ function parseMessageContentText(content) {
         // try to convert <@12345...> format into @username
         .replace(/<@(\d{15,})>/gm, (mention, id) => {
             if (userCache.has(id)) return `@${userCache.get(id)}`;
-            else return mention;
+            else return `<@${id.slice(0, 7)}..>`;
         })
         // try to convert <#12345...> format into #channelname
         .replace(/<#(\d{15,})>/gm, (mention, id) => {
             if (channelNameCache.has(id)) return channelNameCache.get(id);
-            else return mention;
+            else return `<#${id.slice(0, 7)}..>`;
         })
         // replace <:name:12345...> emoji format with :name:
         .replace(/<a?(:\w*:)\d{15,}>/gm, "$1")
