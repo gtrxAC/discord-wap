@@ -51,14 +51,14 @@ function getCharactersPerLine(req, res) {
     return 21;
 }
 
-function allowZeroWidthSpaces(req) {
-    const ua = (req.headers["user-agent"] ?? '').toLowerCase();
+function allowWordBreaks(req) {
+    // const ua = (req.headers["user-agent"] ?? '').toLowerCase();
 
-    // SE Z600 displays zero-width spaces as visible spaces, so don't use them
-    return !(ua.startsWith('sonyericsson') && /midp-1/.test(ua))
+    // return !(ua.startsWith('sonyericsson') && /midp-1/.test(ua))
+    return true;
 }
 
-function placeZeroWidthSpaces(str) {
+function placeWordBreaks(str) {
     // match long words, at least 16 consecutive letters
     return str.replace(/([^\s]{16,})/g, (match) => {
         let result = '';
@@ -71,8 +71,8 @@ function placeZeroWidthSpaces(str) {
             if (chr == '&') canPlace = false;
             else if (chr == ';') canPlace = true;
 
-            // place zero-width spaces (word break opportunities) every 4 characters starting from char position 12 if there are at least 2 more chars left to go
-            if (canPlace && (i + 1) % 4 == 0 && i >= 11 && str.length > (i + 2)) result += "&#8203;";
+            // place word break opportunities every 4 characters starting from char position 12 if there are at least 2 more chars left to go
+            if (canPlace && (i + 1) % 4 == 0 && i >= 11 && str.length > (i + 2)) result += "&shy;";
         })
         return result;
     })
@@ -87,8 +87,8 @@ function placeZeroWidthSpaces(str) {
 function fit(req, res, str) {
     str = sanitize(res, str);
 
-    if (allowZeroWidthSpaces(req)) {
-        str = placeZeroWidthSpaces(str);
+    if (allowWordBreaks(req)) {
+        str = placeWordBreaks(str);
     }
     str = str.replace(/\n/g, "<br/>");
     return str;
