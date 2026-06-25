@@ -3,15 +3,19 @@
     * {
         box-sizing: border-box;
         font-family: sans-serif;
+        <% if (wordBreakMethod == 'css') { %>
+            word-break: break-word;
+        <% } %>
     }
     body {
         margin: 0;
-        background-color: #fff;
+        background-color: #000;
+        color: #eee;
     }
 
     .nav {
         width: 100%;
-        background-color: #ddd;
+        background-color: #282828;
         padding: 0.5em;
     }
     .nav img, .chatbar img, .chatbar input {
@@ -29,7 +33,7 @@
 
     .chatbar {
         width: 100%;
-        background-color: #ddd;
+        background-color: #282828;
         padding: 0.4em 0.2em;
     }
     .chatbar textarea {
@@ -53,7 +57,7 @@
 
     /* Recipient message */
     .reply {
-        color: #555;
+        color: #aaa;
         font-size: 12px;
         margin: 0.3em 0 0 0;
     }
@@ -78,13 +82,13 @@
 
     /* Last message timestamp in channel list */
     .chtime {
-        color: #666;
+        color: #999;
         font-size: 16px;
         text-align: right;
     }
 
     .time {
-        color: #777;
+        color: #999;
         font-size: 12px;
     }
 
@@ -124,7 +128,7 @@
     }
 
     .messages {
-        margin: 0.3em;
+        margin: 0 0.3em;
     }
 
     .channel {
@@ -145,7 +149,7 @@
     }
 
     .categorytitle {
-        background-color: #eee;
+        background-color: #444;
         font-weight: bold;
         padding: 0.2em;
         margin: 0.2em;
@@ -173,14 +177,29 @@
     }
 
     .mention {
-        background-color: #d02;
+        background-color: #f13;
         color: white;
         font-weight: bold;
         padding: 0 0.3em;
     }
 
     .inboxguild {
-        color: #777;
+        color: #999;
         font-size: 14px;
+    }
+
+    /* For dark theme */
+    a {
+        color: #55f;
+    }
+    input, textarea, select {
+        background-color: #333;
+        color: #eee;
+        border: solid 1px #555;
+        border-radius: 4px;
+    }
+    input[type="image"] {
+        background-color: transparent;
+        border: none;
     }
 </style>

@@ -3,6 +3,9 @@
     * {
         box-sizing: border-box;
         font-family: sans-serif;
+        <% if (wordBreakMethod == 'css') { %>
+            word-break: break-word;
+        <% } %>
     }
     body {
         background-color: #eef;

@@ -51,11 +51,19 @@ function getCharactersPerLine(req, res) {
     return 21;
 }
 
-function allowWordBreaks(req) {
-    // const ua = (req.headers["user-agent"] ?? '').toLowerCase();
+/**
+ * Get the best way to break apart long words on the user's browser
+ */
+function getWordBreakMethod(req) {
+    const ua = (req.headers["user-agent"] ?? '').toLowerCase();
 
-    // return !(ua.startsWith('sonyericsson') && /midp-1/.test(ua))
-    return true;
+    if (ua.includes('webkit') || ua.includes('gecko/2010')) {
+        return 'css';  // "word-wrap: break-word" (any webkit, or firefox from ~2009 onwards)
+    }
+    if (ua.startsWith('sonyericsson') && /midp-1/.test(ua)) {
+        return 'none';  // word break automatically handled by browser (T610, T630, Z600)
+    }
+    return 'shy';  // place &shy; entities within long words (may be unsupported)
 }
 
 function placeWordBreaks(str) {
@@ -87,7 +95,7 @@ function placeWordBreaks(str) {
 function fit(req, res, str) {
     str = sanitize(res, str);
 
-    if (allowWordBreaks(req)) {
+    if (res.locals.wordBreakMethod == 'shy') {
         str = placeWordBreaks(str);
     }
     str = str.replace(/\n/g, "<br/>");
@@ -109,6 +117,8 @@ function oneLine(req, res, str, charsUsed = 0) {
 }
 
 function stringFormatMiddleware(req, res, next) {
+    res.locals.wordBreakMethod = getWordBreakMethod(req);
+
     res.locals.sanitize = (str) => sanitize(res, str);
     res.locals.fit = (str) => fit(req, res, str);
     res.locals.oneLine = (str, charsUsed) => oneLine(req, res, str, charsUsed);
