@@ -4,7 +4,9 @@
     <card id="main" title="<%- sanitize(gname) %>">
         <p align="center">
             <anchor>
-                <prev/>
+                <go method="get" href="/main">
+                    <postfield name="token" value="$(token)"/>
+                </go>
                 &lt; Back
             </anchor>
         </p>
