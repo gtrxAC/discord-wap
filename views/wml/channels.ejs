@@ -41,7 +41,7 @@
                     <a href="#main">&lt; Back</a>
                 </p>
 
-                <% cat.channels.forEach(c => { %>
+                <% cat.children.forEach(c => { %>
                     <anchor>
                         <go method="get" href="/g/<%= gid %>/c/<%= c.id %>">
                             <postfield name="token" value="$(token)"/>
