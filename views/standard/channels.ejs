@@ -22,7 +22,7 @@
             Nothing to see here...
         </div>
     <% } else { %>
-        <% if (settings.altChannelListLayout) { %>
+        <% if (settings.channelListLayout == 'recent') { %>
             <div class="sb"><%- oneLine(gname) %></div>
             <div class="s">
                 <% if (theme.basic) { %>

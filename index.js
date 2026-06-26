@@ -328,7 +328,7 @@ function makeGetTokenMiddleware(isOptional) {
 
         res.locals.settings = {
             messageLoadCount,
-            altChannelListLayout: (Number(settingsArr[1]) || 0) != 0,
+            channelListLayout: ['default', 'recent', 'collapsed'][(Number(settingsArr[1]) || 0)],
             timeOffsetHours,
             timeOffsetMinutes,
             use12hTime: (Number(settingsArr[4]) || 0) != 0,
@@ -601,7 +601,7 @@ app.get(["/g/:guildid", "/g/:guildid/c"], getToken, async (req, res) => {
     const guildName = await getGuildName(req, res, guildID);
 
     // Channel list cache can be used if last message IDs are not relevant ("Recent channels first" disabled and using HTML version)
-    const useCache = (!res.locals.settings.altChannelListLayout && res.locals.format == 'html');
+    const useCache = (res.locals.settings.channelListLayout != 'recent' && res.locals.format == 'html');
 
     const channelsGet = await getChannels(req, res, guildID, useCache);
 
@@ -617,7 +617,7 @@ app.get(["/g/:guildid", "/g/:guildid/c"], getToken, async (req, res) => {
 
     let channels;
 
-    if (res.locals.settings.altChannelListLayout) {
+    if (res.locals.settings.channelListLayout == 'recent') {
         // "Recent channels first" option enabled: show up to 15 (WML) or 30 (HTML) channels in order of most recent message
         channels = allChannels
             .slice(0, (res.locals.format == 'wml') ? 15 : 30)
@@ -629,8 +629,9 @@ app.get(["/g/:guildid", "/g/:guildid/c"], getToken, async (req, res) => {
                 parent_id: ch.parent_id
             }))
     } else {
-        // "Recent channels first" disabled: show channels in their original order (still only show 15 most recently used channels in WML)
-        if (res.locals.format == 'wml') {
+        // "Recent channels first" disabled: show channels in their original order
+        // (still only show 15 most recently used channels in WML when not in collapsed mode)
+        if (res.locals.format == 'wml' && res.locals.settings.channelListLayout != 'collapsed') {
             const recentChannelIDs = allChannels
                 .slice(0, 15)
                 .map(ch => ch.id);

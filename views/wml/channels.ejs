@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
 <wml>
-    <card title="<%- sanitize(gname) %>">
+    <card id="main" title="<%- sanitize(gname) %>">
         <p align="center">
             <anchor>
                 <prev/>
@@ -13,15 +13,44 @@
                 Nothing to see here...
             <% } %>
 
-            <% channels.forEach(c => { %>
-                <anchor>
-                    <go method="get" href="/g/<%= gid %>/c/<%= c.id %>">
-                        <postfield name="token" value="$(token)"/>
-                    </go>
-                    <%- oneLine(c.label) %>
-                </anchor>
-                <br/>
-            <% }) %>
+            <% useCollapsedView = (settings.channelListLayout == 'collapsed' && channelCategories.length >= 2) %>
+
+            <% if (useCollapsedView) { %>
+                <% channelCategories.forEach((cat, i) => { %>
+                    <a href="#c<%= i %>"><%- oneLine(cat.name) %></a>
+                    <br/>
+                <% }) %>
+            <% } else { %>
+                <% channels.forEach(c => { %>
+                    <anchor>
+                        <go method="get" href="/g/<%= gid %>/c/<%= c.id %>">
+                            <postfield name="token" value="$(token)"/>
+                        </go>
+                        <%- oneLine(c.label) %>
+                    </anchor>
+                    <br/>
+                <% }) %>
+            <% } %>
         </p>
     </card>
+
+    <% if (useCollapsedView) { %>
+        <% channelCategories.forEach((cat, i) => { %>
+            <card id="c<%= i %>" title="<%- sanitize(cat.name) %>">
+                <p align="center">
+                    <a href="#main">&lt; Back</a>
+                </p>
+
+                <% cat.channels.forEach(c => { %>
+                    <anchor>
+                        <go method="get" href="/g/<%= gid %>/c/<%= c.id %>">
+                            <postfield name="token" value="$(token)"/>
+                        </go>
+                        <%- oneLine(c.label) %>
+                    </anchor>
+                    <br/>
+                <% }) %>
+            </card>
+        <% }) %>
+    <% } %>
 </wml>

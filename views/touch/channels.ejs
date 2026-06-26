@@ -24,7 +24,7 @@
         </div>
     <% } %>
 
-    <% if (settings.altChannelListLayout) { %>
+    <% if (settings.channelListLayout == 'recent') { %>
         <div class="category">
             <% channels.forEach((c, i) => { %>
                 <a class="hidelink" href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">

@@ -14,11 +14,12 @@
             <input name="mcount" size="3" value="<%= settings.messageLoadCount %>"/>
         </p>
         <p>
-            Sort channels by:
+            Channel list:
             <br/>
-            <select name="sort" value="<%= settings.altChannelListLayout ? 1 : 0 %>">
-                <option value="0">Position</option>
-                <option value="1">Last message</option>
+            <select name="sort" value="<%= ['default', 'recent', 'collapsed'].indexOf(settings.channelListLayout) %>">
+                <option value="0">Default</option>
+                <option value="2">Collapsed</option>
+                <option value="1">Recent first</option>
             </select>
         </p>
         <p>
