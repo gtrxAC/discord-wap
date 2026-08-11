@@ -21,7 +21,7 @@
                         <postfield name="token" value="$(token)"/>
                         <% if (page > 1) { %>
                             <postfield name="p" value="<%= page - 1 %>"/>
-                            <postfield name="a" value="<%= messages[0].id %>"/>
+                            <postfield name="a" value="<%= messages[0]?.id %>"/>
                         <% } %>
                     </go>
                     Newer messages
@@ -56,7 +56,7 @@
                     <go method="get" href="<%= gpath %>/<%= id %>">
                         <postfield name="token" value="$(token)"/>
                         <postfield name="p" value="<%= page + 1 %>"/>
-                        <postfield name="b" value="<%= messages[messages.length - 1].id %>"/>
+                        <postfield name="b" value="<%= messages[messages.length - 1]?.id %>"/>
                     </go>
                     Older messages
                 </anchor>
