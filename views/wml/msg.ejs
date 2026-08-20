@@ -46,7 +46,18 @@
                 </anchor>
             <% } %>
             <br/>
-            <a href="<%= shareUrl %>">Share link</a>
+            <anchor>
+                <go method="get" href="/wap/share">
+                    <postfield name="token" value="$(token)"/>
+                    <postfield name="id" value="<%= id %>"/>
+                    <postfield name="msgid" value="<%= msgid %>"/>
+                    <postfield name="cname" value="$(cname)"/>
+                    <% if (locals.gid) { %>
+                        <postfield name="gid" value="<%= gid %>"/>
+                    <% } %>
+                </go>
+                Share
+            </anchor>
             <% if (links && links.length > 0) { %>
                 <% links.forEach(link => { %>
                     <br/>

@@ -25,7 +25,7 @@
             </li>
             <% } %>
             <li style="margin-bottom: 0.5em;">
-                <a href="<%= shareUrl %>">Share link</a>
+                <a href="/wap/share?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&msgid=<%= msgid %><% if (locals.gid) { %>&gid=<%= gid %><% } %>">Share</a>
             </li>
             <% if (links && links.length > 0) { %>
                 <% links.forEach(link => { %>
