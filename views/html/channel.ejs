@@ -17,7 +17,7 @@
         </div>
 
         <% messages.forEach(m => { %>
-            <a href="/wap/msg?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&msgid=<%= m.id %>"><%= m.author.name %></a>
+            <a href="/wap/msg?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&msgid=<%= m.id %><% if (locals.gid) { %>&gid=<%= gid %><% } %>"><%= m.author.name %></a>
             <span class="time"><%= m.timestamp %></span>
             <% if (m.referenced_message) { %>
                 <div class="reply">
@@ -29,7 +29,7 @@
                 </div>
             <% } %>
             <p>
-                <a class="hidelink" href="/wap/msg?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&msgid=<%= m.id %>"><%- m.content %></a>
+                <a class="hidelink" href="/wap/msg?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&msgid=<%= m.id %><% if (locals.gid) { %>&gid=<%= gid %><% } %>"><%- m.content %></a>
             </p>
         <% }) %>
 

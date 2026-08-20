@@ -22,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 // ID -> username mapping cache (used for parsing mentions)
 const userCache = new LRUCache({max: 10000});
 const channelNameCache = new LRUCache({max: 10000});
+const channelGuildCache = new LRUCache({max: 10000});
 const messageCache = new LRUCache({max: 10000, ttl: 30*60*1000});
 
 // Base64 but better - instead of '/' and '=' characters, we use '-' and '_', which stay as one character when URL encoded
@@ -638,9 +639,12 @@ app.get("/wap/g", getToken, async (req, res) => {
             if (useCache) channelCache.set(req.query.id, channelsGet);
         }
 
-        // Populate channel name cache
+        const serverId = decompressID(req.query.id, 'server');
+
+        // Populate channel name and guild cache
         channelsGet.data.forEach(ch => {
             channelNameCache.set(ch.id, ch.name);
+            channelGuildCache.set(ch.id, serverId);
         })
 
         // Due to page length limitations, limit the amount of channels to be shown:
@@ -694,6 +698,7 @@ app.get("/wap/g", getToken, async (req, res) => {
 
         render(res, "channels", {
             gname: req.query.gname,
+            gid: req.query.id,
             channels
         });
     }
@@ -764,12 +769,21 @@ app.get("/wap/ch", getToken, async (req, res) => {
             messages.reverse();
         }
     
+        const rawChannelId = decompressID(req.query.id, 'channel');
+        if (req.query.gid) {
+            try {
+                channelGuildCache.set(rawChannelId, decompressID(req.query.gid, 'server'));
+            } catch(e) {
+                channelGuildCache.set(rawChannelId, req.query.gid);
+            }
+        }
+    
         render(res, res.locals.settings.modern ? "channelNew" : "channel", {
             id: req.query.id,
+            gid: req.query.gid ?? (channelGuildCache.has(rawChannelId) ? compressID(channelGuildCache.get(rawChannelId)) : undefined),
             page: req.query.page ?? 0,
             messages,
             textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000,
-            id: req.query.id,
             cname: res.locals.channelName,
         });
     }
@@ -832,6 +846,7 @@ app.all("/wap/msg", getToken, async (req, res) => {
     try {
         const idParam = req.query.id ?? req.body.id;
         const msgidParam = req.query.msgid ?? req.body.msgid;
+        const gidParam = req.query.gid ?? req.body.gid;
 
         let cached = messageCache.get(msgidParam);
         let authorName = cached?.authorName ?? req.query.recname ?? req.body.recname ?? "Unknown";
@@ -840,15 +855,33 @@ app.all("/wap/msg", getToken, async (req, res) => {
         let rawContent = cached?.rawContent ?? req.query.rawContent ?? "";
         let links = cached?.links ?? extractLinks(rawContent);
 
+        const rawChannelId = decompressID(idParam, 'channel');
+        const rawMessageId = decompressID(msgidParam, 'message');
+
+        let rawServerId = '@me';
+        if (gidParam && gidParam !== '@me') {
+            try {
+                rawServerId = decompressID(gidParam, 'server');
+            } catch (e) {
+                rawServerId = gidParam;
+            }
+        } else if (channelGuildCache.has(rawChannelId)) {
+            rawServerId = channelGuildCache.get(rawChannelId);
+        }
+
+        const shareUrl = `sms:?body=https://discord.com/channels/${rawServerId}/${rawChannelId}/${rawMessageId}`;
+
         render(res, "msg", {
             id: idParam,
             msgid: msgidParam,
+            gid: gidParam,
             cname: res.locals.channelName,
             authorName,
             isOwn,
             content,
             rawContent,
             links,
+            shareUrl,
             rec: msgidParam,
             recname: authorName,
             token: compressToken(res.locals.token),

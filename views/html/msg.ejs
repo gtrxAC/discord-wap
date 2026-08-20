@@ -24,6 +24,9 @@
                 <a href="/wap/delete?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&msgid=<%= msgid %>">Delete message</a>
             </li>
             <% } %>
+            <li style="margin-bottom: 0.5em;">
+                <a href="<%= shareUrl %>">Share link</a>
+            </li>
             <% if (links && links.length > 0) { %>
                 <% links.forEach(link => { %>
                 <li style="margin-bottom: 0.5em;">

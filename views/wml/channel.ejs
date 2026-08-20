@@ -38,6 +38,9 @@
                         <postfield name="id" value="<%= id %>"/>
                         <postfield name="msgid" value="<%= m.id %>"/>
                         <postfield name="cname" value="$(cname)"/>
+                        <% if (locals.gid) { %>
+                            <postfield name="gid" value="<%= gid %>"/>
+                        <% } %>
                     </go>
                     <%= m.authorLine %>
                 </anchor>
