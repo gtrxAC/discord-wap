@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+    <card id="edit" title="$(cname)">
+        <p>
+            Edit message:
+            <br/>
+            <input name="message" value="<%= text %>" size="<%= textBoxSize %>"/>
+        </p>
+
+        <p align="center">
+            <anchor>
+                <go method="post" href="/wap/edit">
+                    <postfield name="token" value="$(token)"/>
+                    <postfield name="id" value="<%= id %>"/>
+                    <postfield name="msgid" value="<%= msgid %>"/>
+                    <postfield name="text" value="$(message)"/>
+                </go>
+                Save
+            </anchor>
+            <br/>
+            <anchor>
+                <prev/>
+                Back
+            </anchor>
+        </p>
+    </card>
+</wml>

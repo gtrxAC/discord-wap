@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= cname %></title>
+    <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>">
+    <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
+</head>
+<body>
+    <div class="main" style="text-align: center;">
+        <p>Edit message</p>
+        <form action="/wap/edit" method="post">
+            <input type="hidden" name="id" value="<%= id %>"/>
+            <input type="hidden" name="msgid" value="<%= msgid %>"/>
+            <label for="text">Message content:</label> <br/>
+            <textarea name="text" id="text" cols="30" rows="5" maxlength="2000"><%= text %></textarea> <br/>
+            <input type="submit" value="Save">
+        </form>
+    </div>
+</body>
+</html>

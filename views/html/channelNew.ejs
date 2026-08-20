@@ -41,12 +41,12 @@
                     </td>
                     <td>
                         <% if (m.showAuthor) { %>
-                            <a href="#"><%= m.author.name %></a>
+                            <a href="/wap/msg?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&msgid=<%= m.id %>"><%= m.author.name %></a>
                             <span class="time"><%= m.timestamp %></span>
                         <% } %>
                         <% if (m.content) { %>
                             <p>
-                                <a class="hidelink" href="/wap/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= m.id %>&recname=<%= encodeURIComponent(m.author.name) %>"><%- m.content %></a>
+                                <a class="hidelink" href="/wap/msg?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&msgid=<%= m.id %>"><%- m.content %></a>
                             </p>
                         <% } %>
                         <% if (m.attachments) { %>

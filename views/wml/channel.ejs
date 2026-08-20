@@ -33,10 +33,11 @@
         <% messages.forEach(m => { %>
             <p>
                 <anchor>
-                    <go href="#reply">
-                        <setvar name="message" value=""/>
-                        <setvar name="rec" value="<%= m.id %>"/>
-                        <setvar name="recname" value="<%= m.author.name %>"/>
+                    <go method="get" href="/wap/msg">
+                        <postfield name="token" value="$(token)"/>
+                        <postfield name="id" value="<%= id %>"/>
+                        <postfield name="msgid" value="<%= m.id %>"/>
+                        <postfield name="cname" value="$(cname)"/>
                     </go>
                     <%= m.authorLine %>
                 </anchor>

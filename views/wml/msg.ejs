@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+    <card id="msg" title="$(cname)">
+        <p align="center">
+            <anchor>
+                <go method="get" href="/wap/ch">
+                    <postfield name="token" value="$(token)"/>
+                    <postfield name="id" value="<%= id %>"/>
+                </go>
+                Back
+            </anchor>
+        </p>
+
+        <p>
+            <b><%= authorName %>:</b> <%- content %>
+        </p>
+
+        <p>
+            <anchor>
+                <go href="#reply">
+                    <setvar name="message" value=""/>
+                    <setvar name="rec" value="<%= msgid %>"/>
+                    <setvar name="recname" value="<%= authorName %>"/>
+                </go>
+                Reply to message
+            </anchor>
+            <% if (isOwn) { %>
+                <br/>
+                <anchor>
+                    <go method="get" href="/wap/edit">
+                        <postfield name="token" value="$(token)"/>
+                        <postfield name="id" value="<%= id %>"/>
+                        <postfield name="msgid" value="<%= msgid %>"/>
+                    </go>
+                    Edit message
+                </anchor>
+                <br/>
+                <anchor>
+                    <go method="post" href="/wap/delete">
+                        <postfield name="token" value="$(token)"/>
+                        <postfield name="id" value="<%= id %>"/>
+                        <postfield name="msgid" value="<%= msgid %>"/>
+                    </go>
+                    Delete message
+                </anchor>
+            <% } %>
+            <% if (links && links.length > 0) { %>
+                <% links.forEach(link => { %>
+                    <br/>
+                    <a href="<%= link %>">Open link: <%= link %></a>
+                <% }) %>
+            <% } %>
+        </p>
+    </card>
+
+    <card id="reply" title="$(cname)">
+        <onevent type="onenterbackward">
+            <prev/>
+        </onevent>
+
+        <p>
+            Reply to $(recname)
+            <br/>
+            <input name="message" size="<%= settings.limitTextBoxSize ? 200 : 2000 %>"/>
+        </p>
+
+        <p align="center">
+            <anchor>
+                <go method="post" href="/wap/send">
+                    <postfield name="token" value="$(token)"/>
+                    <postfield name="id" value="<%= id %>"/>
+                    <postfield name="text" value="$(message)"/>
+                    <postfield name="recipient" value="$(rec)"/>
+                </go>
+                Send @ON
+            </anchor>
+            <br/>
+            <anchor>
+                <go method="post" href="/wap/send">
+                    <postfield name="token" value="$(token)"/>
+                    <postfield name="id" value="<%= id %>"/>
+                    <postfield name="text" value="$(message)"/>
+                    <postfield name="recipient" value="$(rec)"/>
+                    <postfield name="ping" value="0"/>
+                </go>
+                Send @OFF
+            </anchor>
+            <br/>
+            <anchor>
+                <prev/>
+                Back
+            </anchor>
+        </p>
+    </card>
+</wml>

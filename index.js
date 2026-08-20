@@ -22,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 // ID -> username mapping cache (used for parsing mentions)
 const userCache = new LRUCache({max: 10000});
 const channelNameCache = new LRUCache({max: 10000});
+const messageCache = new LRUCache({max: 10000, ttl: 30*60*1000});
 
 // Base64 but better - instead of '/' and '=' characters, we use '-' and '_', which stay as one character when URL encoded
 function customBase64Decode(str) {
@@ -98,6 +99,27 @@ function compressToken(token) {
     catch (e) {
         throw new Error("Token is invalid");
     }
+}
+
+function getRawUserIdFromToken(token) {
+    if (!token || !token.trim().length) return null;
+    try {
+        let idPart = token.split('.')[0];
+        if (idPart.length < 17) {
+            return decompressID(idPart, 'user');
+        } else {
+            return atob(idPart);
+        }
+    } catch (e) {
+        return null;
+    }
+}
+
+function extractLinks(text) {
+    if (!text) return [];
+    const matches = text.match(/https?:\/\/[^\s<"'\(\)]+/g) || [];
+    const cleaned = matches.map(url => url.replace(/[.,!?)]+$/, ''));
+    return [...new Set(cleaned)];
 }
 
 function getIdTimestamp(res, id) {
@@ -700,10 +722,23 @@ app.get("/wap/ch", getToken, async (req, res) => {
     
         const messagesGet = await axios.get(proxyUrl, {headers: res.locals.headers});
     
-        // Populate username cache
+        // Populate username and message cache
+        const rawUserId = getRawUserIdFromToken(res.locals.token);
         messagesGet.data.forEach(msg => {
             userCache.set(msg.author.id, msg.author.username);
-        })
+            const compressedId = compressID(msg.id);
+            const isOwn = Boolean(msg.author && (msg.author.id === rawUserId || compressID(msg.author.id) === res.locals.userID));
+            messageCache.set(compressedId, {
+                id: compressedId,
+                rawId: msg.id,
+                authorName: msg.author?.global_name ?? msg.author?.username ?? "Unknown",
+                authorId: msg.author?.id,
+                isOwn,
+                content: parseMessageContent(res, msg),
+                rawContent: msg.content || "",
+                links: extractLinks(msg.content)
+            });
+        });
 
         // See which messages the author line and profile pic should be shown for
         messagesGet.data.reverse();
@@ -792,6 +827,116 @@ app.post("/wap/send", getToken, async (req, res) => {
     }
     catch (e) {handleError(res, e)}
 })
+
+app.all("/wap/msg", getToken, async (req, res) => {
+    try {
+        const idParam = req.query.id ?? req.body.id;
+        const msgidParam = req.query.msgid ?? req.body.msgid;
+
+        let cached = messageCache.get(msgidParam);
+        let authorName = cached?.authorName ?? req.query.recname ?? req.body.recname ?? "Unknown";
+        let isOwn = cached?.isOwn ?? (req.query.isOwn === '1');
+        let content = cached?.content ?? (req.query.content ? sanitize(req.query.content) : "");
+        let rawContent = cached?.rawContent ?? req.query.rawContent ?? "";
+        let links = cached?.links ?? extractLinks(rawContent);
+
+        render(res, "msg", {
+            id: idParam,
+            msgid: msgidParam,
+            cname: res.locals.channelName,
+            authorName,
+            isOwn,
+            content,
+            rawContent,
+            links,
+            rec: msgidParam,
+            recname: authorName,
+            token: compressToken(res.locals.token),
+        });
+    } catch (e) {
+        handleError(res, e);
+    }
+});
+
+app.get("/wap/edit", getToken, async (req, res) => {
+    try {
+        const idParam = req.query.id;
+        const msgidParam = req.query.msgid;
+
+        let cached = messageCache.get(msgidParam);
+        let isOwn = cached ? cached.isOwn : (req.query.isOwn === '1');
+        let rawContent = cached ? cached.rawContent : (req.query.rawContent ?? "");
+
+        if (!isOwn) {
+            throw new Error("Access denied. You can only edit your own messages.");
+        }
+
+        render(res, "edit", {
+            id: idParam,
+            msgid: msgidParam,
+            cname: res.locals.channelName,
+            text: rawContent,
+            token: compressToken(res.locals.token),
+            textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000,
+        });
+    } catch (e) {
+        handleError(res, e);
+    }
+});
+
+app.post("/wap/edit", getToken, async (req, res) => {
+    try {
+        const channelId = decompressID(req.body.id, 'channel');
+        const messageId = decompressID(req.body.msgid, 'message');
+
+        await axios.patch(
+            `${DEST_BASE}/channels/${channelId}/messages/${messageId}`,
+            { content: req.body.text },
+            { headers: res.locals.headers }
+        );
+
+        if (messageCache.has(req.body.msgid)) {
+            const cached = messageCache.get(req.body.msgid);
+            cached.rawContent = req.body.text;
+            cached.content = parseMessageContentText(req.body.text);
+            cached.links = extractLinks(req.body.text);
+            messageCache.set(req.body.msgid, cached);
+        }
+
+        render(res, "sent", {
+            fromChatBar: req.body.fromchatbar,
+            cname: res.locals.channelName,
+            messageText: "Message edited!"
+        });
+    } catch (e) {
+        handleError(res, e);
+    }
+});
+
+app.all("/wap/delete", getToken, async (req, res) => {
+    try {
+        const idParam = req.body.id ?? req.query.id;
+        const msgidParam = req.body.msgid ?? req.query.msgid;
+
+        const channelId = decompressID(idParam, 'channel');
+        const messageId = decompressID(msgidParam, 'message');
+
+        await axios.delete(
+            `${DEST_BASE}/channels/${channelId}/messages/${messageId}`,
+            { headers: res.locals.headers }
+        );
+
+        messageCache.delete(msgidParam);
+
+        render(res, "sent", {
+            fromChatBar: req.body.fromchatbar,
+            cname: res.locals.channelName,
+            messageText: "Message deleted!"
+        });
+    } catch (e) {
+        handleError(res, e);
+    }
+});
 
 app.get("/wap/set", getToken, (req, res) => {
     render(res, "settings", {
