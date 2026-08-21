@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title>Servers</title>
+</head>
+<body>
+    <table class="nav" id="t">
+        <tr>
+            <td><a href="/main<%= tokenParam %>"><img src="/back.png" alt="Back"></a></td>
+            <td class="title">Servers</td>
+            <td style="min-width: 28px"></td>
+        </tr>
+    </table>
+
+    <% if (!guilds.length) { %>
+        <div class="center">
+            Nothing to see here
+        </div>
+    <% } %>
+    
+    <% guilds.forEach((g, i) => { %>
+        <a class="hidelink" href="/g/<%= g.id %><%= tokenParam %>">
+            <div class="guild">
+                <%- fit(g.name) %>
+            </div>
+        </a>
+    <% }) %>
+
+    <div class="nav" style="text-align: right;">
+        <a href="#t"><img src="/top.png" alt="Top"></a>
+    </div>
+</body>
+</html>

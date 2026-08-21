@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title>Servers</title>
+</head>
+<body>
+    <div class="nav" id="t">
+        <a href="/main<%= tokenParam %>">&lt; Home</a>
+        <% if (hasMoreAbove) { %>
+            <br/>
+            <a href="/g?p=<%= previousPage %><%= tokenParam.replace('?', '&') %>">&lt; Previous</a>
+        <% } %>
+    </div>
+    
+    <div class="sb">Servers</div>
+    <div class="s">
+        <% if (!guilds.length) { %>
+            <div>Nothing to see here...</div>
+        <% } %>
+        
+        <% guilds.forEach((g, i) => { %>
+            <!-- <img src="/wap/go.png" alt="server"> -->
+            &gt; <a href="/g/<%= g.id %><%= tokenParam %>"><%- oneLine(g.name) %></a>
+            <%- (i != guilds.length - 1) ? '<br/>' : '' %>
+        <% }) %>
+    </div>
+
+    <div class="nav">
+        <% if (hasMoreBelow) { %>
+            <a href="/g?p=<%= nextPage %><%= tokenParam.replace('?', '&') %>">&gt; Next</a>
+            <br/>
+        <% } %>
+        <%- include("include/buttonTop.ejs") %>
+    </div>
+</body>
+</html>

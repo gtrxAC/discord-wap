@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title><%= gname %></title>
+    <style>
+        td {
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <table class="nav" id="t">
+        <tr>
+            <td><a href="/g<%= tokenParam %>"><img src="/back.png" alt="Back"></a></td>
+            <td class="title"><%- fit(gname) %></td>
+            <td style="min-width: 28px"></td>
+        </tr>
+    </table>
+
+    <% if (!channels.length) { %>
+        <div class="center">
+            Nothing to see here
+        </div>
+    <% } %>
+
+    <% if (settings.channelListLayout == 'recent') { %>
+        <div class="category">
+            <% channels.forEach((c, i) => { %>
+                <a class="hidelink" href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
+                    <table class="channel">
+                        <tr>
+                            <td class="chname"><span class="channelhash">#</span> <%- fit(c.name) %></td>
+                            <td class="chtime"><%= c.timestamp %></td>
+                        </tr>
+                    </table>
+                </a>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <% channelCategories.forEach(cat => { %>
+            <div class="categorytitle"><%- fit(cat.name) %></div>
+            <div class="category">
+                <% cat.children.forEach((c, i) => { %>
+                    <a class="hidelink" href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
+                        <div class="channel">
+                            <span class="channelhash">#</span> <%- fit(c.name) %>
+                        </div>
+                    </a>
+                <% }) %>
+            </div>
+        <% }) %>
+    <% } %>
+
+    <div class="nav" style="text-align: right;">
+        <a href="#t"><img src="/top.png" alt="Top"></a>
+    </div>
+</body>
+</html>

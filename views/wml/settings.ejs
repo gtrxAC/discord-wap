@@ -1,19 +1,69 @@
 <?xml version="1.0"?>
 <!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
 <wml>
-    <card title="Settings">
+    <card id="main" title="Settings">
+        <p align="center">
+            <anchor>
+                <prev/>
+                &lt; Back
+            </anchor>
+        </p>
         <p>
             Message count:
             <br/>
             <input name="mcount" size="3" value="<%= settings.messageLoadCount %>"/>
         </p>
         <p>
-            Sort channels by:
+            Channel list:
             <br/>
-            <select name="sort" value="<%= settings.altChannelListLayout ? 1 : 0 %>">
-                <option value="0">Position</option>
-                <option value="1">Last message</option>
+            <select name="sort" value="<%= ['default', 'recent', 'collapsed'].indexOf(settings.channelListLayout) %>">
+                <option value="0">Default</option>
+                <option value="2">Collapsed</option>
+                <option value="1">Recent first</option>
             </select>
+        </p>
+        <p>
+            Textbox size:
+            <br/>
+            <select name="tbs" value="<%= settings.limitTextBoxSize ? 1 : 0 %>">
+                <option value="0">Full</option>
+                <option value="1">Reduced</option>
+            </select>
+        </p>
+        <p>
+            Theme:
+            <br/>
+            <select name="lay" value="<%= themes.findIndex(t => t.id == 'wml') %>">
+                <% themes.forEach((th, i) => { %>
+                    <option value="<%= i %>">
+                        <%= (th.id == 'wml') ? '' : 'HTML ' %><%= th.name %>
+                    </option>
+                <% }) %>
+            </select>
+        </p>
+        <p>
+            Character set:
+            <br/>
+            <select name="asc" value="<%= settings.useAnyAscii ? 1 : 0 %>">
+                <option value="0">Full</option>
+                <option value="1">Reduced</option>
+            </select>
+        </p>
+        <p align="center">
+            <a href="#time">Time format</a>
+            <br/>
+            <a href="#save">&gt; Done</a>
+        </p>
+    </card>
+
+    <card id="time" title="Time format">
+        <p align="center">
+            <a href="#main">&lt; Back</a>
+        </p>
+        <p>
+            Current time:
+            <br/>
+            <%= timePreview %>
         </p>
         <p>
             Time offset (h):
@@ -33,32 +83,18 @@
                 <option value="1">12 hours</option>
             </select>
         </p>
-        <p>
-            Textbox size:
-            <br/>
-            <select name="tbs" value="<%= settings.limitTextBoxSize ? 1 : 0 %>">
-                <option value="0">Full</option>
-                <option value="1">Limited</option>
-            </select>
+        <p align="center">
+            <a href="#main">&lt; Back</a>
         </p>
+    </card>
+
+    <card id="save" title="Settings">
         <p>
-            Appearance:
-            <br/>
-            <select name="lay" value="<%= settings.layout %>">
-                <option value="2">WML</option>
-                <option value="0">Standard (HTML)</option>
-                <option value="3">Standard Dark (HTML)</option>
-                <option value="4">Modern (HTML)</option>
-                <option value="5">Modern Dark (HTML)</option>
-                <option value="1">Compact (HTML)</option>
-            </select>
-        </p>
-        <p>
-            To save your settings, press 'save', then add the page to your bookmarks again.
+            To save your settings, press 'save', then add the main page to your bookmarks again.
         </p>
         <p align="center">
             <anchor>
-               <go method="get" href="/wap/main">
+               <go method="get" href="/main">
                    <postfield name="token" value="$(token)"/>
                    <postfield name="s0" value="$(mcount)"/>
                    <postfield name="s1" value="$(sort)"/>
@@ -68,14 +104,12 @@
                    <postfield name="s5" value="$(tbs)"/>
                    <postfield name="s6" value="0"/>
                    <postfield name="s7" value="$(lay)"/>
+                   <postfield name="s8" value="$(asc)"/>
                </go>
-               Save
+               &gt; Save
             </anchor>
             <br/>
-            <anchor>
-                <prev/>
-               Cancel
-            </anchor>
+            <a href="#main">&lt; Back</a>
         </p>
     </card>
 </wml>

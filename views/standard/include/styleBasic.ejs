@@ -1,0 +1,59 @@
+<style>
+    /* Basics */
+    body {
+        background-color: #eef;
+        font-size: 10px;
+        margin: 0;
+        <% if (wordBreakMethod == 'css') { %>
+            word-break: break-word;
+        <% } %>
+    }
+
+    /* Section beginning (title) */
+    .sb {
+        background-color: #23a;
+        color: white;
+        font-weight: bold;
+    }
+
+    /* Section content */
+    .s, form {
+        background-color: white;
+        color: black;
+    }
+
+    /* Table column for mentions/pings in inbox */
+    .mention {
+        width: 16px;
+        text-align: right;
+        font-weight: bold;
+        color: #c23;
+    }
+
+    /* Navigation links */
+    .nav {
+        text-align: center;
+        font-size: 11px;
+        padding: 1px;
+    }
+
+    /* Message timestamp */
+    .time {
+        font-size: 8px;
+        text-align: right;
+    }
+
+    /* Recipient message */
+    .reply {
+        color: #444;
+        font-size: 9px;
+        font-style: italic;
+    }
+
+    /* Last message timestamp in channel list */
+    .chtime {
+        color: #444;
+        font-size: 9px;
+        text-align: right;
+    }
+</style>

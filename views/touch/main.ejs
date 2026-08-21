@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title>Discord WAP</title>
+</head>
+<body>
+    <table class="nav">
+        <tr>
+            <td style="height: 28px"></td>
+            <td class="title">Discord WAP</td>
+            <td style="height: 28px"></td>
+        </tr>
+    </table>
+
+    <a class="hidelink" href="/g<%= tokenParam %>">
+        <div class="guild">
+            Servers
+        </div>
+    </a>
+    <a class="hidelink" href="/d<%= tokenParam %>">
+        <div class="guild">
+            Direct messages
+        </div>
+    </a>
+    <a class="hidelink" href="/i<%= tokenParam %>">
+        <div class="guild">
+            Inbox
+        </div>
+    </a>
+    <a class="hidelink" href="/set<%= tokenParam %>">
+        <div class="guild">
+            Settings
+        </div>
+    </a>
+    <a class="hidelink" href="/about<%= tokenParam %>">
+        <div class="guild">
+            About
+        </div>
+    </a>
+    <a class="hidelink" href="/">
+        <div class="guild">
+            Log out
+        </div>
+    </a>
+</body>
+</html>

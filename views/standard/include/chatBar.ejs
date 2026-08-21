@@ -1,0 +1,11 @@
+<form action="<%= gpath %>/<%= id %>/send" method="post">
+    <input type="hidden" name="t" value="<%= compressedToken %>">
+    <div>
+        <% if (theme.basic) { %>
+            <textarea name="text" id="text" maxlength="200"></textarea>
+        <% } else { %>
+            <textarea name="text" id="text" maxlength="2000" placeholder="Message <%= cname %>"></textarea>
+        <% } %>
+    </div>
+    <div><input type="submit" value="Send"></div>
+</form>

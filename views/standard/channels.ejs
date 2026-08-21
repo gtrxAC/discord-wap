@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title><%= gname %></title>
+    <% if (!theme.basic) { %>
+        <style>
+            td {
+                padding: 0;
+            }
+        </style>
+    <% } %>
+</head>
+<body>
+    <div class="nav" id="t">
+        <a href="/g<%= tokenParam %>">&lt; Servers</a>
+    </div>
+
+    <% if (!channels.length) { %>
+        <div class="sb"><%- oneLine(gname) %></div>
+        <div class="s">
+            Nothing to see here...
+        </div>
+    <% } else { %>
+        <% if (settings.channelListLayout == 'recent') { %>
+            <div class="sb"><%- oneLine(gname) %></div>
+            <div class="s">
+                <% if (theme.basic) { %>
+                    <% channels.forEach(c => { %>
+                        <div>
+                            <span class="chtime"><%= c.timestamp %></span>
+                            <a href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>"><%- oneLine(c.name, 4) %></a>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <table style="width: 100%;">
+                        <% channels.forEach(c => { %>
+                            <tr>
+                                <td><a href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>"><%- oneLine(c.name, 4) %></a></td>
+                                <td class="chtime"><%= c.timestamp %></td>
+                            </tr>
+                        <% }) %>
+                    </table>
+                <% } %>
+            </div>
+        <% } else { %>
+            <% channelCategories.forEach(cat => { %>
+                <div class="sb"><%- oneLine(cat.name) %></div>
+                <div class="s">
+                    <% cat.children.forEach((c, i) => { %>
+                        <!-- <img src="/wap/page.png" alt="channel"> -->
+                        # <a href="/g/<%= gid %>/c/<%= c.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>"><%- oneLine(c.name, 2) %></a>
+                        <%- (i != cat.children.length - 1) ? '<br/>' : '' %>
+                    <% }) %>
+                </div>
+            <% }) %>
+        <% } %>
+    <% } %>
+
+    <div class="nav">
+        <%- include("include/buttonTop.ejs") %>
+    </div>
+</body>
+</html>

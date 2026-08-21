@@ -1,0 +1,92 @@
+<style>
+    /* Basics */
+    * {
+        box-sizing: border-box;
+        font-family: sans-serif;
+        <% if (wordBreakMethod == 'css') { %>
+            word-break: break-word;
+        <% } %>
+    }
+    body {
+        background-color: #eef;
+        font-size: 12px;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    /* Align icons with text */
+    img {
+        vertical-align: bottom;
+    }
+
+    /* Section beginning (title) */
+    .sb {
+        background-color: #23a;
+        color: white;
+        font-weight: bold;
+        padding: 1px 0 0 2px;
+        margin: 1px 1px 0 1px;
+    }
+
+    /* Section content */
+    .s {
+        background-color: white;
+        color: black;
+        border: solid 1px #23a;
+        padding: 1px 1px 1px 2px;
+        margin: 0 1px 3px 1px;
+    }
+
+    /* Form (matching background with sections) */
+    /* Form elements cannot be used inside sections because then page width would overflow on Nokia S40 */
+    form {
+        background-color: white;
+    }
+
+    /* Input-related elements */
+    input, button, textarea, select {
+        font-size: 12px;
+        width: 100%;
+        margin: 1px 0;
+    }
+    input[type="checkbox"] {
+        width: auto;
+    }
+
+    /* Table column for mentions/pings in inbox */
+    .mention {
+        width: 16px;
+        text-align: right;
+        font-weight: bold;
+        color: #c23;
+    }
+
+    /* Navigation links */
+    .nav {
+        text-align: center;
+        font-size: 11px;
+        padding: 1px;
+    }
+
+    /* Message timestamp */
+    .time {
+        color: #444;
+        font-size: 8px;
+        text-align: right;
+        line-height: 1;
+    }
+
+    /* Recipient message */
+    .reply {
+        color: #444;
+        font-size: 9px;
+        font-style: italic;
+    }
+
+    /* Last message timestamp in channel list */
+    .chtime {
+        color: #444;
+        font-size: 9px;
+        text-align: right;
+    }
+</style>

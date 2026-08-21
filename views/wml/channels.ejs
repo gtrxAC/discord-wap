@@ -1,25 +1,58 @@
 <?xml version="1.0"?>
 <!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
 <wml>
-    <card title="$(gname)">
+    <card id="main" title="<%- sanitize(gname) %>">
         <p align="center">
             <anchor>
-                <prev/>
-                Back
+                <go method="get" href="/main">
+                    <postfield name="token" value="$(token)"/>
+                </go>
+                &lt; Back
             </anchor>
         </p>
         <p>
-            <% channels.forEach(c => { %>
-                <anchor>
-                    <go method="get" href="/wap/ch">
-                        <setvar name="cn" value="<%= c.name %>"/>
-                        <postfield name="token" value="$(token)"/>
-                        <postfield name="id" value="<%= c.id %>"/>
-                    </go>
-                    <%= c.label %>
-                </anchor>
-                <br/>
-            <% }) %>
+            <% if (!channels.length) { %>
+                Nothing to see here...
+            <% } %>
+
+            <% useCollapsedView = (settings.channelListLayout == 'collapsed' && channelCategories.length >= 2) %>
+
+            <% if (useCollapsedView) { %>
+                <% channelCategories.forEach((cat, i) => { %>
+                    <a href="#c<%= i %>"><%- oneLine(cat.name) %></a>
+                    <br/>
+                <% }) %>
+            <% } else { %>
+                <% channels.forEach(c => { %>
+                    <anchor>
+                        <go method="get" href="/g/<%= gid %>/c/<%= c.id %>">
+                            <postfield name="token" value="$(token)"/>
+                        </go>
+                        <%- oneLine(c.label) %>
+                    </anchor>
+                    <br/>
+                <% }) %>
+            <% } %>
         </p>
     </card>
+
+    <% if (useCollapsedView) { %>
+        <% channelCategories.forEach((cat, i) => { %>
+            <card id="c<%= i %>" title="<%- sanitize(cat.name) %>">
+                <p align="center">
+                    <a href="#main">&lt; Back</a>
+                </p>
+
+                <% cat.children.forEach(c => { %>
+                    <anchor>
+                        <go method="get" href="/g/<%= gid %>/c/<%= c.id %>">
+                            <postfield name="token" value="$(token)"/>
+                        </go>
+                        <%- oneLine(c.label) %>
+                    </anchor>
+                    <br/>
+                <% }) %>
+            </card>
+        <% }) %>
+    <% } %>
 </wml>

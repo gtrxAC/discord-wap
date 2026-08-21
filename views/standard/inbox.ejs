@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title>Inbox</title>
+    <style>
+        td {
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav" id="t">
+        <a href="/main<%= tokenParam %>">&lt; Home</a>
+    </div>
+
+    <div class="sb">Inbox</div>
+    <div class="s">
+        <% if (notifications.length) { %>
+            <table style="width: 100%;">
+                <% notifications.forEach((n, i) => { %>
+                    <tr>
+                        <td>
+                            <a href="<%= n.path %>">
+                                <% if (n.guildName) { %>
+                                    #<%- oneLine(n.channelName) %> <!--<br/><div class="inboxguild"><%- fit(n.guildName) %></div> -->
+                                <% } else { %>
+                                    <%- oneLine(n.channelName) %>
+                                <% } %>
+                            </a>
+                        </td>
+                        <td class="mention">
+                            <%= n.mentionCount %>
+                        </td>
+                    </tr>
+                <% }) %>
+            </table>
+
+        <% } else { %>
+            <div>You're all caught up!</div>
+        <% } %>
+    </div>
+
+    <% if (notifications.length > 1) { %>
+        <div class="nav">
+            <%- include("include/buttonTop.ejs") %>
+        </div>
+    <% } %>
+</body>
+</html>

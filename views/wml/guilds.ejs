@@ -5,21 +5,44 @@
         <p align="center">
             <anchor>
                 <prev/>
-                Back
+                &lt; Back
+                <% if (hasMoreAbove) { %>
+                    <br/>
+                    <anchor>
+                        <go method="get" href="/g">
+                            <postfield name="token" value="$(token)"/>
+                            <postfield name="p" value="<%= previousPage %>"/>
+                        </go>
+                        &lt; Previous
+                    </anchor>
+                <% } %>
             </anchor>
         </p>
         <p>
+            <% if (!guilds.length) { %>
+                Nothing to see here...
+            <% } %>
+
             <% guilds.forEach(g => { %>
                 <anchor>
-                    <go method="get" href="/wap/g">
-                        <setvar name="gname" value="<%= g.name %>"/>
+                    <go method="get" href="/g/<%= g.id %>">
                         <postfield name="token" value="$(token)"/>
-                        <postfield name="id" value="<%= g.id %>"/>
                     </go>
-                    <%= g.name %>
+                    <%- oneLine(g.name) %>
                 </anchor>
                 <br/>
             <% }) %>
         </p>
+        <% if (hasMoreBelow) { %>
+            <p align="center">
+                <anchor>
+                    <go method="get" href="/g">
+                        <postfield name="token" value="$(token)"/>
+                        <postfield name="p" value="<%= nextPage %>"/>
+                    </go>
+                    &gt; Next
+                </anchor>
+            </p>
+        <% } %>
     </card>
 </wml>

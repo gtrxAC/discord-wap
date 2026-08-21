@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title>About</title>
+</head>
+<body>
+    <table class="nav">
+        <tr>
+            <% if (tokenParam) { %>
+                <td><a href="/main<%= tokenParam %>"><img src="/back.png" alt="Back"></a></td>
+            <% } else { %>
+                <td><a href="/"><img src="/back.png" alt="Back"></a></td>
+            <% } %>
+            <td class="title">About</td>
+            <td style="min-width: 28px"></td>
+        </tr>
+    </table>
+
+    <div class="categorytitle">Discord WAP</div>
+    <div class="section">
+        Discord client for WAP 1.x browsers (HTML version)<br/>
+        Developed by gtrxAC
+    </div>
+
+    <div class="categorytitle">Links</div>
+    <div class="section">
+        <%- fit("Join our support server: discord.gg/2GKuJjQagp") %><br/>
+        <%- fit("github.com/gtrxAC/discord-wap") %>
+    </div>
+
+    <div class="categorytitle">Your user agent</div>
+    <div class="section">
+        <%- fit(userAgent) %>
+    </div>
+</body>
+</html>

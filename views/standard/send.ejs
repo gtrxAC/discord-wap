@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title><%= cname %></title>
+</head>
+<body>
+    <div class="nav">
+        <a href="<%= gpath %>/<%= id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">&lt; <%= cname %></a>
+    </div>
+
+    <div class="sb">Your message</div>
+
+    <form action="<%= gpath %>/<%= id %>/send" method="post">
+        <input type="hidden" name="t" value="<%= compressedToken %>">
+        <div><textarea name="text" id="text" rows="5" maxlength="2000"></textarea></div>
+        <div><input type="submit" value="Send"></div>
+    </form>
+</body>
+</html>

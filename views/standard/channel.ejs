@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title><%= cname %></title>
+</head>
+<body>
+    <div class="nav" id="t">
+        <%- include("include/buttonBottom.ejs") %><br/>
+        <a href="<%= gpath %><%= tokenParam %>">&lt; Channels</a>
+        <% if (!settings.reverseChat) { %>
+            <br/>
+            <%- include("include/sendFull.ejs") %>
+        <% } %>
+    </div>
+
+    <!-- Pagination button (and chat bar if newest messages shown on top) -->
+    <% if (settings.reverseChat) { %>
+        <%- include("include/buttonOlderMessages.ejs") %>
+    <% } else { %>
+        <%- include("include/chatBar.ejs") %>
+        <%- include("include/buttonNewerMessages.ejs") %>
+    <% } %>
+
+    <% messages.forEach((m, i) => { %>
+        <!-- beginning of section for messages where the author is shown -->
+        <% if (m.showAuthor) { %>
+            <% if (i != 0) { %>
+                </div> <!-- end section of previous message cluster-->
+            <% } %>
+
+            <div class="sb"><%- oneLine(m.author.name) %></div>
+            <div class="s">
+        <% } %>
+
+        <!-- preview of recipient message -->
+        <% if (m.referenced_message) { %>
+            <div class="reply">
+                <!-- <img src="/wap/reply.gif" alt="reply to"> -->
+                <strong>
+                    <%= theme.basic ? '' : 'to' %>
+                    <%- oneLine(m.referenced_message.author.name) %>:
+                </strong>
+                <%- fit(m.referenced_message.content) %>
+            </div>
+        <% } %>
+        
+        <!-- content -->
+        <% if (m.content) { %>
+            <div><%- fit(m.content) %></div>
+        <% } %>
+
+        <!-- attachments (names/download links) -->
+        <% if (m.attachments) { %>
+            <% m.attachments.forEach(att => { %>
+                <div>
+                    <!-- <img src="/wap/page.png" alt="attachment"> -->
+                    <a href="<%= att.url %>"><%- fit(att.filename) %></a>
+                </div>
+            <% }) %>
+        <% } %>
+
+        <div class="time">
+            <% replyPath = `${gpath}/${id}/reply/${m.id}?recname=${encodeURIComponent(m.author.name)}${tokenParam.replace('?', '&')}` %>
+
+            <% if (theme.basic) { %>
+                <a href="<%= replyPath %>">
+                    <%= m.edited ? 'edited' : '' %> <%= m.timestamp %>
+                </a>
+            <% } else { %>
+                <%= m.edited ? '(edited) ' : '' %>
+                <%= m.timestamp %> <a href="<%= replyPath %>">&gt;</a>
+            <% } %>
+        </div>
+    <% }) %>
+
+    <% if (!messages.length) { %>
+        <div class="sb"><%- oneLine(cname) %></div>
+        <div class="s">
+            Nothing to see here...
+    <% } %>
+
+    </div> <!-- end section of bottom-most message cluster-->
+
+    <!-- Pagination button (and chat bar if newest messages shown on bottom) -->
+    <% if (settings.reverseChat) { %>
+        <%- include("include/buttonNewerMessages.ejs") %>
+        <%- include("include/chatBar.ejs") %>
+    <% } else { %>
+        <%- include("include/buttonOlderMessages.ejs") %>
+    <% } %>
+
+    <div class="nav" id="b">
+        <% if (settings.reverseChat) { %>
+            <%- include("include/sendFull.ejs") %>
+            <br/>
+        <% } %>
+        <%- include("include/buttonTop.ejs") %>
+    </div>
+</body>
+</html>

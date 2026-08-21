@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title><%= cname %></title>
+</head>
+<body>
+    <table class="nav" id="t">
+        <tr>
+            <td><a href="<%= gpath %><%= tokenParam %>"><img src="/back.png" alt="Back"></a></td>
+            <td class="title"><%- fit(cname) %></td>
+            <td><a href="#b"><img src="/btm.png" alt="Bottom"></a></td>
+        </tr>
+    </table>
+
+    <!-- "View older messages" button -->
+    <% if (messages.length == settings.messageLoadCount) { %>
+        <form action="<%= gpath %>/<%= id %><%= settings.reverseChat ? '#b' : '' %>" class="pagebtn">
+            <input type="hidden" name="t" value="<%= compressedToken %>">
+            <input type="hidden" name="b" value="<%= settings.reverseChat ? messages[0].id : messages[messages.length - 1].id %>"/>
+            <input type="hidden" name="p" value="<%= Number(page) + 1 %>"/>
+            <input type="submit" value="Older messages">
+        </form>
+    <% } %>
+
+    <!-- Text for empty channel -->
+    <% if (!messages.length) { %>
+        <div class="center">
+            Nothing to see here
+        </div>
+    <% } %>
+
+    <!-- Messages -->
+    <table class="messages">
+        <% messages.forEach(m => { %>
+            <% if (m.referenced_message) { %>
+                <tr class="replyrow">
+                    <td class="replyicon">
+                        <img src="/wap/<%= (theme.id == 'touch_dark') ? 'reply-dark' : 'reply' %>.gif" alt="reply to">
+                    </td>
+                    <td class="reply">
+                        <strong><%- fit(m.referenced_message.author.name) %></strong>
+                        <%- fit(m.referenced_message.content) %>
+                    </td>
+                </tr>
+            <% } %>
+            <tr class="message <%= m.showAuthor ? '' : 'noauthor' %>">
+                <td>
+                    <% if (m.showAuthor) { %>
+                        <% if (m.avatar) { %>
+                            <img src="/wap/avatar-overlay<%= (theme.id == 'touch_dark') ? '-dark' : '' %>.png" width="28px" height="28px" class="overlay">
+                        <% } %>
+                        <img src="<%= m.avatar ?? '/wap/avatar.png' %>" alt="avatar" width="28px" height="28px">
+                    <% } %>
+                </td>
+                <td>
+                    <% if (m.showAuthor) { %>
+                        <strong><%- fit(m.author.name) %></strong>
+                        <span class="time"><%= m.timestamp %></span>
+                    <% } %>
+                    <% if (m.content) { %>
+                        <div>
+                            <a class="hidelink" href="<%= gpath %>/<%= id %>/reply/<%= m.id %>?recname=<%= encodeURIComponent(m.author.name) %><%= tokenParam.replace('?', '&') %>">
+                                <%- fit(m.content) %>
+                            </a>
+                            <% if (m.edited) { %>
+                                <span class="time">(edited)</span>
+                            <% } %>
+                        </div>
+                    <% } %>
+                    <% if (m.attachments) { %>
+                        <% m.attachments.forEach(att => { %>
+                            <div><a href="<%= att.url %>"><%- fit(att.filename) %></a></div>
+                        <% }) %>
+                    <% } %>
+                </td>
+            </tr>
+        <% }) %>
+    </table>
+
+    <!-- "View newer messages" button -->
+    <% if (page > 0) { %>
+        <form action="<%= gpath %>/<%= id %>" class="pagebtn">
+            <input type="hidden" name="t" value="<%= compressedToken %>">
+            <% if (page > 1) { %>
+                <input type="hidden" name="a" value="<%= settings.reverseChat ? messages[messages.length - 1].id : messages[0].id %>"/>
+                <input type="hidden" name="p" value="<%= page - 1 %>"/>
+            <% } %>
+            <input type="submit" value="Newer messages">
+        </form>
+    <% } %>
+
+    <!-- Chat bar -->
+    <form action="<%= gpath %>/<%= id %>/send" method="post" id="b">
+        <input type="hidden" name="t" value="<%= compressedToken %>">
+        <table class="chatbar">
+            <tr>
+                <td><a href="#t"><img src="/top.png" alt="Top"></a></td>
+                <td><a href="<%= gpath %>/<%= id %>/send<%= tokenParam %>"><img src="/full.png" alt="Full"></a></td>
+                <td style="width: 100%;">
+                    <textarea name="text" id="text" maxlength="2000" placeholder="Message <%= cname %>"></textarea>
+                </td>
+                <td><input type="image" src="/send.png" value="Send"></td>
+            </tr>
+        </table>
+    </form>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title>Direct msgs.</title>
+</head>
+<body>
+    <div class="nav" id="t">
+        <a href="/main<%= tokenParam %>">&lt; Home</a>
+    </div>
+
+    <div class="sb">Direct messages</div>
+    <div class="s">
+        <% if (!dms.length) { %>
+            <div>Nothing to see here...</div>
+        <% } %>
+        
+        <% dms.forEach((d, i) => { %>
+            <!-- <img src="/wap/page.png" alt="DM"> -->
+            &gt;
+            <a href="/d/<%= d.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
+                <%- oneLine(d.name) %>
+            </a>
+            <%- (i != dms.length - 1) ? '<br/>' : '' %>
+        <% }) %>
+    </div>
+
+    <div class="nav">
+        <%- include("include/buttonTop.ejs") %>
+    </div>
+</body>
+</html>

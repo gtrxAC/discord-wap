@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title>Inbox</title>
+</head>
+<body>
+    <table class="nav" id="t">
+        <tr>
+            <td><a href="/main<%= tokenParam %>"><img src="/back.png" alt="Back"></a></td>
+            <td class="title">Inbox</td>
+            <td style="min-width: 28px"></td>
+        </tr>
+    </table>
+
+    <% if (!notifications.length) { %>
+        <div class="center">
+            You're all caught up!
+        </div>
+    <% } %>
+    
+    <% notifications.forEach((n, i) => { %>
+        <a class="hidelink" href="<%= n.path %>">
+            <table class="guild">
+                <tr>
+                    <td class="chname">
+                        <% if (n.guildName) { %>
+                            #<%- fit(n.channelName) %><br/><div class="inboxguild"><%- fit(n.guildName) %></div>
+                        <% } else { %>
+                            <%- fit(n.channelName) %>
+                        <% } %>
+                    </td>
+                    <td><span class="mention"><%= n.mentionCount %></span></td>
+                </tr>
+            </table>
+        </a>
+    <% }) %>
+</body>
+</html>

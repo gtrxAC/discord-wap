@@ -1,0 +1,80 @@
+/* Basics */
+* {
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+body {
+    background-color: #eef;
+    font-size: 12px;
+    margin: 0;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Section beginning (title) */
+.sb {
+    background-color: #23a;
+    color: white;
+    font-weight: bold;
+    padding: 1px 1px 0 2px;
+    margin: 2px 2px 0 2px;
+}
+
+/* Section content */
+.s {
+    background-color: white;
+    color: black;
+    border: solid 1px #23a;
+    padding: 2px;
+    margin: 0 2px 4px 2px;
+}
+
+/* Input-related elements */
+input, button, textarea, select {
+    font-size: 12px;
+    width: 100%;
+    margin: 1px 0;
+}
+
+/* Table columns for icons and mentions/pings */
+.icon {
+    width: 1px;
+}
+.mention {
+    width: 16px;
+    text-align: right;
+    font-weight: bold;
+    color: #c23;
+}
+
+/* Navigation links */
+.nav {
+    text-align: center;
+    font-size: 11px;
+    padding: 1px;
+}
+
+/* Messages, replies, etc */
+.msg {
+    color: unset;
+    text-decoration: unset;
+}
+
+.time {
+    color: #ddf;
+    font-size: 9px;
+}
+.reply {
+    color: #444;
+    font-size: 9px;
+    font-style: italic;
+}
+.chtime {
+    color: #444;
+    font-size: 9px;
+    text-align: right;
+}
+
+img {
+    vertical-align: bottom;
+}

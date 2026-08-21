@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include("include/head.ejs") %>
+    <title>Direct messages</title>
+</head>
+<body>
+    <table class="nav" id="t">
+        <tr>
+            <td><a href="/main<%= tokenParam %>"><img src="/back.png" alt="Back"></a></td>
+            <td class="title">Direct messages</td>
+            <td style="min-width: 28px"></td>
+        </tr>
+    </table>
+
+    <% if (!dms.length) { %>
+        <div class="center">
+            Nothing to see here
+        </div>
+    <% } %>
+    
+    <% dms.forEach((d, i) => { %>
+        <a class="hidelink" href="/d/<%= d.id %><%= tokenParam %><%= settings.reverseChat ? '#b' : '' %>">
+            <div class="guild">
+                <%- fit(d.name) %>
+            </div>
+        </a>
+    <% }) %>
+
+    <div class="nav" style="text-align: right;">
+        <a href="#t"><img src="/top.png" alt="Top"></a>
+    </div>
+</body>
+</html>
