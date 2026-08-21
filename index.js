@@ -6,6 +6,12 @@ const path = require('path');
 const { LRUCache } = require('lru-cache');
 const sanitizeHtml = require('sanitize-html');
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
+
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 20 * 1024 * 1024 }
+});
 
 const emoji = new EmojiConvertor();
 emoji.replace_mode = 'unified';
@@ -431,7 +437,7 @@ function getToken(req, res, next) {
             res.locals.channelName = "@" + req.query.dn;
         }
         else {
-            res.locals.channelName = req.query.cname ?? "Discord WAP";
+            res.locals.channelName = req.query.cname ?? req.body?.cname ?? "Discord WAP";
         }
 
         if (req.query.s0) {
@@ -807,33 +813,74 @@ app.get("/wap/reply", getToken, async (req, res) => {
     })
 })
 
-app.post("/wap/send", getToken, async (req, res) => {
+app.post("/wap/send", upload.single('file'), getToken, async (req, res) => {
     try {
+        const idParam = req.body?.id ?? req.query?.id;
+        const channelId = decompressID(idParam, 'channel');
+
+        let attachments;
+        if (req.file) {
+            const attachmentRes = await axios.post(
+                `${DEST_BASE}/channels/${channelId}/attachments`,
+                {
+                    files: [{
+                        filename: req.file.originalname,
+                        file_size: req.file.size,
+                        id: "0",
+                        is_clip: false,
+                        original_content_type: req.file.mimetype || "application/octet-stream"
+                    }]
+                },
+                { headers: res.locals.headers }
+            );
+
+            const uploadData = attachmentRes.data.attachments[0];
+            const uploadUrl = uploadData.upload_url;
+            const uploadFilename = uploadData.upload_filename;
+
+            await axios.put(uploadUrl, req.file.buffer, {
+                headers: {
+                    'Content-Type': req.file.mimetype || 'application/octet-stream',
+                    'Content-Length': req.file.size
+                }
+            });
+
+            attachments = [{
+                id: "0",
+                filename: req.file.originalname,
+                original_content_type: req.file.mimetype || "application/octet-stream",
+                uploaded_filename: uploadFilename
+            }];
+        }
+
         const send = {
-            content: req.body.text,
+            content: req.body?.text || "",
             flags: 0,
             mobile_network_type: "unknown",
             tts: false
         };
-        if (req.body.recipient) {
+        if (attachments) {
+            send.attachments = attachments;
+        }
+        if (req.body?.recipient) {
             send.message_reference = {
                 message_id: String(decompressID(req.body.recipient, 'message'))
             }
         }
-        if (Number(req.body.ping) == 0) {
+        if (Number(req.body?.ping) == 0) {
             send.allowed_mentions = {
                 replied_user: false
             }
         }
 
         await axios.post(
-            `${DEST_BASE}/channels/${decompressID(req.body.id, 'channel')}/messages`,
+            `${DEST_BASE}/channels/${channelId}/messages`,
             send,
             { headers: res.locals.headers }
         );
 
         render(res, "sent", {
-            fromChatBar: req.body.fromchatbar,
+            fromChatBar: req.body?.fromchatbar,
             cname: res.locals.channelName
         });
     }
