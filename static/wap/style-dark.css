@@ -64,6 +64,11 @@ a {
     text-decoration: none;
 }
 
+.hidelink {
+    color: inherit;
+    text-decoration: none;
+}
+
 .time {
     color: #99a;
     font-size: 12px;

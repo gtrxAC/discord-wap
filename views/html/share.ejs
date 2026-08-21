@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= cname %></title>
+    <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>">
+    <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
+</head>
+<body>
+    <div class="main">
+        <h3>Share</h3>
+        <p><b><%= authorName %>:</b> <%= rawContent %></p>
+        <hr>
+        <ul style="list-style-type: none; padding-left: 0;">
+            <li style="margin-bottom: 0.5em;">
+                <a href="<%= shareLinkUrl %>">Share link</a>
+            </li>
+            <% if (rawContent) { %>
+            <li style="margin-bottom: 0.5em;">
+                <a href="<%= shareTextUrl %>">Share text</a>
+            </li>
+            <% } %>
+        </ul>
+        <br>
+        <a href="/wap/msg?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&msgid=<%= msgid %><% if (locals.gid) { %>&gid=<%= gid %><% } %>">Back to message options</a>
+    </div>
+</body>
+</html>

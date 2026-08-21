@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= cname %></title>
+    <link rel="stylesheet" href="/wap/<%= settings?.cssFile ?? 'style.css' %>">
+    <link rel="shortcut icon" href="/wap/icon.png" type="image/png">
+</head>
+<body>
+    <div class="main">
+        <h3>Message Options</h3>
+        <p><b><%= authorName %>:</b> <%- content %></p>
+        <hr>
+        <ul style="list-style-type: none; padding-left: 0;">
+            <li style="margin-bottom: 0.5em;">
+                <a href="/wap/reply?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&rec=<%= msgid %>&recname=<%= encodeURIComponent(authorName) %>">Reply to message</a>
+            </li>
+            <% if (isOwn) { %>
+            <li style="margin-bottom: 0.5em;">
+                <a href="/wap/edit?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&msgid=<%= msgid %>">Edit message</a>
+            </li>
+            <li style="margin-bottom: 0.5em;">
+                <a href="/wap/delete?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&msgid=<%= msgid %>">Delete message</a>
+            </li>
+            <% } %>
+            <li style="margin-bottom: 0.5em;">
+                <a href="/wap/share?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>&msgid=<%= msgid %><% if (locals.gid) { %>&gid=<%= gid %><% } %>">Share</a>
+            </li>
+            <% if (links && links.length > 0) { %>
+                <% links.forEach(link => { %>
+                <li style="margin-bottom: 0.5em;">
+                    <a href="<%= link %>" target="_blank" rel="noopener noreferrer">Open link: <%= link %></a>
+                </li>
+                <% }) %>
+            <% } %>
+        </ul>
+        <br>
+        <a href="/wap/ch?id=<%= id %>&cname=<%= encodeURIComponent(cname) %>">Back to channel</a>
+    </div>
+</body>
+</html>

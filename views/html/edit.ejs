@@ -9,14 +9,13 @@
 </head>
 <body>
     <div class="main" style="text-align: center;">
-        <form action="/wap/send" method="post" enctype="multipart/form-data">
+        <p>Edit message</p>
+        <form action="/wap/edit" method="post">
             <input type="hidden" name="id" value="<%= id %>"/>
-            <input type="hidden" name="cname" value="<%= cname %>"/>
-            <label for="text">Your message:</label> <br/>
-            <textarea name="text" id="text" cols="30" rows="5" maxlength="2000"></textarea> <br/>
-            <label for="file">Attach file (max 20MB):</label> <br/>
-            <input type="file" name="file" id="file"/> <br/>
-            <input type="submit" value="Send">
+            <input type="hidden" name="msgid" value="<%= msgid %>"/>
+            <label for="text">Message content:</label> <br/>
+            <textarea name="text" id="text" cols="30" rows="5" maxlength="2000"><%= text %></textarea> <br/>
+            <input type="submit" value="Save">
         </form>
     </div>
 </body>

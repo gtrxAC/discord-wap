@@ -18,6 +18,11 @@ a {
     color: #14c;
 }
 
+.hidelink {
+    color: inherit;
+    text-decoration: none;
+}
+
 .time {
     color: #666;
     font-size: 12px;

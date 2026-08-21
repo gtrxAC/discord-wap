@@ -6,6 +6,12 @@ const path = require('path');
 const { LRUCache } = require('lru-cache');
 const sanitizeHtml = require('sanitize-html');
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
+
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 20 * 1024 * 1024 }
+});
 
 const emoji = new EmojiConvertor();
 emoji.replace_mode = 'unified';
@@ -20,8 +26,10 @@ app.use(express.static(path.join(__dirname, 'static')));
 app.use(express.urlencoded({ extended: true }));
 
 // ID -> username mapping cache (used for parsing mentions)
-const userCache = new LRUCache({max: 10000});
-const channelNameCache = new LRUCache({max: 10000});
+const userCache = new LRUCache({ max: 10000 });
+const channelNameCache = new LRUCache({ max: 10000 });
+const channelGuildCache = new LRUCache({ max: 10000 });
+const messageCache = new LRUCache({ max: 10000, ttl: 30 * 60 * 1000 });
 
 // Base64 but better - instead of '/' and '=' characters, we use '-' and '_', which stay as one character when URL encoded
 function customBase64Decode(str) {
@@ -72,7 +80,7 @@ function decompressToken(token) {
     try {
         let idPart = token.split('.')[0];
         const rest = '.' + token.split('.').slice(1).join('.');
-    
+
         if (idPart.length < 17) {
             idPart = btoa(decompressID(idPart, 'user'));
         }
@@ -89,7 +97,7 @@ function compressToken(token) {
     try {
         let idPart = token.split('.')[0];
         const rest = '.' + token.split('.').slice(1).join('.');
-        
+
         if (idPart.length >= 17) {
             idPart = compressID(atob(idPart));
         }
@@ -98,6 +106,27 @@ function compressToken(token) {
     catch (e) {
         throw new Error("Token is invalid");
     }
+}
+
+function getRawUserIdFromToken(token) {
+    if (!token || !token.trim().length) return null;
+    try {
+        let idPart = token.split('.')[0];
+        if (idPart.length < 17) {
+            return decompressID(idPart, 'user');
+        } else {
+            return atob(idPart);
+        }
+    } catch (e) {
+        return null;
+    }
+}
+
+function extractLinks(text) {
+    if (!text) return [];
+    const matches = text.match(/https?:\/\/[^\s<"'\(\)]+/g) || [];
+    const cleaned = matches.map(url => url.replace(/[.,!?)]+$/, ''));
+    return [...new Set(cleaned)];
 }
 
 function getIdTimestamp(res, id) {
@@ -117,17 +146,17 @@ function getIdTimestamp(res, id) {
 
         if (res.locals.settings.use12hTime) {
             period = date.getHours() < 12 ? "A" : "P";
-    
+
             // Convert hours to 12-hour format
             date.setHours(date.getHours() % 12);
             if (date.getHours() == 0) {
                 date.setHours(12);
             }
         }
-    
+
         let minutes = date.getMinutes();
         if (minutes < 10) minutes = '0' + minutes;
-    
+
         return date.getHours() + ":" + minutes + period;
     } else {
         // not today -> show the date
@@ -157,7 +186,7 @@ function getCharactersPerLine(req) {
     // small font size, tested on siemens a65. a55 seems to use the same font
     // for medium font size, a suitable number would be 15
     if (ua.startsWith('SIE-')) return 18;
-    
+
     // could check some non-nokia models, for now, make a safe assumption of 16 chars
     // could also use uaprof on devices that have that
     if (!ua.startsWith('Nokia')) return 16;
@@ -205,11 +234,11 @@ function getError(e) {
 
 function handleError(res, e) {
     console.log(e);
-    render(res, "error", {error: getError(e)});
+    render(res, "error", { error: getError(e) });
 }
 
 function sanitize(str) {
-    return sanitizeHtml(str, {allowedTags: [], disallowedTagsMode: 'recursiveEscape'});
+    return sanitizeHtml(str, { allowedTags: [], disallowedTagsMode: 'recursiveEscape' });
 }
 
 function fixWordBreak(str) {
@@ -237,7 +266,6 @@ function parseMessageObject(req, res, msg) {
         result.type = msg.type;
     }
 
-    // Parse content 
     result.content = parseMessageContent(res, msg);
 
     if (msg.referenced_message) {
@@ -268,9 +296,9 @@ function parseMessageObject(req, res, msg) {
                 let width = att.width;
                 let height = att.height;
                 if (width > 1000 || height > 1000) {
-                    const ratio = Math.max(att.width, att.height)/1000;
-                    width = Math.round(width/ratio);
-                    height = Math.round(height/ratio);
+                    const ratio = Math.max(att.width, att.height) / 1000;
+                    width = Math.round(width / ratio);
+                    height = Math.round(height / ratio);
                 }
                 url = att.proxy_url.replace(/^https/, 'http') + `width=${width}&height=${height}`;
             }
@@ -320,7 +348,7 @@ function parseMessageContentNonStatus(res, msg, singleLine) {
     else if (msg.content) {
         result = parseMessageContentText(msg.content);
     }
-    
+
     if (msg.attachments?.length && !res.locals.settings.modern) {
         msg.attachments.forEach(att => {
             if (result.length) result += "\n";
@@ -393,7 +421,7 @@ function getToken(req, res, next) {
         res.locals.token = req.query?.token ?? req.body?.token ?? req.cookies?.dwtoken;
 
         if (!res.locals.token) throw new Error("Your request does not contain a token. Please return to the Discord WAP front page and try again.");
-        
+
         if (process.env.PASSWORD && process.env.PASSWORD_TOKEN && res.locals.token == process.env.PASSWORD) {
             res.locals.token = process.env.PASSWORD_TOKEN;
         }
@@ -409,7 +437,7 @@ function getToken(req, res, next) {
             res.locals.channelName = "@" + req.query.dn;
         }
         else {
-            res.locals.channelName = req.query.cname ?? "Discord WAP";
+            res.locals.channelName = req.query.cname ?? req.body?.cname ?? "Discord WAP";
         }
 
         if (req.query.s0) {
@@ -456,7 +484,7 @@ function getToken(req, res, next) {
             modern: (layout == 4 || layout == 5),
             dark: (layout == 3 || layout == 5),
         }
-    
+
         res.locals.headers = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0",
             "Accept": "*/*",
@@ -469,7 +497,7 @@ function getToken(req, res, next) {
             "Sec-Fetch-Site": "same-origin"
         };
         if (req.cookies?.dwtoken != res.locals.token) {
-            res.cookie('dwtoken', res.locals.token, {maxAge: 1000*60*60*24*30});
+            res.cookie('dwtoken', res.locals.token, { maxAge: 1000 * 60 * 60 * 24 * 30 });
         }
         next();
     }
@@ -481,7 +509,7 @@ function getToken(req, res, next) {
 async function fetchDMs(req, res) {
     const dmsGet = await axios.get(
         `${DEST_BASE}/users/@me/channels`,
-        {headers: res.locals.headers}
+        { headers: res.locals.headers }
     )
     // Sort by latest first
     dmsGet.data.sort((a, b) => {
@@ -553,7 +581,7 @@ app.get("/wap/main", getToken, async (req, res) => {
             dms,
         });
     }
-    catch (e) {handleError(res, e)}
+    catch (e) { handleError(res, e) }
 })
 
 // Direct message list (separate page for HTML version)
@@ -566,10 +594,10 @@ app.get("/wap/dm", getToken, async (req, res) => {
             dms,
         });
     }
-    catch (e) {handleError(res, e)}
+    catch (e) { handleError(res, e) }
 })
 
-const guildCache = new LRUCache({max: 200, ttl: 10*60*1000, updateAgeOnGet: false})
+const guildCache = new LRUCache({ max: 200, ttl: 10 * 60 * 1000, updateAgeOnGet: false })
 
 // Server list
 app.get("/wap/gl", getToken, async (req, res) => {
@@ -581,7 +609,7 @@ app.get("/wap/gl", getToken, async (req, res) => {
         } else {
             const guildsGet = await axios.get(
                 `${DEST_BASE}/users/@me/guilds`,
-                {headers: res.locals.headers}
+                { headers: res.locals.headers }
             )
             guilds = guildsGet.data.map(g => ({
                 id: compressID(g.id),
@@ -594,10 +622,10 @@ app.get("/wap/gl", getToken, async (req, res) => {
             guilds
         });
     }
-    catch (e) {handleError(res, e)}
+    catch (e) { handleError(res, e) }
 })
 
-const channelCache = new LRUCache({max: 400, ttl: 10*60*1000, updateAgeOnGet: false});
+const channelCache = new LRUCache({ max: 400, ttl: 10 * 60 * 1000, updateAgeOnGet: false });
 
 // Channel list of a server
 app.get("/wap/g", getToken, async (req, res) => {
@@ -611,14 +639,17 @@ app.get("/wap/g", getToken, async (req, res) => {
         } else {
             channelsGet = await axios.get(
                 `${DEST_BASE}/guilds/${decompressID(req.query.id, 'server')}/channels`,
-                {headers: res.locals.headers}
+                { headers: res.locals.headers }
             )
             if (useCache) channelCache.set(req.query.id, channelsGet);
         }
 
-        // Populate channel name cache
+        const serverId = decompressID(req.query.id, 'server');
+
+        // Populate channel name and guild cache
         channelsGet.data.forEach(ch => {
             channelNameCache.set(ch.id, ch.name);
+            channelGuildCache.set(ch.id, serverId);
         })
 
         // Due to page length limitations, limit the amount of channels to be shown:
@@ -648,14 +679,14 @@ app.get("/wap/g", getToken, async (req, res) => {
                 const recentChannelIDs = allChannels
                     .slice(0, 15)
                     .map(ch => ch.id);
-        
+
                 // Also, channels with certain names will always be shown, because those are channels that people might often want to visit.
                 const whitelistedChannelIDs = allChannels
                     .filter(ch => /^(general|phones|off\S*topic|discord-j2me-wap)$/g.test(ch.name))
                     .map(ch => ch.id);
-        
+
                 const shownChannelIDs = [...new Set([...recentChannelIDs, ...whitelistedChannelIDs])]
-        
+
                 channels = allChannels.filter(ch => shownChannelIDs.includes(ch.id));
             } else {
                 channels = allChannels;
@@ -672,10 +703,11 @@ app.get("/wap/g", getToken, async (req, res) => {
 
         render(res, "channels", {
             gname: req.query.gname,
+            gid: req.query.id,
             channels
         });
     }
-    catch (e) {handleError(res, e)}
+    catch (e) { handleError(res, e) }
 })
 
 // ported from discord j2me
@@ -686,7 +718,7 @@ function shouldShowAuthor(msg, above, clusterStart) {
     if (msg.attachments && !msg.content) return true;
     if (msg.isStatus || above.isStatus) return true;
 
-    return (BigInt(msg.id) >> 22n) - (BigInt(clusterStart) >> 22n) > BigInt(7*60*1000);
+    return (BigInt(msg.id) >> 22n) - (BigInt(clusterStart) >> 22n) > BigInt(7 * 60 * 1000);
 }
 
 // Get channel messages
@@ -697,13 +729,26 @@ app.get("/wap/ch", getToken, async (req, res) => {
         if (req.query.before) queryParam.push(`before=${decompressID(req.query.before, 'message')}`);
         if (req.query.after) queryParam.push(`after=${decompressID(req.query.after, 'message')}`);
         proxyUrl += '?' + queryParam.join('&');
-    
-        const messagesGet = await axios.get(proxyUrl, {headers: res.locals.headers});
-    
-        // Populate username cache
+
+        const messagesGet = await axios.get(proxyUrl, { headers: res.locals.headers });
+
+        // Populate username and message cache
+        const rawUserId = getRawUserIdFromToken(res.locals.token);
         messagesGet.data.forEach(msg => {
             userCache.set(msg.author.id, msg.author.username);
-        })
+            const compressedId = compressID(msg.id);
+            const isOwn = Boolean(msg.author && (msg.author.id === rawUserId || compressID(msg.author.id) === res.locals.userID));
+            messageCache.set(compressedId, {
+                id: compressedId,
+                rawId: msg.id,
+                authorName: msg.author?.global_name ?? msg.author?.username ?? "Unknown",
+                authorId: msg.author?.id,
+                isOwn,
+                content: parseMessageContent(res, msg),
+                rawContent: msg.content || "",
+                links: extractLinks(msg.content)
+            });
+        });
 
         // See which messages the author line and profile pic should be shown for
         messagesGet.data.reverse();
@@ -722,23 +767,32 @@ app.get("/wap/ch", getToken, async (req, res) => {
             above = m;
         })
         messagesGet.data.reverse();
-    
+
         const messages = messagesGet.data.map(m => parseMessageObject(req, res, m));
 
         if (res.locals.settings.reverseChat && res.locals.format == 'html') {
             messages.reverse();
         }
-    
+
+        const rawChannelId = decompressID(req.query.id, 'channel');
+        if (req.query.gid) {
+            try {
+                channelGuildCache.set(rawChannelId, decompressID(req.query.gid, 'server'));
+            } catch (e) {
+                channelGuildCache.set(rawChannelId, req.query.gid);
+            }
+        }
+
         render(res, res.locals.settings.modern ? "channelNew" : "channel", {
             id: req.query.id,
+            gid: req.query.gid ?? (channelGuildCache.has(rawChannelId) ? compressID(channelGuildCache.get(rawChannelId)) : undefined),
             page: req.query.page ?? 0,
             messages,
             textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000,
-            id: req.query.id,
             cname: res.locals.channelName,
         });
     }
-    catch (e) {handleError(res, e)}
+    catch (e) { handleError(res, e) }
 })
 
 app.get("/wap/send", getToken, async (req, res) => {
@@ -759,39 +813,250 @@ app.get("/wap/reply", getToken, async (req, res) => {
     })
 })
 
-// Send message
-app.post("/wap/send", getToken, async (req, res) => {
+app.post("/wap/send", upload.single('file'), getToken, async (req, res) => {
     try {
+        const idParam = req.body?.id ?? req.query?.id;
+        const channelId = decompressID(idParam, 'channel');
+
+        let attachments;
+        if (req.file) {
+            const attachmentRes = await axios.post(
+                `${DEST_BASE}/channels/${channelId}/attachments`,
+                {
+                    files: [{
+                        filename: req.file.originalname,
+                        file_size: req.file.size,
+                        id: "0",
+                        is_clip: false,
+                        original_content_type: req.file.mimetype || "application/octet-stream"
+                    }]
+                },
+                { headers: res.locals.headers }
+            );
+
+            const uploadData = attachmentRes.data.attachments[0];
+            const uploadUrl = uploadData.upload_url;
+            const uploadFilename = uploadData.upload_filename;
+
+            await axios.put(uploadUrl, req.file.buffer, {
+                headers: {
+                    'Content-Type': req.file.mimetype || 'application/octet-stream',
+                    'Content-Length': req.file.size
+                }
+            });
+
+            attachments = [{
+                id: "0",
+                filename: req.file.originalname,
+                original_content_type: req.file.mimetype || "application/octet-stream",
+                uploaded_filename: uploadFilename
+            }];
+        }
+
         const send = {
-            content: req.body.text,
+            content: req.body?.text || "",
             flags: 0,
             mobile_network_type: "unknown",
             tts: false
         };
-        if (req.body.recipient) {
+        if (attachments) {
+            send.attachments = attachments;
+        }
+        if (req.body?.recipient) {
             send.message_reference = {
                 message_id: String(decompressID(req.body.recipient, 'message'))
             }
         }
-        if (Number(req.body.ping) == 0) {
+        if (Number(req.body?.ping) == 0) {
             send.allowed_mentions = {
                 replied_user: false
             }
         }
 
         await axios.post(
-            `${DEST_BASE}/channels/${decompressID(req.body.id, 'channel')}/messages`,
+            `${DEST_BASE}/channels/${channelId}/messages`,
             send,
-            {headers: res.locals.headers}
+            { headers: res.locals.headers }
         );
 
         render(res, "sent", {
-            fromChatBar: req.body.fromchatbar,
-            cname: res.locals.channelName 
+            fromChatBar: req.body?.fromchatbar,
+            cname: res.locals.channelName
         });
     }
-    catch (e) {handleError(res, e)}
+    catch (e) { handleError(res, e) }
 })
+
+app.all("/wap/msg", getToken, async (req, res) => {
+    try {
+        const idParam = req.query.id ?? req.body.id;
+        const msgidParam = req.query.msgid ?? req.body.msgid;
+        const gidParam = req.query.gid ?? req.body.gid;
+
+        let cached = messageCache.get(msgidParam);
+        let authorName = cached?.authorName ?? req.query.recname ?? req.body.recname ?? "Unknown";
+        let isOwn = cached?.isOwn ?? (req.query.isOwn === '1');
+        let content = cached?.content ?? (req.query.content ? sanitize(req.query.content) : "");
+        let rawContent = cached?.rawContent ?? req.query.rawContent ?? "";
+        let links = cached?.links ?? extractLinks(rawContent);
+
+        const rawChannelId = decompressID(idParam, 'channel');
+        const rawMessageId = decompressID(msgidParam, 'message');
+
+        let rawServerId = '@me';
+        if (gidParam && gidParam !== '@me') {
+            try {
+                rawServerId = decompressID(gidParam, 'server');
+            } catch (e) {
+                rawServerId = gidParam;
+            }
+        } else if (channelGuildCache.has(rawChannelId)) {
+            rawServerId = channelGuildCache.get(rawChannelId);
+        }
+
+        render(res, "msg", {
+            id: idParam,
+            msgid: msgidParam,
+            gid: gidParam,
+            cname: res.locals.channelName,
+            authorName,
+            isOwn,
+            content,
+            rawContent,
+            links,
+            rec: msgidParam,
+            recname: authorName,
+            token: compressToken(res.locals.token),
+        });
+    } catch (e) {
+        handleError(res, e);
+    }
+});
+
+app.all("/wap/share", getToken, async (req, res) => {
+    try {
+        const idParam = req.query.id ?? req.body.id;
+        const msgidParam = req.query.msgid ?? req.body.msgid;
+        const gidParam = req.query.gid ?? req.body.gid;
+
+        let cached = messageCache.get(msgidParam);
+        let authorName = cached?.authorName ?? req.query.recname ?? req.body.recname ?? "Unknown";
+        let rawContent = cached?.rawContent ?? req.query.rawContent ?? "";
+
+        const rawChannelId = decompressID(idParam, 'channel');
+        const rawMessageId = decompressID(msgidParam, 'message');
+
+        let rawServerId = '@me';
+        if (gidParam && gidParam !== '@me') {
+            try {
+                rawServerId = decompressID(gidParam, 'server');
+            } catch (e) {
+                rawServerId = gidParam;
+            }
+        } else if (channelGuildCache.has(rawChannelId)) {
+            rawServerId = channelGuildCache.get(rawChannelId);
+        }
+
+        const messageLink = `https://discord.com/channels/${rawServerId}/${rawChannelId}/${rawMessageId}`;
+        const shareLinkUrl = `sms:?body=${messageLink}`;
+        const shareTextUrl = `sms:?body=${encodeURIComponent(rawContent)}`;
+
+        render(res, "share", {
+            id: idParam,
+            msgid: msgidParam,
+            gid: gidParam,
+            cname: res.locals.channelName,
+            authorName,
+            rawContent,
+            messageLink,
+            shareLinkUrl,
+            shareTextUrl,
+            token: compressToken(res.locals.token),
+        });
+    } catch (e) {
+        handleError(res, e);
+    }
+});
+
+app.get("/wap/edit", getToken, async (req, res) => {
+    try {
+        const idParam = req.query.id;
+        const msgidParam = req.query.msgid;
+
+        let cached = messageCache.get(msgidParam);
+        let isOwn = cached ? cached.isOwn : (req.query.isOwn === '1');
+        let rawContent = cached ? cached.rawContent : (req.query.rawContent ?? "");
+
+        if (!isOwn) {
+            throw new Error("Access denied. You can only edit your own messages.");
+        }
+
+        render(res, "edit", {
+            id: idParam,
+            msgid: msgidParam,
+            cname: res.locals.channelName,
+            text: rawContent,
+            token: compressToken(res.locals.token),
+            textBoxSize: res.locals.settings.limitTextBoxSize ? 200 : 2000,
+        });
+    } catch (e) {
+        handleError(res, e);
+    }
+});
+
+app.post("/wap/edit", getToken, async (req, res) => {
+    try {
+        const channelId = decompressID(req.body.id, 'channel');
+        const messageId = decompressID(req.body.msgid, 'message');
+
+        await axios.patch(
+            `${DEST_BASE}/channels/${channelId}/messages/${messageId}`,
+            { content: req.body.text },
+            { headers: res.locals.headers }
+        );
+
+        if (messageCache.has(req.body.msgid)) {
+            const cached = messageCache.get(req.body.msgid);
+            cached.rawContent = req.body.text;
+            cached.content = parseMessageContentText(req.body.text);
+            cached.links = extractLinks(req.body.text);
+            messageCache.set(req.body.msgid, cached);
+        }
+
+        render(res, "sent", {
+            fromChatBar: req.body.fromchatbar,
+            cname: res.locals.channelName,
+            messageText: "Message edited!"
+        });
+    } catch (e) {
+        handleError(res, e);
+    }
+});
+
+app.all("/wap/delete", getToken, async (req, res) => {
+    try {
+        const idParam = req.body.id ?? req.query.id;
+        const msgidParam = req.body.msgid ?? req.query.msgid;
+
+        const channelId = decompressID(idParam, 'channel');
+        const messageId = decompressID(msgidParam, 'message');
+
+        await axios.delete(
+            `${DEST_BASE}/channels/${channelId}/messages/${messageId}`,
+            { headers: res.locals.headers }
+        );
+
+        messageCache.delete(msgidParam);
+
+        render(res, "sent", {
+            fromChatBar: req.body.fromchatbar,
+            cname: res.locals.channelName,
+            messageText: "Message deleted!"
+        });
+    } catch (e) {
+        handleError(res, e);
+    }
+});
 
 app.get("/wap/set", getToken, (req, res) => {
     render(res, "settings", {

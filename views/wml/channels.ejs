@@ -15,6 +15,9 @@
                         <setvar name="cn" value="<%= c.name %>"/>
                         <postfield name="token" value="$(token)"/>
                         <postfield name="id" value="<%= c.id %>"/>
+                        <% if (locals.gid) { %>
+                            <postfield name="gid" value="<%= gid %>"/>
+                        <% } %>
                     </go>
                     <%= c.label %>
                 </anchor>

@@ -12,9 +12,10 @@ Also see [Discord J2ME](https://github.com/gtrxAC/discord-j2me), a client for de
 * Message history with pagination
 * Settings (e.g. message load count)
 * Message timestamps
-* Attachments and profile pictures (HTML "modern" layout only)
-### Not implemented
 * Message editing and deleting
+* Viewing and uploading attachments 
+* Profile pictures (HTML "modern" layout only)
+### Not implemented
 * Threads
 * Emojis
 
